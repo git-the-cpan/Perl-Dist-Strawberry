@@ -1,0 +1,15 @@
+abstract: Strawberry Perl for win32
+author: David A Golden <dagolden@cpan.org>
+distribution_type: module
+generated_by: Module::Install version 0.63
+license: perl
+name: Perl-Dist-Strawberry
+no_index: 
+  directory: 
+    - extra
+    - bin
+    - inc
+    - t
+requires: 
+  Perl::Dist::Builder: 0.000001
+version: 0.000001
