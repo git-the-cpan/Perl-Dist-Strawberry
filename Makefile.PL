@@ -1,16 +1,13 @@
-# Load the Module::Install bundled in ./inc/
 use inc::Module::Install;
 
-# Define metadata
-name        'Perl-Dist-Strawberry';
-author      'David A Golden <dagolden@cpan.org>';
-license     'perl';
-version     '0.1.2';
-all_from    'lib/Perl/Dist/Strawberry.pm';
-
-requires    'Perl::Dist::Builder'      => '0.0.4'; 
-
-no_index    directory => 'extra';
-no_index    directory => 'bin';
+name           'Perl-Dist-Strawberry';
+author         'Adam Kennedy <adamk@cpan.org>';
+license        'perl';
+version        '1.00';
+all_from       'lib/Perl/Dist/Strawberry.pm';
+requires       'Perl::Dist' => '0.90';
+build_requires 'Test::More' => '0.42';
+install_script 'perldist_strawberry';
+install_share;
 
 WriteAll;

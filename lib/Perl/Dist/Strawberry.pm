@@ -1,19 +1,264 @@
 package Perl::Dist::Strawberry;
-use version; $VERSION = qv('0.1.2'); # Alpha 2
 
+use 5.005;
 use strict;
-use warnings;
+use base 'Perl::Dist';
+use Perl::Dist::Util::Toolchain ();
+
+use vars qw{$VERSION};
+BEGIN {
+	$VERSION = '1.00';
+}
+
+use Object::Tiny qw{
+	bin_patch
+};
+
+
+
+
+
+#####################################################################
+# Configuration
+
+# Apply some default paths
+sub new {
+	shift->SUPER::new(
+		app_id            => 'strawberryperl',
+		app_name          => 'Strawberry Perl',
+		app_publisher     => 'Vanilla Perl Project',
+		app_publisher_url => 'http://vanillaperl.org/',
+		image_dir         => 'C:\\strawberry',
+
+		# Build both exe and zip versions
+		exe               => 1,
+		zip               => 1,
+
+		@_,
+	);
+}
+
+# Lazily default the full name.
+# Supports building multiple versions of Perl.
+sub app_ver_name {
+	$_[0]->{app_ver_name} or
+	$_[0]->app_name . ' ' . $_[0]->perl_version_human . '.1';
+}
+
+# Lazily default the file name
+# Supports building multiple versions of Perl.
+sub output_base_filename {
+	$_[0]->{output_base_filename} or
+	'strawberry-perl-' . $_[0]->perl_version_human . '.1';
+}
+
+
+
+
+
+#####################################################################
+# Customisations for C assets
+
+sub install_c_toolchain {
+	my $self = shift;
+	$self->SUPER::install_c_toolchain(@_);
+
+	# Extra Binary Tools
+	$self->install_patch;
+
+	return 1;
+}
+
+sub install_c_libraries {
+	my $self = shift;
+	$self->SUPER::install_c_libraries(@_);
+
+	# XML Libraries
+	$self->install_zlib;
+	$self->install_libiconv;
+	$self->install_libxml;
+	$self->install_expat;
+
+	# Math Libraries
+	$self->install_gmp;
+
+	return 1;
+}
+
+sub install_patch {
+	my $self = shift;
+
+	$self->install_binary(
+		name       => 'patch',
+		url        => $self->binary_url('patch-2.5.9-7-bin.zip'),
+		install_to => {
+			'bin/patch.exe' => 'c/bin/patch.exe',
+		},
+	);
+	$self->{bin_patch} = File::Spec->catfile(
+		$self->image_dir, 'c', 'bin', 'patch.exe',
+	);
+	unless ( -x $self->bin_patch ) {
+		die "Can't execute patch";
+	}
+
+	return 1;
+}
+
+
+
+
+
+#####################################################################
+# Customisations for Perl assets
+
+sub install_perl_588 {
+	my $self = shift;
+	$self->SUPER::install_perl_588(@_);
+
+	# Install the vanilla CPAN::Config
+	$self->install_file(
+		share      => 'Perl-Dist-Strawberry CPAN_Config_588.pm',
+		install_to => 'perl/lib/CPAN/Config.pm',
+	);
+
+	return 1;
+}
+
+sub install_perl_5100 {
+	my $self = shift;
+	$self->SUPER::install_perl_5100(@_);
+
+	# Install the vanilla CPAN::Config
+	$self->install_file(
+		share      => 'Perl-Dist-Strawberry CPAN_Config_5100.pm',
+		install_to => 'perl/lib/CPAN/Config.pm',
+	);
+
+	return 1;
+}
+
+sub install_perl_modules {
+	my $self = shift;
+
+	# Win32 Modules
+	$self->install_module(
+		# This is actually libwin32
+		name  => 'Win32::File',
+		force => 1,
+	);
+	$self->install_module(
+		name => 'Win32::File::Object',
+	);
+	$self->install_module(
+		name => 'Win32::API',
+	);
+	$self->install_module(
+		name => 'Win32::Env::Path',
+	);
+	$self->install_module(
+		name => 'Win32::Exe',
+	);
+
+	# XML Modules
+	$self->install_distribution(
+		name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
+		makefilepl_param => [
+			'EXPATLIBPATH=' . File::Spec->catdir(
+				$self->image_dir, 'c', 'lib',
+			),
+			'EXPATINCPATH=' . File::Spec->catdir(
+				$self->image_dir, 'c', 'include',
+			),
+		],
+	);
+	$self->install_module(
+		name => 'XML::LibXML',
+	);
+
+	# Networking Enhancements
+	$self->install_module(
+		name => 'Bundle::LWP',
+	);
+	$self->install_module(
+		name => 'LWP::Online',
+	);
+
+	# Binary Package Support
+	$self->install_module(
+		name => 'PAR::Dist::InstallPPD',
+	);
+	$self->install_module(
+		name => 'PAR::Repository::Client',
+	);
+	$self->install_distribution(
+		name => 'RKOBES/PPM-0.01_01.tar.gz',
+		url  => 'http://strawberryperl.com/package/PPM-0.01_01.tar.gz',
+	);
+
+	# Console Utilities
+	$self->install_module(
+		name => 'pler',
+	);
+	$self->install_module(
+		name => 'pip',
+	);
+
+	# CPAN::SQLite Modules
+	$self->install_module(
+		name => 'DBI',
+	);
+	$self->install_distribution(
+		name  => 'MSERGEANT/DBD-SQLite-1.14.tar.gz',
+		force => 1,
+	);
+	$self->install_module(
+		name => 'CPAN::SQLite',
+	);
+
+	return 1;
+}
+
+
+
+
+
+#####################################################################
+# Customisations to Windows assets
+
+sub install_win32_extras {
+	my $self = shift;
+
+	# Link to the Strawberry Perl website.
+	# Don't include this for non-Strawberry sub-classes
+        if ( ref($self) eq 'Perl::Dist::Strawberry' ) {
+		$self->install_file(
+			name       => 'Strawberry Perl Website Icon',
+			url        => 'http://strawberryperl.com/favicon.ico',
+			install_to => 'Strawberry Perl Website.ico',
+		);
+		$self->install_website(
+			name       => 'Strawberry Perl Website',
+			url        => 'http://strawberryperl.com/' . $self->output_base_filename,
+			icon_file  => 'Strawberry Perl Website.ico',
+		);
+	}
+
+	# Add the rest of the extras
+	$self->SUPER::install_win32_extras(@_);
+
+	return 1;
+}
 
 1;
+
 __END__
+
+=pod
 
 =head1 NAME
 
 Perl::Dist::Strawberry - Strawberry Perl for win32
-
-=head1 VERSION
-
-This is 0.1.2, corresponding to Strawberry Perl 5.8.8 Alpha 2
 
 =head1 DESCRIPTION
 
@@ -22,7 +267,7 @@ for production purposes.>
 
 Strawberry Perl is a binary distribution of Perl for the Windows operating
 system.  It includes a bundled compiler and pre-installed modules that offer
-the ability to install XS CPAN modules directly from CPAN.  
+the ability to install XS CPAN modules directly from CPAN.
 
 The purpose of the Strawberry Perl series is to provide a practical Win32 Perl
 environment for experienced Perl developers to experiment with and test the
@@ -132,32 +377,29 @@ Windows temporary directory for the CPAN working directory.
 
 =head1 DOWNLOADING THE INSTALLER
 
-Strawberry Perl is available from L<http://vanillaperl.com/>.
+Strawberry Perl is available from L<http://strawberryperl.com/>.
 
 =head1 CONFIGURATION
 
-At present, Strawberry Perl must be installed in C:\strawberry-perl.  The
+At present, Strawberry Perl must be installed in C:\strawberry.  The
 executable installer adds the following environment variable changes:
 
     * adds directories to PATH
-        - C:\strawberry-perl\perl\bin  
-        - C:\strawberry-perl\dmake\bin
-        - C:\strawberry-perl\mingw
-        - C:\strawberry-perl\mingw\bin
+        - C:\strawberry\perl\bin  
+        - C:\strawberry\c\bin  
 
     * adds directories to LIB
-        - C:\strawberry-perl\mingw\lib
-        - C:\strawberry-perl\perl\bin
+        - C:\strawberry\perl\bin
+        - C:\strawberry\c\lib
 
     * adds directories to INCLUDE 
-        - C:\strawberry-perl\mingw\include 
-        - C:\strawberry-perl\perl\lib\CORE 
-        - C:\strawberry-perl\perl\lib\encode
+        - C:\strawberry\perl\lib\CORE 
+        - C:\strawberry\mingw\include 
 
 LIB and INCLUDE changes are likely more than are necessary, but attempt to
 head off potential problems compiling external programs for use with Perl.
 
-Users installing Strawberry Perl manually without the installer will need to
+Users installing Strawberry Perl without the installer will need to
 change their environment variables manually.
 
 The first time that the "cpan" program is run, users will be prompted for
@@ -179,7 +421,7 @@ versions as follows:
    0.1.y -- Alpha series
    0.3.y -- Beta series
    0.5.y -- Release candidate series
-
+ 
  Perl 5.8 series (1.x.y) -- 'x' will be odd for test releases 
  
  Perl 5.10 series (2.x.y) -- 'x' will be odd for test releases 
@@ -199,33 +441,14 @@ Bugs can be sent by email to C<<< bug-Perl-Dist-Strawberry@rt.cpan.org >>> or
 submitted using the web interface at
 L<http://rt.cpan.org/Dist/Display.html?Queue=Perl-Dist-Strawberry>
 
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT
 
-Strawberry Perl is open source and may be licensed under the same terms as
-Perl.  Open source software included with Strawberry Perl installations are
-governed by their respective licenses.  See LICENSE.txt for details.
+Copyright 2007 - 2008 Adam Kennedy.
 
-=head1 DISCLAIMER OF WARRANTY
+This program is free software; you can redistribute
+it and/or modify it under the same terms as Perl itself.
 
-BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
-OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-PROVIDE THE SOFTWARE "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
-EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
-ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
-YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
-NECESSARY SERVICING, REPAIR, OR CORRECTION.
-
-IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
-LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
-OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
-THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
-RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
-FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
-SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
+The full text of the license can be found in the
+LICENSE file included with this module.
 
 =cut
