@@ -8,6 +8,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Share.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+lib/Perl/Dist/Bootstrap.pm
 lib/Perl/Dist/Strawberry.pm
 LICENSE
 Makefile.PL
@@ -15,6 +16,7 @@ MANIFEST			This list of files
 META.yml
 README
 script/perldist_strawberry
+share/bootperl_CPAN_Config_5100.pm
 share/CPAN_Config_5100.pm
 share/CPAN_Config_588.pm
 t/01_compile.t

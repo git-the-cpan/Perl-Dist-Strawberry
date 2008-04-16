@@ -7,7 +7,7 @@ use Perl::Dist::Util::Toolchain ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '1.00';
+	$VERSION = '1.01';
 }
 
 use Object::Tiny qw{
@@ -141,24 +141,23 @@ sub install_perl_5100 {
 sub install_perl_modules {
 	my $self = shift;
 
+	# Install LWP::Online, so our custom minicpan code works
+	$self->install_distribution(
+		name => 'ADAMK/LWP-Online-0.04.tar.gz'
+	);
+
 	# Win32 Modules
 	$self->install_module(
 		# This is actually libwin32
 		name  => 'Win32::File',
 		force => 1,
 	);
-	$self->install_module(
-		name => 'Win32::File::Object',
-	);
-	$self->install_module(
-		name => 'Win32::API',
-	);
-	$self->install_module(
-		name => 'Win32::Env::Path',
-	);
-	$self->install_module(
-		name => 'Win32::Exe',
-	);
+	$self->install_modules( qw{
+		Win32::File::Object
+		Win32::API
+		Win32::Env::Path
+		Win32::Exe
+	} );
 
 	# XML Modules
 	$self->install_distribution(
@@ -177,32 +176,26 @@ sub install_perl_modules {
 	);
 
 	# Networking Enhancements
-	$self->install_module(
-		name => 'Bundle::LWP',
-	);
-	$self->install_module(
-		name => 'LWP::Online',
-	);
+	$self->install_modules( qw{
+		Bundle::LWP
+		LWP::Online
+	} );
 
 	# Binary Package Support
-	$self->install_module(
-		name => 'PAR::Dist::InstallPPD',
-	);
-	$self->install_module(
-		name => 'PAR::Repository::Client',
-	);
+	$self->install_modules( qw{
+		PAR::Dist::InstallPPD
+		PAR::Repository::Client
+	} );
 	$self->install_distribution(
 		name => 'RKOBES/PPM-0.01_01.tar.gz',
 		url  => 'http://strawberryperl.com/package/PPM-0.01_01.tar.gz',
 	);
 
 	# Console Utilities
-	$self->install_module(
-		name => 'pler',
-	);
-	$self->install_module(
-		name => 'pip',
-	);
+	$self->install_modules( qw{
+		pler
+		pip
+	} );
 
 	# CPAN::SQLite Modules
 	$self->install_module(

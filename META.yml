@@ -19,6 +19,6 @@ no_index:
     - inc
     - t
 requires:
-  Perl::Dist: 0.90
+  Perl::Dist: 1.01
   perl: 5.005
-version: 1.00
+version: 1.01
