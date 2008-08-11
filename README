@@ -2,9 +2,6 @@ NAME
     Perl::Dist::Strawberry - Strawberry Perl for win32
 
 DESCRIPTION
-    *Strawberry Perl is currently an alpha release and is not recommended
-    for production purposes.*
-
     Strawberry Perl is a binary distribution of Perl for the Windows
     operating system. It includes a bundled compiler and pre-installed
     modules that offer the ability to install XS CPAN modules directly from
@@ -17,29 +14,32 @@ DESCRIPTION
 
     Strawberry Perl includes:
 
-    *   Perl 5.8.8
+    *   Perl 5.8.8 or Perl 5.10.0
 
     *   Mingw GCC C/C++ compiler
 
     *   Dmake "make" tool
 
-    *   ExtUtils::CBuilder and ExtUtils::ParseXS
+    *   "Updates for many toolchain modules"
 
-    *   Bundle::CPAN (including Perl modules that largely eliminate the need
-        for external helper programs like "gzip" and "tar")
+    *   Bundle::CPAN (including Perl modules that eliminate the need for
+        external helper programs like "gzip" and "tar")
 
     *   Bundle::LWP (providing more reliable http CPAN repository support)
 
     *   Additional Perl modules that enhance the stability of core Perl for
         the Win32 platform
 
-    The Perl::Dist::Strawberry distribution on CPAN contains programs and
+    *   Other modules that improve the toolchain, or enhance the ability to
+        install packages.
+
+    The Perl::Dist::Strawberry modules on CPAN contains programs and
     instructions for downloading component sources and assembling them into
     the executable installer for Strawberry Perl. It does not include the
-    resulting Strawberry Perl installer itself.
+    resulting Strawberry Perl installer.
 
-    See "DOWNLOADING THE INSTALLER" for instructions on where to download
-    and how to install Strawberry Perl.
+    See the Strawberry Perl website at <http://strawberryperl.com/> to
+    download the Strawberry Perl installer.
 
     See Perl::Dist::Build at <http://search.cpan.org> for details on the
     builder used to create Strawberry Perl from source.
@@ -82,9 +82,6 @@ CHANGES FROM CORE PERL
     defaults to the path for dmake, to automatically follow dependencies and
     to use the Windows temporary directory for the CPAN working directory.
 
-DOWNLOADING THE INSTALLER
-    Strawberry Perl is available from <http://strawberryperl.com/>.
-
 CONFIGURATION
     At present, Strawberry Perl must be installed in C:\strawberry. The
     executable installer adds the following environment variable changes:
@@ -93,59 +90,31 @@ CONFIGURATION
             - C:\strawberry\perl\bin  
             - C:\strawberry\c\bin  
 
-        * adds directories to LIB
-            - C:\strawberry\perl\bin
-            - C:\strawberry\c\lib
-
-        * adds directories to INCLUDE 
-            - C:\strawberry\perl\lib\CORE 
-            - C:\strawberry\mingw\include 
-
-    LIB and INCLUDE changes are likely more than are necessary, but attempt
-    to head off potential problems compiling external programs for use with
-    Perl.
-
     Users installing Strawberry Perl without the installer will need to
-    change their environment variables manually.
+    change the environment manually.
 
-    The first time that the "cpan" program is run, users will be prompted
-    for configuration settings. With the defaults provided in Strawberry
-    Perl, users may answer "no" to manual configuration and the installation
-    should still work.
+METHODS
+    In addition to extending various underlying Perl::Dist::Inno methods,
+    Strawberry Perl adds some additional methods that provide installation
+    support for miscellaneous tools that have not yet been promoted to the
+    core.
 
-    Manual CPAN configuration may be repeated by running the following
-    command:
+  install_patch
+    The "install_path" method can be used to install a copy of the Unix
+    patch program into the distribution.
 
-        perl -MCPAN::FirstTime -e "CPAN::FirstTime::init"
+    Returns true or throws an exception on error.
 
-VERSION HISTORY AND ROADMAP
-    Perl::Dist::Strawberry version numbers map to Strawberry Perl release
-    versions as follows:
+SUPPORT
+    Bugs should be reported via the CPAN bug tracker at
 
-     Pre-release series (0.x.y)
-       0.0.1 -- Strawberry Perl 5.8.8 Alpha 1 (July 9, 2006)
-       0.1.2 -- Strawberry Perl 5.8.8 Alpha 2 (August 27, 2006)
-       0.1.y -- Alpha series
-       0.3.y -- Beta series
-       0.5.y -- Release candidate series
- 
-     Perl 5.8 series (1.x.y) -- 'x' will be odd for test releases 
- 
-     Perl 5.10 series (2.x.y) -- 'x' will be odd for test releases 
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry>
 
-    Strawberry Perl is targeting release 1.0.0 to correspond to the next
-    maintenance release of Perl (5.8.9), which should include most of the
-    "changes from core Perl" listed above. Strawberry Perl will be declared
-    Beta when the pre-release candidate for Perl 5.8.9 is available.
+    For more support information and places for discussion, see the
+    Strawberry Perl Support page <http://strawberryperl.com/support.html>.
 
-CONTACTS AND BUGS REPORTING
-    Currently, Strawberry Perl discussion is centered at win32.perl.org. New
-    venues for discussion may be listed there.
-
-    Please report bugs or feature requests using the CPAN Request Tracker.
-    Bugs can be sent by email to "bug-Perl-Dist-Strawberry@rt.cpan.org" or
-    submitted using the web interface at
-    <http://rt.cpan.org/Dist/Display.html?Queue=Perl-Dist-Strawberry>
+AUTHOR
+    Adam Kennedy <adamk@cpan.org>
 
 COPYRIGHT
     Copyright 2007 - 2008 Adam Kennedy.
