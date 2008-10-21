@@ -20,78 +20,68 @@ DESCRIPTION
 
     *   Dmake "make" tool
 
-    *   "Updates for many toolchain modules"
+    *   Every bundled and dual-life modules upgraded to the latest version.
 
-    *   Bundle::CPAN (including Perl modules that eliminate the need for
-        external helper programs like "gzip" and "tar")
-
-    *   Bundle::LWP (providing more reliable http CPAN repository support)
+    *   Bundle::CPAN, Bundle::LWP and CPAN::SQLite to enhance the
+        functionality of the CPAN client.
 
     *   Additional Perl modules that enhance the stability of core Perl for
         the Win32 platform
 
-    *   Other modules that improve the toolchain, or enhance the ability to
-        install packages.
+    *   Modules that enhance the ability to install non-CPAN packages such
+        as PAR::Dist, PPM and pip.
 
-    The Perl::Dist::Strawberry modules on CPAN contains programs and
-    instructions for downloading component sources and assembling them into
-    the executable installer for Strawberry Perl. It does not include the
-    resulting Strawberry Perl installer.
+    *   Prebuilt and known-good C libraries for math, crypto and XML
+        support.
 
-    See the Strawberry Perl website at <http://strawberryperl.com/> to
-    download the Strawberry Perl installer.
+    *   BETA - Additions that provide Portable support.
 
-    See Perl::Dist::Build at <http://search.cpan.org> for details on the
-    builder used to create Strawberry Perl from source.
+    The Perl::Dist::Strawberry module available on CPAN contains the modules
+    and perldist_strawberry script that are used to generate the Strawberry
+    Perl installers.
+
+    Please note that Perl::Dist::Strawberry does not include the resulting
+    Strawberry Perl installer. See the Strawberry Perl website at
+    <http://strawberryperl.com/> to download the Strawberry Perl installer.
+
+    See Perl::Dist::Inno for details on how the underlying distribution
+    construction toolkit works.
 
 CHANGES FROM CORE PERL
     Strawberry Perl is and will continue to be based on the latest "stable"
-    release of Perl, currently version 5.8.8. Some additional modifications
-    are included that improve general compatibility with the Win32 platform
-    or improve "turnkey" operation on Win32.
+    releases of Perl, currently 5.8.8 and 5.10.0.
+
+    Some additional modifications are included that improve general
+    compatibility with the Win32 platform or improve "turnkey" operation on
+    Win32.
 
     Whenever possible, these modifications will be made only by
-    preinstalling additional CPAN modules within Strawberry Perl,
+    preinstalling additional or updated CPAN modules within Strawberry Perl,
     particularly modules that have been newly included as core Perl modules
     in the "development" branch of perl to address Win32 compatibility
     issues.
 
-    Modules or distributions currently included are:
+    Additionally, a stub CPAN Config.pm file is added. This provides a
+    complete zero-conf preconfiguration for CPAN, using a stable
+    <http://cpan.strawberryperl.com/> redirector to bounce to a
+    known-reliable mirrors.
 
-    *   ExtUtils::MakeMaker 6.30_01 -- fixes a Win32 perl path bug
+    A more-thorough network-aware zero-conf capability is currently being
+    developed and will be included at a later time.
 
-    *   CPAN 1.87_57 -- many small fixes for numerous annoyances on Win32
-
-    *   Win32API::File -- to allow for deletion of in-use files at next
-        reboot; required for CPAN.pm to be able to upgrade itself
-
-    *   IO -- to address Win32 Socket bugs
-
-    *   Compress::Zlib, IO::Zlib and Archive::Tar -- to eliminate the
-        CPAN.pm dependency on external, binary programs to handle .tar.gz
-        files
-
-    *   Archive::Zip (and its dependency, Time::Local) -- to eliminate the
-        CPAN.pm dependency on external, binary programs to handle .zip files
-
-    *   libnet -- provides Net::FTP to eliminate the CPAN.pm dependency on
-        an external, binary ftp program; installed configured for FTP
-        passive mode
-
-    Additionally, a stub CPAN Config.pm file is installed. It provides
-    defaults to the path for dmake, to automatically follow dependencies and
-    to use the Windows temporary directory for the CPAN working directory.
+    Strawberry has never patched the Perl source code or modified the
+    perl.exe binary.
 
 CONFIGURATION
     At present, Strawberry Perl must be installed in C:\strawberry. The
     executable installer adds the following environment variable changes:
 
-        * adds directories to PATH
-            - C:\strawberry\perl\bin  
-            - C:\strawberry\c\bin  
+      * Adds directories to PATH
+        - C:\strawberry\perl\bin  
+        - C:\strawberry\c\bin  
 
-    Users installing Strawberry Perl without the installer will need to
-    change the environment manually.
+    Users installing Strawberry Perl without the installer will need to add
+    the environment entries manually.
 
 METHODS
     In addition to extending various underlying Perl::Dist::Inno methods,
@@ -99,16 +89,40 @@ METHODS
     support for miscellaneous tools that have not yet been promoted to the
     core.
 
+  default_machine
+      Perl::Dist::Strawberry->default_machine->run;
+  
+    The "default_machine" class method is used to setup the most common
+    machine for building Strawberry Perl.
+
+    The machine provided creates a standard 5.8.8 distribution (.zip and
+    .exe), a standard 5.10.0 distribution (.zip and .exe) and a
+    Portable-enabled 5.10.0 distribution (.zip only).
+
+    Returns a Perl::Dist::Machine object.
+
   install_patch
+      $dist->install_patch;
+
     The "install_path" method can be used to install a copy of the Unix
     patch program into the distribution.
 
     Returns true or throws an exception on error.
 
+  install_win32_manifest
+      $dist->install_win32_manifest( 'WX Perl' => 'perl', 'bin', 'wxperl.exe' );
+
+    Installs a manifest file to make an executable binary look like a "real"
+    Win32 program.
+
 SUPPORT
     Bugs should be reported via the CPAN bug tracker at
 
     <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry>
+
+    Please note that only bugs in the distribution itself or the CPAN
+    configuration should be reported to RT. Bugs in individual modules
+    should be reported to their respective distributions.
 
     For more support information and places for discussion, see the
     Strawberry Perl Support page <http://strawberryperl.com/support.html>.

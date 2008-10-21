@@ -5,16 +5,15 @@
 use 5.006;
 use strict;
 use warnings;
-use Params::Util qw{ _IDENTIFIER };
 use Pod::Usage;
-use Getopt::Long;
-use URI;
-use Perl::Dist::Machine;
-use Perl::Dist::Strawberry;
+use Getopt::Long           ();
+use URI                    ();
+use Perl::Dist::Machine    ();
+use Perl::Dist::Strawberry ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '1.04';
+	$VERSION = '1.07';
 }
 
 
@@ -26,12 +25,12 @@ BEGIN {
 
 my $PERL_VERSION = undef;
 my $CPAN         = undef;
-my $BINARY_ROOT  = undef;
+my $OUTPUT       = undef;
 my $FORCE        = undef;
-my $result       = GetOptions(
+my $result       = Getopt::Long::GetOptions(
 	"perl_version=s" => \$PERL_VERSION,
 	"cpan=s"         => \$CPAN,
-	"binary_root=s"  => \$BINARY_ROOT,
+	"output=s"       => \$OUTPUT,
 	"force"          => \$FORCE,
 );
 
@@ -57,29 +56,18 @@ if ( defined $PERL_VERSION ) {
 if ( defined $CPAN ) {
 	$options{cpan} = URI->new( $CPAN );
 }
-if ( defined $BINARY_ROOT ) {
-	$options{binary_root} = $BINARY_ROOT;
+if ( defined $OUTPUT ) {
+	$options{output} = $OUTPUT;
 }
 if ( defined $FORCE ) {
 	$options{force} = 1;
 }
 
 # Create the machine
-my $machine = Perl::Dist::Machine->new(
-	class  => 'Perl::Dist::Strawberry',
-	common => \%options,
-);
-$machine->add_dimension('version');
-$machine->add_option('version',
-	perl_version => '5100',
-	portable     => 1,
-);
-$machine->add_option('version',
-	perl_version => '5100',
-);
-$machine->add_option('version',
-	perl_version => '588',
-);
+my $machine = Perl::Dist::Strawberry->default_machine( common => \%options );
+unless ( $machine ) {
+	die("Failed to create default machine");
+}
 
 unless ( $machine->run ) {
 	die("Failed to run");
