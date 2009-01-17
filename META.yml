@@ -27,8 +27,8 @@ no_index:
 requires:
   Archive::Zip: 1.26
   Object::Tiny: 1.06
-  Perl::Dist: 1.09
+  Perl::Dist: 1.11
   perl: 5.6.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.07
+version: 1.08

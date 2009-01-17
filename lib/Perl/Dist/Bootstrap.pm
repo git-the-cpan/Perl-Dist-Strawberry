@@ -24,7 +24,7 @@ use Perl::Dist::Util::Toolchain ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.07';
+	$VERSION = '1.08';
 	@ISA     = 'Perl::Dist::Strawberry';
 }
 
@@ -94,8 +94,9 @@ sub install_perl_modules {
 		File::Remove
 		File::ShareDir
 		File::Temp
+		File::HomeDir
 		IPC::Run3
-		LWP::UserAgent::Determined
+		LWP::UserAgent::WithCache
 		LWP::Online
 		Object::Tiny
 		Tie::File
@@ -142,7 +143,7 @@ Adam Kennedy E<lt>adamk@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2007 - 2008 Adam Kennedy.
+Copyright 2007 - 2009 Adam Kennedy.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
