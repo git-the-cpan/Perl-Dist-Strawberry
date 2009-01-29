@@ -5,6 +5,7 @@ inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
+inc/Module/Install/Scripts.pm
 inc/Module/Install/Share.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
@@ -17,10 +18,13 @@ META.yml
 README
 script/perldist_strawberry
 share/bootstrap/perl-5.10.0/lib/CPAN/Config.pm
+share/ppm/README.txt
 share/strawberry/perl-5.10.0/lib/CPAN/Config.pm.tt
 share/strawberry/perl-5.10.0/win32/config.gc.tt
 share/strawberry/perl-5.8.8/lib/CPAN/Config.pm.tt
 share/strawberry/perl-5.8.8/win32/config.gc.tt
+share/strawberry/perl-5.8.9/lib/CPAN/Config.pm.tt
+share/strawberry/perl-5.8.9/win32/config.gc.tt
 t/01_compile.t
 t/02_new.t
 t/03_perl_5100.t

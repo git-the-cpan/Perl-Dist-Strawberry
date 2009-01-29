@@ -128,7 +128,7 @@ use Perl::Dist::Util::Toolchain ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.08';
+	$VERSION = '1.09';
 	@ISA     = 'Perl::Dist';
 }
 
@@ -164,10 +164,16 @@ sub default_machine {
 	my $class = shift;
 
 	# Create the machine
-	my $machine = Perl::Dist::Machine->new( class => $class, @_ );
+	my $machine = Perl::Dist::Machine->new(
+		class => $class,
+		@_,
+	);
 
 	# Set the different versions
 	$machine->add_dimension('version');
+	$machine->add_option('version',
+		perl_version => '589',
+	);
 	$machine->add_option('version',
 		perl_version => '5100',
 	);
@@ -224,14 +230,30 @@ sub app_ver_name {
 		return $self->{app_ver_name};
 	}
 
-	my $name = $self->app_name;
+	my $version = $self->perl_version_human;
+	my $name    = $self->app_name;
+
+	if ( $self->portable ) {
+		$name .= ' Portable';
+	}
+
+	# Add the version
+	$name .= " $version";
+	if ( $version eq '5.8.9' ) {
+		$name .= '.0';
+	} else {
+		$name .= '.4';
+	}
+
+	# Tag the betas
+	if ( $version eq '5.8.9' ) {
+		$name .= ' ';
+		$name .= 'Beta 1';
+	}
 	if ( $self->portable ) {
 		$name .= ' ';
-		$name .= 'Portable';
+		$name .= 'Beta 2';
 	}
-	$name .= ' ';
-	$name .= $self->perl_version_human;
-	$name .= '.4 Beta 1';
 
 	return $name;
 }
@@ -244,17 +266,31 @@ sub output_base_filename {
 		return $self->{output_base_filename};
 	}
 
-	my $file = 'strawberry-perl';
-	$file .= '-';
-	$file .= $self->perl_version_human;
-	$file .= '.4';
+	my $version = $self->perl_version_human;
+	my $file    = "strawberry-perl-$version";
+
+	# Add the version
+	if ( $version eq '5.8.9' ) {
+		$file .= '.0';
+	} else {
+		$file .= '.4';
+	}
+
 	if ( $self->image_dir =~ /^d:/i ) {
 		$file .= '-ddrive';
 	}
+
 	if ( $self->portable ) {
 		$file .= '-portable';
 	}
-	$file .= '-beta-1';
+
+	# Tag the betas
+	if ( $version eq '5.8.9' ) {
+		$file .= '-beta-1';
+	}
+	if ( $self->portable ) {
+		$file .= '-beta-2';
+	}
 
 	return $file;
 }
@@ -289,9 +325,30 @@ sub install_c_libraries {
 	# Math Libraries
 	$self->install_gmp;
 
+	# Database Libraries
+	# $self->install_libdb;
+
 	return 1;
 }
 
+sub install_libdb {
+	my $self = shift;
+
+	$self->install_binary(
+		name       => 'libdb',
+		url        => $self->binary_url('db-4.7.25-vanilla.tar.gz'),
+		install_to => {
+			'bin'     => 'c/bin',
+			'include' => 'c/include',
+			'lib'     => 'c/lib',
+		},
+		license    => {
+			'LICENSE' => 'libdb/LICENSE',
+		},
+	);
+
+	return 1;
+}
 
 
 
@@ -398,10 +455,7 @@ sub install_perl_modules {
 	$self->install_modules( qw{
 		PAR::Repository::Client
 	} );
-	$self->install_distribution(
-		name => 'RKOBES/PPM-0.01_01.tar.gz',
-		url  => 'http://strawberryperl.com/package/PPM-0.01_01.tar.gz',
-	);
+	$self->install_ppm;
 
 	# Console Utilities
 	$self->install_modules( qw{
@@ -409,16 +463,26 @@ sub install_perl_modules {
 		pip
 	} );
 
+	# BerkelyDB Support
+	#$self->install_distribution(
+	#	name => 'DB_File',
+	#	url  => 'http://strawberryperl.com/package/DB_File-1.1817-vanilla.tar.gz',
+	#);
+	#$self->install_distribution(
+	#	name => 'BerkeleyDB',
+	#	url  => 'http://strawberryperl.com/package/BerkeleyDB-0.34-vanilla.tar.gz',
+	#);
+
 	# CPAN::SQLite Modules
 	$self->install_module(
-		name => 'DBI',
+		name  => 'DBI',
 	);
 	$self->install_distribution(
 		name  => 'MSERGEANT/DBD-SQLite-1.14.tar.gz',
 		force => 1,
 	);
 	$self->install_module(
-		name => 'CPAN::SQLite',
+		name  => 'CPAN::SQLite',
 	);
 
 	return 1;
@@ -502,6 +566,57 @@ sub install_patch {
 	);
 	unless ( -x $self->bin_patch ) {
 		die "Can't execute patch";
+	}
+
+	return 1;
+}
+
+=pod
+
+=head2 install_ppm
+
+  $dist->install_ppm;
+
+Installs the PPM module, and then customises the temp path to live
+underneath the strawberry dist.
+
+=cut
+
+sub install_ppm {
+	my $self = shift;
+
+	# Where should the ppm build directory be
+	my $ppmdir = File::Spec->catdir(
+		$self->image_dir,
+		'ppm',
+	);
+	if ( -d $ppmdir ) {
+		die("PPM build direcotry '$ppmdir' already exists");
+	}
+
+	SCOPE: {
+		# The build path in ppm.xml is derived from $ENV{TMP}.
+		# So set TMP to a dedicated location inside of the
+		# distribution root to prevent it being locked to the
+		# temp directory of the build machine.
+		local $ENV{TMP} = $ppmdir;
+
+		# Create the ppm temp directory so it exists when
+		# the PPM build needs it.
+		$self->install_file(
+			share      => 'Perl-Dist-Strawberry ppm/README.txt',
+			install_to => 'ppm/README.txt',
+		);
+		$self->add_dir('ppm');
+		unless ( -d $ppmdir ) {
+			die("Failed to create '$ppmdir' directory");
+		}
+
+		# Install PPM itself
+		$self->install_distribution(
+			name => 'RKOBES/PPM-0.01_01.tar.gz',
+			url  => 'http://strawberryperl.com/package/PPM-0.01_01.tar.gz',
+		);
 	}
 
 	return 1;

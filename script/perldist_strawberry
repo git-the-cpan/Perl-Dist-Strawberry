@@ -13,7 +13,7 @@ use Perl::Dist::Strawberry ();
 
 use vars qw{$VERSION};
 BEGIN {
-	$VERSION = '1.08';
+	$VERSION = '1.09';
 }
 
 
@@ -69,9 +69,12 @@ unless ( $machine ) {
 	die("Failed to create default machine");
 }
 
+my $start = time;
 unless ( $machine->run ) {
 	die("Failed to run");
 }
+my $t = time - $start;
+print "Completed full generation run in $t seconds\n";
 
 chdir $machine->output;
 

@@ -109,6 +109,12 @@ METHODS
 
     Returns true or throws an exception on error.
 
+  install_ppm
+      $dist->install_ppm;
+
+    Installs the PPM module, and then customises the temp path to live
+    underneath the strawberry dist.
+
   install_win32_manifest
       $dist->install_win32_manifest( 'WX Perl' => 'perl', 'bin', 'wxperl.exe' );
 
