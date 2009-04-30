@@ -78,7 +78,7 @@ CONFIGURATION
 
       * Adds directories to PATH
         - C:\strawberry\perl\bin  
-        - C:\strawberry\c\bin  
+        - C:\strawberry\c\bin
 
     Users installing Strawberry Perl without the installer will need to add
     the environment entries manually.
@@ -91,7 +91,7 @@ METHODS
 
   default_machine
       Perl::Dist::Strawberry->default_machine->run;
-  
+
     The "default_machine" class method is used to setup the most common
     machine for building Strawberry Perl.
 

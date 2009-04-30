@@ -128,11 +128,11 @@ use Perl::Dist::Util::Toolchain ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.09';
+	$VERSION = '1.11';
 	@ISA     = 'Perl::Dist';
 }
 
-use Object::Tiny qw{
+use Object::Tiny 1.06 qw{
 	bin_patch
 };
 
@@ -176,9 +176,6 @@ sub default_machine {
 	);
 	$machine->add_option('version',
 		perl_version => '5100',
-	);
-	$machine->add_option('version',
-		perl_version => '588',
 	);
 	$machine->add_option('version',
 		perl_version => '5100',
@@ -240,19 +237,9 @@ sub app_ver_name {
 	# Add the version
 	$name .= " $version";
 	if ( $version eq '5.8.9' ) {
-		$name .= '.0';
+		$name .= '.1';
 	} else {
-		$name .= '.4';
-	}
-
-	# Tag the betas
-	if ( $version eq '5.8.9' ) {
-		$name .= ' ';
-		$name .= 'Beta 1';
-	}
-	if ( $self->portable ) {
-		$name .= ' ';
-		$name .= 'Beta 2';
+		$name .= '.5';
 	}
 
 	return $name;
@@ -271,9 +258,9 @@ sub output_base_filename {
 
 	# Add the version
 	if ( $version eq '5.8.9' ) {
-		$file .= '.0';
+		$file .= '.1';
 	} else {
-		$file .= '.4';
+		$file .= '.5';
 	}
 
 	if ( $self->image_dir =~ /^d:/i ) {
@@ -282,14 +269,6 @@ sub output_base_filename {
 
 	if ( $self->portable ) {
 		$file .= '-portable';
-	}
-
-	# Tag the betas
-	if ( $version eq '5.8.9' ) {
-		$file .= '-beta-1';
-	}
-	if ( $self->portable ) {
-		$file .= '-beta-2';
 	}
 
 	return $file;
@@ -385,6 +364,18 @@ sub install_perl_588_bin {
 	);
 }
 
+sub install_perl_589_bin {
+	my $self   = shift;
+	my %params = @_;
+	my $patch  = delete($params{patch}) || [];
+	return $self->SUPER::install_perl_589_bin(
+		patch => [ qw{
+			win32/config.gc
+		}, @$patch ],
+		%params,
+	);
+}
+
 sub install_perl_5100_bin {
 	my $self   = shift;
 	my %params = @_;
@@ -410,7 +401,6 @@ sub install_perl_modules {
 		Win32::File
 		Win32::File::Object
 		Win32::API
-		Win32::Env::Path
 		Win32::Exe
 	} );
 
@@ -452,6 +442,12 @@ sub install_perl_modules {
 		name  => 'RKINYON/DBM-Deep-1.0013.tar.gz',
 		force => 1,
 	);
+	$self->install_module(
+		name  => 'PAR',
+		# In the cleaup test script, the test doesn't
+		# handle Win32's non-instant delete problem.
+		force => 1,
+	);
 	$self->install_modules( qw{
 		PAR::Repository::Client
 	} );
@@ -474,16 +470,11 @@ sub install_perl_modules {
 	#);
 
 	# CPAN::SQLite Modules
-	$self->install_module(
-		name  => 'DBI',
-	);
-	$self->install_distribution(
-		name  => 'MSERGEANT/DBD-SQLite-1.14.tar.gz',
-		force => 1,
-	);
-	$self->install_module(
-		name  => 'CPAN::SQLite',
-	);
+	$self->install_modules( qw{
+		DBI
+		DBD::SQLite
+		CPAN::SQLite
+	} );
 
 	return 1;
 }
