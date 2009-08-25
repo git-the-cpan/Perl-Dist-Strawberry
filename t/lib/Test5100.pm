@@ -1,11 +1,11 @@
-package t::lib::Test4;
+package t::lib::Test5100;
 
 use strict;
 use Perl::Dist::Strawberry;
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.11';
+	$VERSION = '2.00';
 	@ISA     = 'Perl::Dist::Strawberry';
 }
 
@@ -18,9 +18,10 @@ BEGIN {
 
 sub new {
 	return shift->SUPER::new(
-		trace => 1,
+		perl_version => 5100,
+		trace        => 101,
 		@_,
 	);
 }
 
-sub trace { Test::More::diag($_[1]) }
+1;

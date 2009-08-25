@@ -1,11 +1,11 @@
-package t::lib::Test1;
+package t::lib::TestNew;
 
 use strict;
 use Perl::Dist::Strawberry;
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.11';
+	$VERSION = '2.00';
 	@ISA     = 'Perl::Dist::Strawberry';
 }
 
@@ -19,18 +19,9 @@ BEGIN {
 sub new {
 	return shift->SUPER::new(
 		perl_version => 5100,
+		trace        => 101,
 		@_,
 	);
-}
-
-sub trace { 1 } # Test::More::diag($_[1]) }
-
-sub install_binary {
-	return shift->SUPER::install_binary( @_, trace => sub { 1 } );
-}
-
-sub install_module {
-	return shift->SUPER::install_module( @_, trace => sub { 1 } );
 }
 
 1;

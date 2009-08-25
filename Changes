@@ -1,6 +1,27 @@
 Changes for Perl extension Perl-Dist-Strawberry
 
-1.11 May  1 Apr 2009
+2.00 Tue 25 Aug 2009
+	- This release corresponds to Strawberry Perl July 2009.
+	  (Yes, it's late.)
+	  It was branched off from 1.09 for the purpose of building using
+	  Perl::Dist::WiX, but all changes from 1.10 and 1.11 
+	  are included, plus the ones below. (by CSJEWELL unless noted)
+	- Store a Strawberry-specific e-mail in the Perl configuration
+	- Onion image from perfoundation.org, Link to #win32 via Mibbit (SZABGAB)
+	- Moving JSON and JSON::XS to Strawberry
+	- Installing DBIx::Simple when CPANPLUS is installed
+	- Installing DBD::mysql and local::lib (DBD::Pg code was added, but
+	  is not used.)
+	- Configure a CPANPLUS::Config with settings along the
+	  lines of the CPAN::Config
+	- Dropping building 5.8.8 in the default machine
+	- Updated tests to include perl 5.8.9
+	- Updated tests to test for dlltool error
+	- Now depends on Perl::Dist::WiX 1.000 and Perl::Dist 1.16
+	- Bootstrap installs Perl::Dist::WiX and its required modules
+	- Upgrading to Module::Install 0.91
+
+1.11 Wed  1 Apr 2009
 	- This release corresponds to Strawberry Perl April 2009
 	- Upgrading to Module::Install::DSL 0.83 (ADAMK)
 	- Do not use external tar/gzip in CPAN::Config template (CHORNY)
@@ -17,7 +38,7 @@ Changes for Perl extension Perl-Dist-Strawberry
 
 1.09 Thu 29 Jan 2009
 	- This release was used to build Strawberry Perl January 2009
-	- Removed the experimental berkelydb functionality
+	- Removed the experimental berkeleydb functionality
 	- Bug fix to make the ppm temporary build directory get stored
 	  in the ppm.xml properly.
 	- Correcting the file and distribution naming
@@ -44,7 +65,7 @@ Changes for Perl extension Perl-Dist-Strawberry
 	- Adding support for Math::Pari by default
 	- Updating Perl::Dist dep to 1.03 to get Vista support
 	- Cleaning up the documenation to refer to the current
-	  release, removed historical innacuracies.
+	  release, removed historical inaccuracies.
 	- Adding support for installing path via install_patch
 
 1.02 Wed 16 Apr 2008

@@ -14,13 +14,13 @@ DESCRIPTION
 
     Strawberry Perl includes:
 
-    *   Perl 5.8.8 or Perl 5.10.0
+    *   Perl 5.8.9 or Perl 5.10.0
 
-    *   Mingw GCC C/C++ compiler
+    *   MingW GCC C/C++ compiler
 
     *   Dmake "make" tool
 
-    *   Every bundled and dual-life modules upgraded to the latest version.
+    *   Every bundled and dual-life module upgraded to the latest version.
 
     *   Bundle::CPAN, Bundle::LWP and CPAN::SQLite to enhance the
         functionality of the CPAN client.
@@ -34,7 +34,7 @@ DESCRIPTION
     *   Prebuilt and known-good C libraries for math, crypto and XML
         support.
 
-    *   BETA - Additions that provide Portable support.
+    *   Additions that provide Portable support.
 
     The Perl::Dist::Strawberry module available on CPAN contains the modules
     and perldist_strawberry script that are used to generate the Strawberry
@@ -42,14 +42,14 @@ DESCRIPTION
 
     Please note that Perl::Dist::Strawberry does not include the resulting
     Strawberry Perl installer. See the Strawberry Perl website at
-    <http://strawberryperl.com/> to download the Strawberry Perl installer.
+    http://strawberryperl.com/ to download the Strawberry Perl installer.
 
-    See Perl::Dist::Inno for details on how the underlying distribution
+    See Perl::Dist::WiX for details on how the underlying distribution
     construction toolkit works.
 
 CHANGES FROM CORE PERL
     Strawberry Perl is and will continue to be based on the latest "stable"
-    releases of Perl, currently 5.8.8 and 5.10.0.
+    releases of Perl, currently 5.8.9, and 5.10.0.
 
     Some additional modifications are included that improve general
     compatibility with the Win32 platform or improve "turnkey" operation on
@@ -63,8 +63,8 @@ CHANGES FROM CORE PERL
 
     Additionally, a stub CPAN Config.pm file is added. This provides a
     complete zero-conf preconfiguration for CPAN, using a stable
-    <http://cpan.strawberryperl.com/> redirector to bounce to a
-    known-reliable mirrors.
+    http://cpan.strawberryperl.com/ redirector to bounce to a known-reliable
+    mirrors.
 
     A more-thorough network-aware zero-conf capability is currently being
     developed and will be included at a later time.
@@ -78,33 +78,34 @@ CONFIGURATION
 
       * Adds directories to PATH
         - C:\strawberry\perl\bin  
-        - C:\strawberry\c\bin
+        - C:\strawberry\c\bin  
 
     Users installing Strawberry Perl without the installer will need to add
     the environment entries manually.
 
 METHODS
-    In addition to extending various underlying Perl::Dist::Inno methods,
+    In addition to extending various underlying Perl::Dist::WiX methods,
     Strawberry Perl adds some additional methods that provide installation
     support for miscellaneous tools that have not yet been promoted to the
     core.
 
   default_machine
       Perl::Dist::Strawberry->default_machine->run;
-
-    The "default_machine" class method is used to setup the most common
+  
+    The `default_machine' class method is used to setup the most common
     machine for building Strawberry Perl.
 
     The machine provided creates a standard 5.8.8 distribution (.zip and
-    .exe), a standard 5.10.0 distribution (.zip and .exe) and a
-    Portable-enabled 5.10.0 distribution (.zip only).
+    .exe), a standard 5.8.9 distribution (.zip and .exe), a standard 5.10.0
+    distribution (.zip and .exe) and a Portable-enabled 5.10.0 distribution
+    (.zip only).
 
     Returns a Perl::Dist::Machine object.
 
   install_patch
       $dist->install_patch;
 
-    The "install_path" method can be used to install a copy of the Unix
+    The `install_path' method can be used to install a copy of the Unix
     patch program into the distribution.
 
     Returns true or throws an exception on error.
@@ -121,23 +122,43 @@ METHODS
     Installs a manifest file to make an executable binary look like a "real"
     Win32 program.
 
+  install_dbd_mysql
+      $dist->install_dbd_mysql;
+
+    Installs DBD::mysql from the PAR files on the Strawberry Perl web site.
+
+  install_dbd_pg
+      $dist->install_dbd_pg;
+
+    Installs DBD::Pg from the PAR files on the Strawberry Perl web site.
+
+    install_pari
+      $dist->install_pari
+
+    The `install_pari' method install (via a PAR package) libpari and the
+    Math::Pari module into the distribution.
+
+    This method should only be called at during the install_modules phase.
+
 SUPPORT
     Bugs should be reported via the CPAN bug tracker at
 
-    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry>
+    http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry
 
     Please note that only bugs in the distribution itself or the CPAN
     configuration should be reported to RT. Bugs in individual modules
     should be reported to their respective distributions.
 
     For more support information and places for discussion, see the
-    Strawberry Perl Support page <http://strawberryperl.com/support.html>.
+    Strawberry Perl Support page http://strawberryperl.com/support.html.
 
 AUTHOR
     Adam Kennedy <adamk@cpan.org>
 
+    Curtis Jewell <csjewell@cpan.org>
+
 COPYRIGHT
-    Copyright 2007 - 2009 Adam Kennedy.
+    Copyright 2007 - 2009 Adam Kennedy. Copyright 2009 Curtis Jewell.
 
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

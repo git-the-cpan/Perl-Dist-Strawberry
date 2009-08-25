@@ -1,12 +1,12 @@
-package t::lib::Test2;
+package t::lib::TestBootstrap;
 
 use strict;
-use Perl::Dist::Strawberry;
+use Perl::Dist::Bootstrap;
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '1.11';
-	@ISA     = 'Perl::Dist::Strawberry';
+	$VERSION = '2.00';
+	@ISA     = 'Perl::Dist::Bootstrap';
 }
 
 
@@ -18,12 +18,9 @@ BEGIN {
 
 sub new {
 	return shift->SUPER::new(
-		perl_version => 5100,
-		trace        => 1,
+		trace        => 101,
 		@_,
 	);
 }
-
-sub trace { Test::More::diag($_[1]) }
 
 1;
