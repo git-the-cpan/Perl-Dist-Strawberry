@@ -17,16 +17,15 @@ dependencies of Perl::Dist and Perl::Dist::WiX.
 
 =cut
 
-use 5.006;
+use 5.008001;
 use strict;
-use base                    qw( Perl::Dist::Strawberry );
-use vars                    qw( $VERSION               );
+use warnings;
+use parent                  qw( Perl::Dist::Strawberry );
 use File::Spec::Functions   qw( catfile catdir         );
 use File::ShareDir          qw();
 
-BEGIN {
-	$VERSION = '2.00';
-}
+our $VERSION = '2.00_02';
+$VERSION = eval $VERSION;
 
 
 
@@ -37,6 +36,11 @@ BEGIN {
 
 # Apply some default paths
 sub new {
+
+	if ($Perl::Dist::Strawberry::VERSION < 2.00_02) {
+		PDWiX->throw('Perl::Dist::Strawberry version is not high enough.')
+	}
+
 	shift->SUPER::new(
 		app_id            => 'bootperl',
 		app_name          => 'Bootstrap Perl',
@@ -44,42 +48,35 @@ sub new {
 		app_publisher_url => 'http://vanillaperl.org/',
 		image_dir         => 'C:\\bootperl',
 
-		msi_directory_tree_additions => [qw (
-			perl\site\lib\Class
-			perl\site\lib\Data
-			perl\site\lib\Devel
-			perl\site\lib\Module
-			perl\site\lib\Object
-			perl\site\lib\Perl
-			perl\site\lib\Perl\Dist
-			perl\site\lib\Process
-			perl\site\lib\Readonly
-			perl\site\lib\Sub
-			perl\site\lib\Tie
-			perl\site\lib\auto\Class
-			perl\site\lib\auto\Data
-			perl\site\lib\auto\Devel
-			perl\site\lib\auto\Module
-			perl\site\lib\auto\Object
-			perl\site\lib\auto\Perl
-			perl\site\lib\auto\Perl\Dist
-			perl\site\lib\auto\Process
-			perl\site\lib\auto\Readonly
-			perl\site\lib\auto\share\dist
-			perl\site\lib\auto\share\dist\Perl-Dist
-			perl\site\lib\auto\share\dist\Perl-Dist\default
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.10.0
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.10.0\lib
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.8.8
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.8.8\lib
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.8.9
-			perl\site\lib\auto\share\dist\Perl-Dist\default\perl-5.8.9\lib
-			perl\site\lib\auto\Sub
-		)],
+		# Tasks to complete to create Bootstrap
+		tasklist => [
+			'final_initialization',
+			'install_c_toolchain',
+			'install_strawberry_c_toolchain',
+			'install_c_libraries',
+			'install_strawberry_c_libraries',
+			'install_perl',
+			'install_perl_toolchain',
+			'install_cpan_upgrades',
+			'install_strawberry_modules_1',
+			'install_strawberry_modules_2',
+			'install_strawberry_modules_3',
+			'install_strawberry_modules_4',
+			'install_bootstrap_modules_1',
+			'install_bootstrap_modules_2',
+			'install_win32_extras',
+			'install_strawberry_extras',
+			'install_portable',
+			'remove_waste',
+			'add_forgotten_files',
+			'create_distribution_list',
+			'regenerate_fragments',
+			'write',
+		],
 
-		# Build both msi and zip versions
+		# Build msi version only.
 		msi               => 1,
-		zip               => 1,
+		zip               => 0,
 
 		@_,
 	);
@@ -118,14 +115,16 @@ sub patch_include_path {
 	];
 }
 
-sub install_perl_modules {
+sub install_bootstrap_modules_1 {
 	my $self = shift;
-	$self->SUPER::install_perl_modules(@_);
-
 	my $share = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
 
+	# Install a "cheat" version of Alien::WiX that yells on import
+	# to require a real installation.
 	$self->install_distribution_from_file(
-	    file => catfile($share, 'modules', 'Alien-WiX-0.300000.tar.gz'),
+	    mod_name      => 'Alien::WiX',
+	    file          => catfile($share, 'modules', 'Alien-WiX-0.300000.tar.gz'),
+		buildpl_param => ['--installdirs', 'vendor'],
 	);
 
 	# Install Perl::Dist and everything required for Perl::Dist::WiX itself
@@ -149,16 +148,11 @@ sub install_perl_modules {
 		Portable::Dist
 		List::MoreUtils
 		AppConfig
+		Template
 	) );
-
-	$self->install_distribution( 
-		name     => 'ABW/Template-Toolkit-2.21_02.tar.gz', 
-		mod_name => 'Template',
-		force    => $self->force(),
-	);
 	
 	# Perl::Dist does not pass tests if offline.
-	$self->install_module( name => 'Perl::Dist', force => !! $self->offline );
+	# $self->install_module( name => 'Perl::Dist', force => !! $self->offline );
 
 	# Data::UUID needs to have a temp directory set.
 	{
@@ -166,6 +160,12 @@ sub install_perl_modules {
 		$self->install_module( name => 'Data::UUID', );
 	}
 
+	return 1;
+}
+
+sub install_bootstrap_modules_2 {
+	my $self = shift;
+	
 	$self->install_modules( qw(
 		Sub::Install
 		Data::OptList
@@ -175,7 +175,8 @@ sub install_perl_modules {
 		Class::Data::Inheritable
 		Exception::Class
 		Test::UseAllModules
-		Object::InsideOut
+		ExtUtils::Depends
+		Task::Weaken
 		B::Utils
 		PadWalker
 		Data::Dump::Streamer
@@ -186,21 +187,51 @@ sub install_perl_modules {
 		Algorithm::C3
 		Class::C3
 		MRO::Compat
-		Task::Weaken
 		Scope::Guard
 		Devel::GlobalDestruction
 		Sub::Name
+		Test::Exception
 		Class::MOP
+		Try::Tiny
 		Moose
 		MooseX::AttributeHelpers
 		File::List::Object
+		Params::Validate
+		parent
+		MooseX::Singleton
+		Variable::Magic
+		B::Hooks::EndOfScope
+		namespace::clean
+		Carp::Clan
+		MooseX::Types
+		Email::Date::Format
+		Date::Format
+		Test::Pod
+		Mail::Address
+		MIME::Types
 	) );
+	# The current version of MIME::Types causes
+	# MIME::Lite to fail tests.
 	$self->install_module(
-		name => 'Perl::Dist::WiX',
+		name => 'MIME::Lite',
 		force => 1,
 	);
+	$self->install_modules( qw(
+		WiX3
+		CPAN::Mini
+		CPAN::Mini::Devel
+	) );
 
-#	$self->trace_line(0, "Loading extra Bootstrap packlists\n");
+#	$self->install_module(
+#		name => 'Perl::Dist::WiX',
+#		force => 1,
+#	);
+#	$self->install_distribution(
+#		name     => 'CSJEWELL/Perl-Dist-WiX-1.090_103.tar.gz',
+#		mod_name => 'Perl::Dist::WiX',
+#		force    => 1,
+#		makefilepl_param => ['INSTALLDIRS=vendor'],
+#	);
 
 	return 1;
 }
