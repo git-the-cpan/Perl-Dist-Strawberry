@@ -24,7 +24,6 @@ share/License-short.rtf
 share/License.rtf
 share/minicpan_filters.txt
 share/modules/Alien-WiX-0.300000.tar.gz
-share/modules/Math-GMP-2.05.tar.gz
 share/onion.ico
 share/ppm/README.txt
 share/release_notes.html.tt
@@ -36,6 +35,7 @@ share/strawberry/perl-5.10.1/win32/config.gc.tt
 share/strawberry/perl-5.8.9/lib/CPAN/Config.pm.tt
 share/strawberry/perl-5.8.9/win32/config.gc.tt
 share/strawberry/perl/lib/CPANPLUS/Config.pm.tt
+share/strawberry/README.txt.tt
 share/StrawberryBanner.bmp
 share/StrawberryDialog.bmp
 t/001_compile.t

@@ -4,7 +4,7 @@ package Perl::Dist::Strawberry::Libraries;
 
 =head1 NAME
 
-Perl::Dist::Strawberry - Library installation routines for Strawberry Perl
+Perl::Dist::Strawberry::Libraries - Library installation routines for Strawberry Perl
 
 =head1 SYNOPSIS
 
@@ -37,7 +37,7 @@ use File::Spec::Functions       qw( catfile catdir  );
 #use URI::file                   qw();
 #use File::ShareDir              qw();
 
-our $VERSION = '2.00_02';
+our $VERSION = '2.01';
 $VERSION = eval $VERSION;
 
 
@@ -150,6 +150,9 @@ sub install_ppm {
 	my $xml_file_new = catfile($self->image_dir, qw(perl site lib ppm.xml));
 	
 	$self->_copy($xml_file_old, $xml_file_new);
+	
+	# This is because the UWinnipeg repository is insane atm.
+	$self->_run3("ppm.bat", qw(set repository --remove UWinnipeg));
 	
 	# Add the readme file.
 	$self->add_to_fragment('PPM', $filelist->files);
@@ -378,7 +381,8 @@ sub install_libiconv {
 
 	my $filelist = $self->install_binary( 
 		name => 'libiconv', 
-		url  => $self->binary_url('libiconv-08192009.zip'),
+		install_to => q{.},
+		url  => $self->binary_url('libiconv-1.9.2-1-bin_20090831.zip'),
 	);
 
 	$self->insert_fragment( 'libiconv', $filelist );

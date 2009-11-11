@@ -128,7 +128,7 @@ use URI::file                   qw();
 use File::ShareDir              qw();
 require Perl::Dist::WiX::Util::Machine;
 
-our $VERSION = '2.00_02';
+our $VERSION = '2.01';
 $VERSION = eval $VERSION;
 
 #####################################################################
@@ -143,8 +143,8 @@ $VERSION = eval $VERSION;
 The C<default_machine> class method is used to setup the most common
 machine for building Strawberry Perl.
 
-The machine provided creates a standard 5.8.9 distribution (.zip and .exe),
-a standard 5.10.1 distribution (.zip and .exe) and a Portable-enabled 5.10.0 
+The machine provided creates a standard 5.8.9 distribution (.zip and .msi),
+a standard 5.10.1 distribution (.zip and .msi) and a Portable-enabled 5.10.0 
 distribution (.zip only).
 
 Returns a L<Perl::Dist::WiX::Util::Machine> object.
@@ -173,10 +173,11 @@ sub default_machine {
 	$machine->add_option('version',
 		perl_version => '5101',
 	);
-	$machine->add_option('version',
-		perl_version => '5101',
-		portable     => 1,
-	);
+# Too many bugs in portable to want to try to do it in October.
+#	$machine->add_option('version',
+#		perl_version => '5101',
+#		portable     => 1,
+#	);
 
 	# Set the different paths
 	$machine->add_dimension('drive');
@@ -220,7 +221,7 @@ sub new {
 		
 		# Program version.
 		build_number         => 0,
-		beta_number          => 2,
+#		beta_number          => 3,
 		
 		# New options for msi building...
 		msi_license_file     => catfile($dist_dir, 'License-short.rtf'),
@@ -430,6 +431,7 @@ sub install_strawberry_modules_1 {
 		Win32::API
 		Parse::Binary
 		Win32::Exe
+		Win32::EventLog
 	} );
 
 	# Install additional math modules
@@ -451,12 +453,9 @@ sub install_strawberry_modules_1 {
 	$self->install_modules( qw{
 		XML::NamespaceSupport
 		XML::SAX
-		XML::LibXML::Common
+		XML::LibXML
+		XML::LibXSLT
 	} );
-
-	$self->install_module(
-		name => 'XML::LibXML',
-	);
 
 	# Insert ParserDetails.ini
 	$self->add_to_fragment('XML_SAX', [ catfile($self->image_dir, qw(perl site lib XML SAX ParserDetails.ini)) ]);
@@ -601,27 +600,9 @@ sub install_strawberry_modules_4 {
 	$self->install_modules( qw{
 		Net::SSLeay
 		Digest::HMAC_MD5
-	});
-
-	# 1.30 has a test that does not work on Windows.
-	# So installing this one while we wait for 1.31.
-	$self->install_distribution( 
-		mod_name         => 'IO::Socket::SSL',
-		name             => 'SULLR/IO-Socket-SSL-1.30_3.tar.gz',
-		makefilepl_param => ['INSTALLDIRS=vendor'],
-	);
-
-	$self->install_modules( qw{
+		IO::Socket::SSL
 		Net::SMTP::TLS	
 	});
-
-	# Needs patched to build on Win32 at all.
-	my $share = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
-	$self->install_distribution_from_file(
-		mod_name         => 'Math::GMP',
-		file             => catfile($share, 'modules', 'Math-GMP-2.05.tar.gz'),
-		makefilepl_param => ['INSTALLDIRS=vendor'],
-	);
 
 	# The rest of the Net::SSH::Perl toolchain.
 	$self->install_module(
@@ -629,6 +610,7 @@ sub install_strawberry_modules_4 {
 		force => 1, # Timing-dependent test.
 	);
 	$self->install_modules( qw{
+		Math::GMP
 		Data::Buffer
 		Crypt::DSA
 		Class::ErrorHandler
@@ -656,8 +638,11 @@ sub install_strawberry_modules_4 {
 		Digest::BubbleBabble
 		Crypt::IDEA
 		String::CRC32
-		Net::SSH::Perl
 	});
+
+	# Since	Net::SSH::Perl does not work under Win32 yet, it
+	# is not being installed.  When it does, add it to the end
+	# of the previous install_modules call.
 
 	# Module::Signature toolchain.
 	$self->install_modules( qw{
@@ -706,14 +691,16 @@ sub install_strawberry_extras {
 			url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
 			icon_file  => catfile($dist_dir, 'onion.ico')
 		);
+		$self->patch_file( 'README.txt' => $self->image_dir, { dist => $self } );
 	}
 
 	my $license_file_from = catfile($dist_dir, 'License.rtf');
 	my $license_file_to = catfile($self->license_dir, 'License.rtf');
-	
+	my $readme_file = catfile($self->image_dir, 'README.txt');
+
 	$self->_copy($license_file_from, $license_file_to);
-	$self->add_to_fragment('perl_licenses', [ $license_file_to ]);
-	
+	$self->add_to_fragment('perl_licenses', [ $license_file_to, $readme_file ]);
+
 	return 1;
 }
 

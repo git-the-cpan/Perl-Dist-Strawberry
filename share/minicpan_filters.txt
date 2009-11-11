@@ -2,6 +2,8 @@
 # version 1.000 or greater.
 
 # Perl::Dist::Bootstrap
+/DROLSKY/MooseX-AttributeHelpers-
+/TSCH/ExtUtils-Depends-
 /NUFFIN/Try-Tiny-
 /DROLSKY/Params-Validate-
 /CORION/parent-
@@ -88,6 +90,7 @@
 
 # Perl::Dist::Strawberry
 /JDB/Win32-File-\d
+/JDB/Win32-EventLog-\d
 /ADAMK/Win32-File-Object-
 /COSIMO/Win32-API-
 /SMUELLER/Win32-Exe-
@@ -167,6 +170,7 @@
 /DPARIS/Crypt-IDEA-
 /SOENKE/String-CRC32-
 /TURNSTEP/Net-SSH-Perl-
+/TURNSTEP/Math-GMP-
 
 # Module::Signature toolchain.
 /BDFOY/Test-Manifest-

@@ -24,7 +24,7 @@ use parent                  qw( Perl::Dist::Strawberry );
 use File::Spec::Functions   qw( catfile catdir         );
 use File::ShareDir          qw();
 
-our $VERSION = '2.00_02';
+our $VERSION = '2.01';
 $VERSION = eval $VERSION;
 
 
@@ -197,7 +197,6 @@ sub install_bootstrap_modules_2 {
 		MooseX::AttributeHelpers
 		File::List::Object
 		Params::Validate
-		parent
 		MooseX::Singleton
 		Variable::Magic
 		B::Hooks::EndOfScope
@@ -209,6 +208,7 @@ sub install_bootstrap_modules_2 {
 		Test::Pod
 		Mail::Address
 		MIME::Types
+		MooseX::NonMoose
 	) );
 	# The current version of MIME::Types causes
 	# MIME::Lite to fail tests.
