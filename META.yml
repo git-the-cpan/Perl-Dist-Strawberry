@@ -14,7 +14,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.91'
+generated_by: 'Module::Install version 0.92'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -27,8 +27,8 @@ no_index:
     - share
     - t
 requires:
-  Perl::Dist::WiX: 1.090
+  Perl::Dist::WiX: 1.102
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.01
+version: 2.02

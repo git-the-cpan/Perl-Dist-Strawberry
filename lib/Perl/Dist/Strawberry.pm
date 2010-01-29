@@ -128,8 +128,8 @@ use URI::file                   qw();
 use File::ShareDir              qw();
 require Perl::Dist::WiX::Util::Machine;
 
-our $VERSION = '2.01';
-$VERSION = eval $VERSION;
+our $VERSION = '2.02';
+$VERSION =~ s/_//ms;
 
 #####################################################################
 # Build Machine Generator
@@ -144,7 +144,7 @@ The C<default_machine> class method is used to setup the most common
 machine for building Strawberry Perl.
 
 The machine provided creates a standard 5.8.9 distribution (.zip and .msi),
-a standard 5.10.1 distribution (.zip and .msi) and a Portable-enabled 5.10.0 
+a standard 5.10.1 distribution (.zip and .msi) and a Portable-enabled 5.10.1 
 distribution (.zip only).
 
 Returns a L<Perl::Dist::WiX::Util::Machine> object.
@@ -157,6 +157,7 @@ sub default_machine {
 	# Create the machine
 	my $machine = Perl::Dist::WiX::Util::Machine->new(
 		class => $class,
+		skip  => [6],
 		@_,
 	);
 
@@ -164,20 +165,15 @@ sub default_machine {
 	$machine->add_dimension('version');
 	$machine->add_option('version',
 		perl_version => '589',
-	    build_number => 3,
+	    build_number => 4,
 	);
-# Not worrying about building 5.10.0 in October.
-#	$machine->add_option('version',
-#		perl_version => '5100',
-#	);
 	$machine->add_option('version',
 		perl_version => '5101',
 	);
-# Too many bugs in portable to want to try to do it in October.
-#	$machine->add_option('version',
-#		perl_version => '5101',
-#		portable     => 1,
-#	);
+	$machine->add_option('version',
+		perl_version => '5101',
+		portable     => 1,
+	);
 
 	# Set the different paths
 	$machine->add_dimension('drive');
@@ -205,7 +201,7 @@ sub new {
 	my $dist_dir = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
 	my $class = shift;
 	
-	if ($Perl::Dist::WiX::VERSION < '1.090') {
+	if ($Perl::Dist::WiX::VERSION < '1.102') {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -220,8 +216,7 @@ sub new {
 		perl_version         => '5101',
 		
 		# Program version.
-		build_number         => 0,
-#		beta_number          => 3,
+		build_number         => 1,
 		
 		# New options for msi building...
 		msi_license_file     => catfile($dist_dir, 'License-short.rtf'),
@@ -242,7 +237,6 @@ sub new {
 			'final_initialization',
 			'install_c_toolchain',
 			'install_strawberry_c_toolchain',
-			'install_c_libraries',
 			'install_strawberry_c_libraries',
 			'install_perl',
 			'install_perl_toolchain',
@@ -251,11 +245,13 @@ sub new {
 			'install_strawberry_modules_2',
 			'install_strawberry_modules_3',
 			'install_strawberry_modules_4',
+			'add_forgotten_files',
+			'regenerate_fragments',
+			'write_merge_module',
 			'install_win32_extras',
 			'install_strawberry_extras',
 			'install_portable',
 			'remove_waste',
-			'add_forgotten_files',
 			'create_distribution_list',
 			'regenerate_fragments',
 			'write',
@@ -300,11 +296,11 @@ sub add_forgotten_files {
 sub output_base_filename {
 	$_[0]->{output_base_filename} or
 	'strawberry-perl'
-		. '-' . $_[0]->perl_version_human
-		. '.' . $_[0]->build_number
-		. ($_[0]->image_dir =~ /^d:/i ? '-ddrive' : '')
-		. ($_[0]->portable ? '-portable' : '')
-		. ($_[0]->beta_number ? '-beta-' . $_[0]->beta_number : '')
+		. '-' . $_[0]->perl_version_human()
+		. '.' . $_[0]->build_number()
+		. ($_[0]->image_dir() =~ /^d:/i ? '-ddrive' : '')
+		. ($_[0]->portable() ? '-portable' : '')
+		. ($_[0]->beta_number() ? '-beta-' . $_[0]->beta_number() : '')
 }
 
 
@@ -317,7 +313,7 @@ sub install_strawberry_c_toolchain {
 	my $self = shift;
 
 	# Extra Binary Tools
-	$self->install_patch;
+	$self->install_patch();
 
 	return 1;
 }
@@ -345,6 +341,7 @@ sub install_strawberry_c_libraries {
 	
 	# Database Libraries
 	$self->install_libdb();
+	$self->install_libgdbm();
 	$self->install_libpostgresql();
 
 	# Crypto libraries
@@ -366,48 +363,39 @@ sub patch_include_path {
 
 	# Find the share path for this distribution
 	my $share = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
+	
+	# Verify the subdirectories we need exist.
 	my $path  = File::Spec->catdir( $share, 'strawberry' );
+	my $portable  = File::Spec->catdir( $share, 'portable' );
 	unless ( -d $path ) {
 		die("Directory $path does not exist");
 	}
 
-	# Prepend to the default include path
-	return [ $path,
-		@{ $self->SUPER::patch_include_path },
-	];
+	if ( $self->portable() ) {
+		unless ( -d $portable ) {
+			die("Directory $portable does not exist");
+		}
+		# Prepend to the default include path
+		return [ $portable, $path,
+			@{ $self->SUPER::patch_include_path() },
+		];
+	} else {
+		# Prepend to the default include path
+		return [ $path,
+			@{ $self->SUPER::patch_include_path() },
+		];
+	}
 }
 
-sub install_perl_589_bin {
+sub install_perl_bin {
 	my $self   = shift;
 	my %params = @_;
 	my $patch  = delete($params{patch}) || [];
-	return $self->SUPER::install_perl_589_bin(
+	return $self->SUPER::install_perl_bin(
 		patch => [ qw{
-			win32/config.gc
-		}, @$patch ],
-		%params,
-	);
-}
-
-sub install_perl_5100_bin {
-	my $self   = shift;
-	my %params = @_;
-	my $patch  = delete($params{patch}) || [];
-	return $self->SUPER::install_perl_5100_bin(
-		patch => [ qw{
-			win32/config.gc
-		}, @$patch ],
-		%params,
-	);
-}
-
-sub install_perl_5101_bin {
-	my $self   = shift;
-	my %params = @_;
-	my $patch  = delete($params{patch}) || [];
-	return $self->SUPER::install_perl_5101_bin(
-		patch => [ qw{
-			win32/config.gc
+			win32/FindExt.pm
+			ext/GDBM_File/GDBM_File.xs
+			ext/GDBM_File/GDBM_File.pm
 		}, @$patch ],
 		%params,
 	);
@@ -417,11 +405,19 @@ sub install_strawberry_modules_1 {
 	my $self = shift;
 
 	# Install LWP::Online so our custom minicpan code works
-	$self->install_distribution(
-		name     => 'ADAMK/LWP-Online-1.07.tar.gz',
-		mod_name => 'LWP::Online',
-		makefilepl_param => ['INSTALLDIRS=vendor'],
-	);
+	if ($self->portable()) {
+		$self->install_distribution(
+			name     => 'ADAMK/LWP-Online-1.07.tar.gz',
+			mod_name => 'LWP::Online',
+			makefilepl_param => ['INSTALLDIRS=site'],
+		);
+	} else {
+		$self->install_distribution(
+			name     => 'ADAMK/LWP-Online-1.07.tar.gz',
+			mod_name => 'LWP::Online',
+			makefilepl_param => ['INSTALLDIRS=vendor'],
+		);
+	}
 
 	# Win32 Modules
 	$self->install_modules( qw{
@@ -440,15 +436,27 @@ sub install_strawberry_modules_1 {
 		Math::BigInt::GMP
 	} );
 	# XML Modules
-	$self->install_distribution(
-		name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
-		mod_name         => 'XML::Parser',
-		makefilepl_param => [
-			'INSTALLDIRS=vendor',
-			'EXPATLIBPATH=' . $self->dir(qw{ c lib     }),
-			'EXPATINCPATH=' . $self->dir(qw{ c include }),
-		],
-	);
+	if ($self->portable()) {
+		$self->install_distribution(
+			name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
+			mod_name         => 'XML::Parser',
+			makefilepl_param => [
+				'INSTALLDIRS=site',
+				'EXPATLIBPATH=' . $self->_dir(qw{ c lib     }),
+				'EXPATINCPATH=' . $self->_dir(qw{ c include }),
+			],
+		);
+	} else {
+		$self->install_distribution(
+			name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
+			mod_name         => 'XML::Parser',
+			makefilepl_param => [
+				'INSTALLDIRS=vendor',
+				'EXPATLIBPATH=' . $self->_dir(qw{ c lib     }),
+				'EXPATINCPATH=' . $self->_dir(qw{ c include }),
+			],
+		);
+	}
 
 	$self->install_modules( qw{
 		XML::NamespaceSupport
@@ -456,10 +464,13 @@ sub install_strawberry_modules_1 {
 		XML::LibXML
 		XML::LibXSLT
 	} );
-
-	# Insert ParserDetails.ini
-	$self->add_to_fragment('XML_SAX', [ catfile($self->image_dir, qw(perl site lib XML SAX ParserDetails.ini)) ]);
-
+	
+	unless ($self->portable()) {
+		# Insert ParserDetails.ini
+		my $ini_file = catfile($self->image_dir(), qw(perl vendor lib XML SAX ParserDetails.ini));
+		$self->add_to_fragment('XML_SAX', [ $ini_file ]);
+	}
+	
 	return 1;
 }
 
@@ -483,13 +494,25 @@ sub install_strawberry_modules_2 {
 		Test::Deep
 		IO::Scalar
 	} );
-	$self->install_distribution(
-		name             => 'RKINYON/DBM-Deep-1.0013.tar.gz',
-		mod_name         => 'DBM::Deep',
-		makefilepl_param => ['INSTALLDIRS=vendor'],
-		buildpl_param    => ['--installdirs', 'vendor'],
-		force            => 1,
-	);
+	
+	if ($self->portable()) {
+		$self->install_distribution(
+			name             => 'RKINYON/DBM-Deep-1.0013.tar.gz',
+			mod_name         => 'DBM::Deep',
+			makefilepl_param => ['INSTALLDIRS=site'],
+			buildpl_param    => ['--installdirs', 'site'],
+			force            => 1,
+		);
+	} else {
+		$self->install_distribution(
+			name             => 'RKINYON/DBM-Deep-1.0013.tar.gz',
+			mod_name         => 'DBM::Deep',
+			makefilepl_param => ['INSTALLDIRS=vendor'],
+			buildpl_param    => ['--installdirs', 'vendor'],
+			force            => 1,
+		);
+	}
+	
 	$self->install_modules( qw{
 		YAML::Tiny
 		PAR
@@ -536,17 +559,12 @@ sub install_strawberry_modules_3 {
 	# needs this module, so adding it.
 	$self->install_modules( qw{
 		DBIx::Simple
-	} ) if ($self->perl_version >= 5100);
+	} ) if ($self->perl_version() >= 5100);
 	
-	# TODO: BerkeleyDB does not build yet.
-	#$self->install_distribution(
-	#	name => 'BerkeleyDB',
-	#	url  => 'http://strawberryperl.com/package/BerkeleyDB-0.34-vanilla.tar.gz',
-	#);
-
 	# Support for other databases.
 	$self->install_modules( qw{
 		DB_File
+		BerkeleyDB
 		DBD::ODBC
 	} );
 	$self->install_dbd_mysql;
@@ -555,10 +573,13 @@ sub install_strawberry_modules_3 {
 		force => 1,
 	);
 
+	my $library_location = $self->library_directory();
+	my $install_location = $self->portable() ? q{perl\site\lib} : q{perl\vendor\lib};
+	
 	my $filelist = $self->install_binary(
 		name       => 'db_libraries',
-		url        => $self->binary_url('DatabaseLibraries-09162009.zip'),
-		install_to => q{.}
+		url        => $self->_binary_url("$library_location/MySQLLibraries-20100121.zip"),
+		install_to => $install_location
 	);
 	$self->insert_fragment( 'db_libraries', $filelist );
 
@@ -589,14 +610,24 @@ sub install_strawberry_modules_4 {
 
 	# We have to tell the Makefile.PL where the OpenSSL 
 	# libraries are by passing a parameter for Crypt::SSLeay.
-	$self->install_distribution( 
-		mod_name => 'Crypt::SSLeay',
-		name     => 'DLAND/Crypt-SSLeay-0.57.tar.gz',
-		makefilepl_param => [
-			'INSTALLDIRS=vendor', '--lib', $ENV{'OPENSSL_PREFIX'} ,
-		],
-	);
-
+	if ($self->portable()) {
+		$self->install_distribution( 
+			mod_name => 'Crypt::SSLeay',
+			name     => 'DLAND/Crypt-SSLeay-0.57.tar.gz',
+			makefilepl_param => [
+				'--lib', $ENV{'OPENSSL_PREFIX'} ,
+			],
+		);
+	} else {
+		$self->install_distribution( 
+			mod_name => 'Crypt::SSLeay',
+			name     => 'DLAND/Crypt-SSLeay-0.57.tar.gz',
+			makefilepl_param => [
+				'INSTALLDIRS=vendor', '--lib', $ENV{'OPENSSL_PREFIX'} ,
+			],
+		);
+	}
+	
 	$self->install_modules( qw{
 		Net::SSLeay
 		Digest::HMAC_MD5
@@ -651,6 +682,7 @@ sub install_strawberry_modules_4 {
 		Crypt::CAST5_PP
 		Crypt::RIPEMD160
 		Crypt::Twofish
+		Test::Exception
 		Crypt::OpenPGP
 		Algorithm::Diff
 		Text::Diff
@@ -675,38 +707,43 @@ sub install_strawberry_extras {
 	# Links to the Strawberry Perl website.
 	# Don't include this for non-Strawberry sub-classes
 	if ( ref($self) eq 'Perl::Dist::Strawberry' ) {
-		$self->install_website(
-			name       => 'Strawberry Perl Website',
-			url        => $self->strawberry_url,
-			icon_file  => catfile($dist_dir, 'strawberry.ico')
-		);
-		$self->install_website(
-			name       => 'Strawberry Perl Release Notes',
-			url        => $self->strawberry_release_notes_url,
-			icon_file  => catfile($dist_dir, 'strawberry.ico')
-		);
-		# Link to IRC.
-		$self->install_website(
-			name       => 'Live Support',
-			url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
-			icon_file  => catfile($dist_dir, 'onion.ico')
-		);
-		$self->patch_file( 'README.txt' => $self->image_dir, { dist => $self } );
+		if (not $self->portable()) {
+			$self->install_website(
+				name       => 'Strawberry Perl Website',
+				url        => $self->strawberry_url(),
+				icon_file  => catfile($dist_dir, 'strawberry.ico')
+			);
+			$self->install_website(
+				name       => 'Strawberry Perl Release Notes',
+				url        => $self->strawberry_release_notes_url(),
+				icon_file  => catfile($dist_dir, 'strawberry.ico')
+			);
+			# Link to IRC.
+			$self->install_website(
+				name       => 'Live Support',
+				url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
+				icon_file  => catfile($dist_dir, 'onion.ico')
+			);
+		}
+		$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
 	}
 
 	my $license_file_from = catfile($dist_dir, 'License.rtf');
-	my $license_file_to = catfile($self->license_dir, 'License.rtf');
-	my $readme_file = catfile($self->image_dir, 'README.txt');
+	my $license_file_to = catfile($self->license_dir(), 'License.rtf');
+	my $readme_file = catfile($self->image_dir(), 'README.txt');
 
-	$self->_copy($license_file_from, $license_file_to);
-	$self->add_to_fragment('perl_licenses', [ $license_file_to, $readme_file ]);
+	$self->_copy($license_file_from, $license_file_to);	
+	if (not $self->portable()) {
+		$self->add_to_fragment( 'Win32Extras',
+			[ $license_file_to, $readme_file ] );
+	}
 
 	return 1;
 }
 
 sub strawberry_url {
 	my $self = shift;
-	my $path = $self->output_base_filename;
+	my $path = $self->output_base_filename();
 
 	# Strip off anything post-version
 	unless ( $path =~ s/^(strawberry-perl-\d+(?:\.\d+)+).*$/$1/ ) {
@@ -718,15 +755,14 @@ sub strawberry_url {
 
 sub strawberry_release_notes_url {
 	my $self = shift;
-	my $path = $self->perl_version_human
-		. q{.} . $self->build_number
-		. ($self->beta_number ? '.beta' : '');
+	my $path = $self->perl_version_human()
+		. q{.} . $self->build_number()
+		. ($self->beta_number() ? '.beta' : '');
 
 	return "http://strawberryperl.com/release-notes/$path.html";
 }
 
-
-
+1;
 
 =pod
 
@@ -742,6 +778,7 @@ should be reported to their respective distributions.
 
 For more support information and places for discussion, see the
 Strawberry Perl Support page L<http://strawberryperl.com/support.html>.
+Strawberry Perl Support page L<http://strawberryperl.com/support.html>.
 
 =head1 AUTHOR
 
@@ -751,7 +788,9 @@ Curtis Jewell E<lt>csjewell@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2007 - 2009 Adam Kennedy.  Copyright 2009 Curtis Jewell.
+Copyright 2007 - 2009 Adam Kennedy.  
+
+Copyright 2009 - 2010 Curtis Jewell.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

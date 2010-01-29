@@ -2,8 +2,7 @@
 # version 1.000 or greater.
 
 # Perl::Dist::Bootstrap
-/DROLSKY/MooseX-AttributeHelpers-
-/TSCH/ExtUtils-Depends-
+/RGARCIA/Sub-Identify-
 /NUFFIN/Try-Tiny-
 /DROLSKY/Params-Validate-
 /CORION/parent-
@@ -89,6 +88,9 @@
 /MAKAMAKA/JSON-
 
 # Perl::Dist::Strawberry
+/RKOBES/PPM-0
+/ADAMK/Test-NoWarnings-\d
+/PAJAS/XML-LibXSLT-\d
 /JDB/Win32-File-\d
 /JDB/Win32-EventLog-\d
 /ADAMK/Win32-File-Object-

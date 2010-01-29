@@ -7,22 +7,25 @@ Perl::Dist::Strawberry::Repository - The repository that is used for Perl::Dist:
 =head1 DESCRIPTION
 
 This documentation describes the repository that Perl::Dist::Strawberry uses, 
-and the branches that are currently being used as of October 2009.
+and the branches that are currently being used as of January 2010.
 
 =head1 REPOSITORY
 
 Perl::Dist::Strawberry is currently on Adam Kennedy's "Open Repository" for 
 CPAN authors, at L<http://svn.ali.as/cpan/>
 
-If you're a CPAN author, you can get commit access by asking Adam 
-Kennedy for it. His e-mail address is C<< adamk@cpan.org >>.
+My understanding is that if you're a CPAN author, you can get commit access 
+to it by asking Adam Kennedy for it. His e-mail address is 
+C<< adamk@cpan.org >>.
 
 If you aren't a CPAN author and need commit access for Perl::Dist::Strawberry, 
-please e-mail both Adam and I (Curtis Jewell, C<< csjewell@cpan.org >>) with 
-what you'd like to do (a patch would be nice to see, but it isn't required).
+please e-mail me with what you'd like to do (a patch would be nice to see) and 
+I'll recommend to him that you be given access.
 
-In any case, If you would like to make significant changes or improvements to the 
-Perl-Dist-Strawberry trunk or maintenance branches, please e-mail me.
+In any case, before committing anything more than minor changes to the 
+Perl-Dist-Strawberry trunk or branches, please e-mail me.  I'll probably say 
+yes, but I need to know what you're planning to do, so that I don't accidentally 
+step on your changes.
 
 You may wish to work on your own branch, and then communicate with me to get it 
 merged into the trunk, by doing:
@@ -31,24 +34,26 @@ merged into the trunk, by doing:
 
 =head1 BRANCHES
 
-Here is the list of current branches:
+The trunk is currently in the process of polishing for a January 2010
+release of Strawberry Perl.
 
-=head2 Trunk (think of this as equivalent to perl's "blead")
+Here are the branches:
+
+=head2 Trunk 
 
 Location: L<http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/>
 
-The trunk is currently working with Perl::Dist::WiX 1.100, although this will 
-change soon, as the ability to build 64-bit .msi's and make a relocatable .msi 
-will start to filter in to both this module and Perl::Dist::WiX.
+The trunk is currently working with Perl::Dist::WiX 1.101.
 
-=head2 "October 2009 Maintenance" 
+=head2 Maintenance 
 
 Location: L<http://svn.ali.as/cpan/branches/Perl-Dist-Strawberry/October-2009-maintenance/>
 
-This branch, as its name states, is the maintenance branch for 5.10.1.0 and 
-5.8.9.3 - it will only be updated to fix major problems in those releases.
+This is a maintenance branch for use only if there is a major bug that 
+requires a re-release of the October 2009 version of Strawberry Perl.
 
-Perl-Dist-Strawberry 2.01 was released off of this branch. 
+This branch will be deleted once the January 2010 version is released, 
+and a new maintenance branch will be created at that time.
 
 =head1 AUTHORS
 

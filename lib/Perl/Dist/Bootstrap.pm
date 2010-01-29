@@ -24,10 +24,8 @@ use parent                  qw( Perl::Dist::Strawberry );
 use File::Spec::Functions   qw( catfile catdir         );
 use File::ShareDir          qw();
 
-our $VERSION = '2.01';
-$VERSION = eval $VERSION;
-
-
+our $VERSION = '2.02';
+$VERSION =~ s/_//ms;
 
 
 
@@ -37,8 +35,11 @@ $VERSION = eval $VERSION;
 # Apply some default paths
 sub new {
 
-	if ($Perl::Dist::Strawberry::VERSION < 2.00_02) {
+	if ($Perl::Dist::Strawberry::VERSION < 2.02) {
 		PDWiX->throw('Perl::Dist::Strawberry version is not high enough.')
+	}
+	if ($Perl::Dist::WiX::VERSION < 1.102001) {
+		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
 	shift->SUPER::new(
@@ -51,9 +52,9 @@ sub new {
 		# Tasks to complete to create Bootstrap
 		tasklist => [
 			'final_initialization',
+			'initialize_nomsm',
 			'install_c_toolchain',
 			'install_strawberry_c_toolchain',
-			'install_c_libraries',
 			'install_strawberry_c_libraries',
 			'install_perl',
 			'install_perl_toolchain',
@@ -64,35 +65,35 @@ sub new {
 			'install_strawberry_modules_4',
 			'install_bootstrap_modules_1',
 			'install_bootstrap_modules_2',
+			'add_forgotten_files',
 			'install_win32_extras',
 			'install_strawberry_extras',
-			'install_portable',
 			'remove_waste',
-			'add_forgotten_files',
 			'create_distribution_list',
 			'regenerate_fragments',
 			'write',
 		],
 
-		# Build msi version only.
+		# Build msi version only. Do not create a merge module.
 		msi               => 1,
 		zip               => 0,
+		msm               => 0,
 
 		@_,
 	);
 }
 
+
+
 # Lazily default the file name
 # Supports building multiple versions of Perl.
 sub output_base_filename {
 	$_[0]->{output_base_filename} or
-	'bootstrap-perl-' . $_[0]->perl_version_human 
-	. '.' . $_[0]->build_number
-	. ($_[0]->beta_number ? '-beta-' . $_[0]->beta_number : '');
+	'bootstrap-perl' 
+	. '-' . $_[0]->perl_version_human() 
+	. '.' . $_[0]->build_number()
+	. ($_[0]->beta_number() ? '-beta-' . $_[0]->beta_number : '');
 }
-
-
-
 
 
 
@@ -115,6 +116,8 @@ sub patch_include_path {
 	];
 }
 
+
+
 sub install_bootstrap_modules_1 {
 	my $self = shift;
 	my $share = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
@@ -127,7 +130,7 @@ sub install_bootstrap_modules_1 {
 		buildpl_param => ['--installdirs', 'vendor'],
 	);
 
-	# Install Perl::Dist and everything required for Perl::Dist::WiX itself
+	# Install everything required for Perl::Dist::WiX itself
 	$self->install_modules( qw(
 		File::Copy::Recursive
 		Class::Inspector
@@ -151,9 +154,6 @@ sub install_bootstrap_modules_1 {
 		Template
 	) );
 	
-	# Perl::Dist does not pass tests if offline.
-	# $self->install_module( name => 'Perl::Dist', force => !! $self->offline );
-
 	# Data::UUID needs to have a temp directory set.
 	{
 		local $ENV{'TMPDIR'} = $self->image_dir;
@@ -162,6 +162,8 @@ sub install_bootstrap_modules_1 {
 
 	return 1;
 }
+
+
 
 sub install_bootstrap_modules_2 {
 	my $self = shift;
@@ -190,9 +192,8 @@ sub install_bootstrap_modules_2 {
 		Scope::Guard
 		Devel::GlobalDestruction
 		Sub::Name
-		Test::Exception
-		Class::MOP
 		Try::Tiny
+		Class::MOP
 		Moose
 		MooseX::AttributeHelpers
 		File::List::Object
@@ -200,6 +201,7 @@ sub install_bootstrap_modules_2 {
 		MooseX::Singleton
 		Variable::Magic
 		B::Hooks::EndOfScope
+		Sub::Identify
 		namespace::clean
 		Carp::Clan
 		MooseX::Types
@@ -208,7 +210,6 @@ sub install_bootstrap_modules_2 {
 		Test::Pod
 		Mail::Address
 		MIME::Types
-		MooseX::NonMoose
 	) );
 	# The current version of MIME::Types causes
 	# MIME::Lite to fail tests.
@@ -222,16 +223,12 @@ sub install_bootstrap_modules_2 {
 		CPAN::Mini::Devel
 	) );
 
-#	$self->install_module(
-#		name => 'Perl::Dist::WiX',
-#		force => 1,
-#	);
-#	$self->install_distribution(
-#		name     => 'CSJEWELL/Perl-Dist-WiX-1.090_103.tar.gz',
-#		mod_name => 'Perl::Dist::WiX',
-#		force    => 1,
-#		makefilepl_param => ['INSTALLDIRS=vendor'],
-#	);
+	$self->install_distribution(
+		name     => 'CSJEWELL/Perl-Dist-WiX-1.102001.tar.gz',
+		mod_name => 'Perl::Dist::WiX',
+		force    => 1,
+		makefilepl_param => ['INSTALLDIRS=vendor'],
+	);
 
 	return 1;
 }
@@ -261,7 +258,9 @@ Curtis Jewell E<lt>csjewell@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2007 - 2009 Adam Kennedy.  Copyright 2009 Curtis Jewell.
+Copyright 2007 - 2009 Adam Kennedy.  
+
+Copyright 2009 - 2010 Curtis Jewell.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
