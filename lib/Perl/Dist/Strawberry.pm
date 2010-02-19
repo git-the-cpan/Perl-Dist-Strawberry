@@ -128,7 +128,7 @@ use URI::file                   qw();
 use File::ShareDir              qw();
 require Perl::Dist::WiX::Util::Machine;
 
-our $VERSION = '2.02_03';
+our $VERSION = '2.02_01';
 $VERSION =~ s/_//ms;
 
 #####################################################################
