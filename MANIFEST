@@ -24,7 +24,10 @@ share/cpan.ico
 share/License-short.rtf
 share/License.rtf
 share/minicpan_filters.txt
+share/module-version
+share/module-version.ico
 share/modules/Alien-WiX-0.300000.tar.gz
+share/modules/PPM-0.01_02.tar.gz
 share/onion.ico
 share/portable/perl-5.10.1/win32/config.gc.tt
 share/portable/perl-5.10.1/win32/config_H.gc
@@ -42,6 +45,12 @@ share/strawberry/perl-5.10.1/lib/CPAN/Config.pm.tt
 share/strawberry/perl-5.10.1/win32/config.gc.tt
 share/strawberry/perl-5.10.1/win32/config_H.gc
 share/strawberry/perl-5.10.1/win32/FindExt.pm
+share/strawberry/perl-5.11.5/ext/GDBM_File/GDBM_File.pm
+share/strawberry/perl-5.11.5/ext/GDBM_File/GDBM_File.xs
+share/strawberry/perl-5.11.5/lib/CPAN/Config.pm.tt
+share/strawberry/perl-5.11.5/win32/config.gc.tt
+share/strawberry/perl-5.11.5/win32/config_H.gc
+share/strawberry/perl-5.11.5/win32/FindExt.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.xs
 share/strawberry/perl-5.8.9/lib/CPAN/Config.pm.tt
@@ -49,6 +58,8 @@ share/strawberry/perl-5.8.9/win32/config.gc.tt
 share/strawberry/perl-5.8.9/win32/FindExt.pm
 share/strawberry/perl/lib/CPANPLUS/Config.pm.tt
 share/strawberry/README.txt.tt
+share/strawberry/strawberry-merge-module.reloc.txt.tt
+share/strawberry/strawberry-ui.reloc.txt.tt
 share/StrawberryBanner.bmp
 share/StrawberryDialog.bmp
 t/001_compile.t

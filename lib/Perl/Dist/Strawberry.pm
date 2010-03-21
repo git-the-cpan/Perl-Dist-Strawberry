@@ -121,14 +121,15 @@ core.
 
 use 5.010;
 use strict;
-use parent                      qw( Perl::Dist::WiX 
-                                    Perl::Dist::Strawberry::Libraries );
-use File::Spec::Functions       qw( catfile catdir  );
-use URI::file                   qw();
-use File::ShareDir              qw();
-require Perl::Dist::WiX::Util::Machine;
+use parent                           qw( Perl::Dist::WiX 
+                                         Perl::Dist::Strawberry::Libraries );
+use File::Spec::Functions            qw( catfile catdir  );
+use URI::file                        qw();
+use File::ShareDir                   qw();
+use Perl::Dist::WiX::Util::Machine   qw();
+use File::List::Object               qw();
 
-our $VERSION = '2.02_01';
+our $VERSION = '2.02_04';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -157,7 +158,6 @@ sub default_machine {
 	# Create the machine
 	my $machine = Perl::Dist::WiX::Util::Machine->new(
 		class => $class,
-		skip  => [6],
 		@_,
 	);
 
@@ -172,18 +172,13 @@ sub default_machine {
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
-		portable     => 1,
-	);
-
-	# Set the different paths
-	$machine->add_dimension('drive');
-	$machine->add_option('drive',
-		image_dir => 'C:\strawberry',
-	);
-	$machine->add_option('drive',
 		image_dir => 'D:\strawberry',
 		msi       => 1,
 		zip       => 0,
+	);
+	$machine->add_option('version',
+		perl_version => '5101',
+		portable     => 1,
 	);
 
 	return $machine;
@@ -246,8 +241,12 @@ sub new {
 			'install_strawberry_modules_2',
 			'install_strawberry_modules_3',
 			'install_strawberry_modules_4',
+			'install_strawberry_modules_5',
+			'install_strawberry_files',
 			'add_forgotten_files',
+			'install_relocatable',
 			'regenerate_fragments',
+			'find_relocatable_fields',
 			'write_merge_module',
 			'install_win32_extras',
 			'install_strawberry_extras',
@@ -287,7 +286,7 @@ sub add_forgotten_files {
 
 	$self->add_to_fragment('Digest_HMAC_MD5', 
 		[ catfile($self->image_dir(), qw( perl site lib auto Digest HMAC .packlist )) ]
-	);
+	) if 32 == $self->bits();
 	
 	return 1;
 }
@@ -339,11 +338,14 @@ sub install_strawberry_c_libraries {
 	$self->install_libpng();
 	$self->install_libgd();
 	$self->install_libfreetype();
+	$self->install_libxpm();	
 	
 	# Database Libraries
 	$self->install_libdb();
 	$self->install_libgdbm();
-	$self->install_libpostgresql();
+ 	if (32 == $self->bits()) {
+		$self->install_libpostgresql();
+	}
 
 	# Crypto libraries
 	$self->install_libopenssl();
@@ -425,17 +427,18 @@ sub install_strawberry_modules_1 {
 		Win32::File
 		File::Remove
 		Win32::File::Object
-		Win32::API
 		Parse::Binary
 		Win32::Exe
 		Win32::EventLog
 	} );
+	$self->install_modules('Win32::API') if not 64 == $self->bits();
 
 	# Install additional math modules
-	$self->install_pari;
+	$self->install_pari() if not 64 == $self->bits();
 	$self->install_modules( qw{
 		Math::BigInt::GMP
 	} );
+	
 	# XML Modules
 	if ($self->portable()) {
 		$self->install_distribution(
@@ -520,7 +523,7 @@ sub install_strawberry_modules_2 {
 		PAR::Repository::Query
 		PAR::Repository::Client
 	} );
-	$self->install_ppm;
+	$self->install_ppm();
 
 	my $cpan_sources = catdir($self->image_dir, 'cpan', 'sources');
 	unless (-d $cpan_sources) {
@@ -563,27 +566,38 @@ sub install_strawberry_modules_3 {
 	} ) if ($self->perl_version() >= 5100);
 	
 	# Support for other databases.
+	# DB_File had a "Permission denied" on 64-bit Win7 machine on the last test. 
+	# Could be artifact of build environment... 
+	$self->install_module(
+		name  => 'DB_File',
+		force => 1,
+	); 
 	$self->install_modules( qw{
-		DB_File
 		BerkeleyDB
 		DBD::ODBC
 	} );
-	$self->install_dbd_mysql;
-	$self->install_module(
-		name  => 'DBD::Pg',
-		force => 1,
-	);
 
-	my $library_location = $self->library_directory();
-	my $install_location = $self->portable() ? q{perl\site\lib} : q{perl\vendor\lib};
+	if (3 == $self->gcc_version()) {
+		$self->install_dbd_mysql();
+		
+		my $install_location = $self->portable() ? q{perl\site\lib} : q{perl\vendor\lib};	
+		my $mysql_url = $self->get_library_file('mysqllib');
+		
+		my $filelist = $self->install_binary(
+			name       => 'db_libraries',
+			url        => $self->_binary_url($mysql_url),
+			install_to => $install_location
+		);
+		$self->insert_fragment( 'db_libraries', $filelist );
+	}
 	
-	my $filelist = $self->install_binary(
-		name       => 'db_libraries',
-		url        => $self->_binary_url("$library_location/MySQLLibraries-20100121.zip"),
-		install_to => $install_location
-	);
-	$self->insert_fragment( 'db_libraries', $filelist );
-
+	if (32 == $self->bits()) {
+		$self->install_module(
+			name  => 'DBD::Pg',
+			force => 1,
+		);
+	}
+	
 	# JSON and local library installation
 	$self->install_modules( qw{
 		common::sense
@@ -593,6 +607,7 @@ sub install_strawberry_modules_3 {
 	} );	
 
 	# Graphics module installation.
+	$self->_remake_path(catdir($self->image_dir(), qw(cpan build))); 
 	$self->install_module( name => 'Imager' );
 	$self->install_module( name => 'GD' );
 	
@@ -602,12 +617,13 @@ sub install_strawberry_modules_3 {
 sub install_strawberry_modules_4 {
 	my $self = shift;
 
+	# This is due to RT #52408.
+	return 1 if 64 == $self->bits();
+	
 	# Required for Net::SSLeay.
 	local $ENV{'OPENSSL_PREFIX'} = catdir($self->image_dir, 'c');
 	# This is required for IO::Socket::SSL.
 	local $ENV{'SKIP_RNG_TEST'} = 1;
-	# This is required for Net::SSH::Perl.
-	local $ENV{'HOME'} = $ENV{'USERPROFILE'};
 
 	# We have to tell the Makefile.PL where the OpenSSL 
 	# libraries are by passing a parameter for Crypt::SSLeay.
@@ -633,7 +649,7 @@ sub install_strawberry_modules_4 {
 		Net::SSLeay
 		Digest::HMAC_MD5
 		IO::Socket::SSL
-		Net::SMTP::TLS	
+		Net::SMTP::TLS
 	});
 
 	# The rest of the Net::SSH::Perl toolchain.
@@ -696,14 +712,51 @@ sub install_strawberry_modules_4 {
 sub install_strawberry_modules_5 {
 	my $self = shift;
 
+	# These are common requests.
 	$self->install_modules( qw{
+		File::Slurp
 		Task::Weaken
 	});
 	# This is fixed by a distropref.
 	$self->install_modules( qw{
 		SOAP::Lite
 	});
+
+	# Clear things out.
+	$self->_remake_path(catdir($self->image_dir(), qw(cpan build))); 
+
+	return 1;
+}
+
+sub install_strawberry_files {
+	my $self = shift;
 	
+	## Now let's copy individual files in.
+	
+	# Copy the module-version script in, and use the runperl.bat trick on it.
+	$self->_copy(catfile($self->dist_dir(), 'module-version'), catdir($self->image_dir(), qw(perl bin)));
+	$self->_copy(catfile($self->image_dir(), qw(perl bin runperl.bat)), catfile($self->image_dir(), qw(perl bin module-version.bat)));
+	
+	# Make sure it gets installed.
+	$self->insert_fragment('module_version',
+		File::List::Object->new()->add_files(
+			catfile($self->image_dir(), qw(perl bin module-version)),
+			catfile($self->image_dir(), qw(perl bin module-version.bat)),				
+		),
+	);
+
+	if ($self->relocatable()) {
+		# Copy the relocation information in.
+		$self->patch_file('strawberry-merge-module.reloc.txt', $self->image_dir());
+		
+		# Make sure it gets installed.
+		$self->insert_fragment('relocation_info',
+			File::List::Object->new()->add_file(
+				catfile($self->image_dir(), 'strawberry-merge-module.reloc.txt'),				
+			),
+		);
+	}
+
 	return 1;
 }
 
@@ -716,11 +769,15 @@ sub install_strawberry_extras {
 	my $self = shift;
 
 	my $dist_dir = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
-	
+
 	# Links to the Strawberry Perl website.
 	# Don't include this for non-Strawberry sub-classes
 	if ( ref($self) eq 'Perl::Dist::Strawberry' ) {
 		if (not $self->portable()) {
+			$self->install_launcher(
+				name => 'Check installed versions of modules',
+				bin  => 'module-version',
+			);
 			$self->install_website(
 				name       => 'Strawberry Perl Website',
 				url        => $self->strawberry_url(),
@@ -751,6 +808,19 @@ sub install_strawberry_extras {
 			[ $license_file_to, $readme_file ] );
 	}
 
+	if ($self->relocatable()) {
+		# Copy the relocation information in.
+		$self->patch_file('strawberry-ui.reloc.txt', $self->image_dir());
+		
+		# Make sure it gets installed.
+		$self->insert_fragment('relocation_ui_info',
+			File::List::Object->new()->add_file(
+				catfile($self->image_dir(), 'strawberry-ui.reloc.txt'),				
+			),
+		);
+	}
+
+	
 	return 1;
 }
 
@@ -770,9 +840,21 @@ sub strawberry_release_notes_url {
 	my $self = shift;
 	my $path = $self->perl_version_human()
 		. q{.} . $self->build_number()
-		. ($self->beta_number() ? '.beta' : '');
+		. ($self->beta_number() ? '.beta-' . $self->beta_number() : '');
 
 	return "http://strawberryperl.com/release-notes/$path.html";
+}
+
+sub msi_relocation_commandline_files {
+	my $self = shift;
+	
+	return('relocation_ui_info', catfile($self->image_dir(), 'strawberry-ui.reloc.txt'));
+}
+
+sub msm_relocation_commandline_files {
+	my $self = shift;
+	
+	return('relocation_info', catfile($self->image_dir(), 'strawberry-merge-module.reloc.txt'));
 }
 
 1;

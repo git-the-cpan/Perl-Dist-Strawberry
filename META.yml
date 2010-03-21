@@ -9,12 +9,12 @@ build_requires:
   File::Spec: 3.2701
   LWP::Online: 1.07
   Test::More: 0.42
-  Test::Perl::Dist: 0.202
+  Test::Perl::Dist: 0.203
   URI::file: 4.20
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.93'
+generated_by: 'Module::Install version 0.95'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -31,4 +31,4 @@ requires:
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.02_01
+version: 2.02_04

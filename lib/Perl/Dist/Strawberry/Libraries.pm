@@ -34,10 +34,157 @@ use 5.010;
 use strict;
 use warnings;
 use File::Spec::Functions qw( catfile catdir );
+use Readonly;
 
-our $VERSION = '2.02';
+our $VERSION = '2.02_04';
 $VERSION =~ s/_//ms;
 
+Readonly my %LIBRARIES_S => {
+	'32bit-gcc3' => { # The 32bit-gcc4 libraries can be used, but not par files.
+		'patch'         => '32bit-gcc3/patch-2.5.9-7-bin_20100110_20100303.zip',
+		'mysql589'      => 'DBD-mysql-4.012-MSWin32-x86-multi-thread-5.8.9.par',
+		'mysql5100'     => 'DBD-mysql-4.012-MSWin32-x86-multi-thread-5.10.0.par',
+		'mysql5101'     => 'DBD-mysql-4.012-MSWin32-x86-multi-thread-5.10.0.par',
+		'mysql5115'     => undef,
+		'mysqllib'      => '32bit-gcc3/MySQLLibraries-20100121.zip',
+		'pari589'       => 'Math-Pari-2.010801-MSWin32-x86-multi-thread-5.8.9.par',
+		'pari5100'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.10.1.par',
+		'pari5101'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.10.1.par',
+		'pari5115'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.11.5.par',
+		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
+		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
+		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
+		'libexpat'      => '32bit-gcc4/expat-2.0.1-bin_20091126.zip',
+		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20100306.zip',
+		'libxslt'       => '32bit-gcc4/libxslt-1.1.26-bin_20091126.zip',
+		'libjpeg'       => '32bit-gcc4/jpeg-6b-gnuwin32-bin_20091126.zip',
+		'libgif'        => '32bit-gcc4/giflib-4.1.6-bin_20091126.zip',
+		'libpng'        => '32bit-gcc4/libpng-1.2.40-bin_20091126.zip',
+		'libtiff'       => '32bit-gcc4/tiff-3.9.1-bin_20091126.zip',
+		'libgd'         => '32bit-gcc4/gd-2.0.35-bin_20091126.zip',
+		'libfreetype'   => '32bit-gcc4/freetype-2.3.11-bin_20091126.zip',
+		'libopenssl'    => '32bit-gcc4/openssl-0.9.8l-bin_20091126.zip',
+		'libpostgresql' => '32bit-gcc4/postgresql-8.4.1-bin_20091126.zip',
+		'libdb'         => '32bit-gcc4/db-4.8.24-bin_20091126.zip',
+		'libgdbm'       => '32bit-gcc4/gdbm-1.8.3-bin_20100112.zip',
+		'libxpm'        => '32bit-gcc4/libXpm-3.5.8-bin_20091126.zip',
+	},
+	'32bit-gcc4' => {
+		'patch'         => '32bit-gcc4/patch-2.5.9-7-bin_20100110_20100303.zip',
+		'mysql589'      => undef,
+		'mysql5100'     => undef,
+		'mysql5101'     => undef,
+		'mysql5115'     => undef,
+		'mysqllib'      => '32bit-gcc3/MySQLLibraries-20100121.zip',
+		'pari589'       => undef,
+		'pari5100'      => undef,
+		'pari5101'      => undef,
+		'pari5115'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.11.5.par',
+		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
+		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
+		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
+		'libexpat'      => '32bit-gcc4/expat-2.0.1-bin_20091126.zip',
+		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20100306.zip',
+		'libxslt'       => '32bit-gcc4/libxslt-1.1.26-bin_20091126.zip',
+		'libjpeg'       => '32bit-gcc4/jpeg-6b-gnuwin32-bin_20091126.zip',
+		'libgif'        => '32bit-gcc4/giflib-4.1.6-bin_20091126.zip',
+		'libpng'        => '32bit-gcc4/libpng-1.2.40-bin_20091126.zip',
+		'libtiff'       => '32bit-gcc4/tiff-3.9.1-bin_20091126.zip',
+		'libgd'         => '32bit-gcc4/gd-2.0.35-bin_20091126.zip',
+		'libfreetype'   => '32bit-gcc4/freetype-2.3.11-bin_20091126.zip',
+		'libopenssl'    => '32bit-gcc4/openssl-0.9.8l-bin_20091126.zip',
+		'libpostgresql' => '32bit-gcc4/postgresql-8.4.1-bin_20091126.zip',
+		'libdb'         => '32bit-gcc4/db-4.8.24-bin_20091126.zip',
+		'libgdbm'       => '32bit-gcc4/gdbm-1.8.3-bin_20100112.zip',
+		'libxpm'        => '32bit-gcc4/libXpm-3.5.8-bin_20091126.zip',
+	},
+	'64bit-gcc4' => {
+		'patch'         => '64bit-gcc4/patch-2.5.9-7-bin_20100110_20100303.zip',
+		'mysql589'      => undef,
+		'mysql5100'     => undef,
+		'mysql5101'     => undef,
+		'mysql5115'     => undef,
+		'mysqllib'      => undef,
+		'pari589'       => undef,
+		'pari5100'      => undef,
+		'pari5101'      => undef,
+		'pari5115'      => undef,
+		'zlib'          => '64bit-gcc4/zlib-1.2.3-bin_20100110.zip',
+		'libiconv'      => '64bit-gcc4/libiconv-1.13.1-bin_20100110.zip',
+		'libxml2'       => '64bit-gcc4/libxml2-2.7.3-bin_20100110.zip',
+		'libexpat'      => '64bit-gcc4/expat-2.0.1-bin_20100110.zip',
+		'gmp'           => '64bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20100306.zip',
+		'libxslt'       => '64bit-gcc4/libxslt-1.1.26-bin_20100111.zip',
+		'libjpeg'       => '64bit-gcc4/jpeg-6b-gnuwin32-bin_20100110.zip',
+		'libgif'        => '64bit-gcc4/giflib-4.1.6-bin_20100110.zip',
+		'libpng'        => '64bit-gcc4/libpng-1.2.40-bin_20100110.zip',
+		'libtiff'       => '64bit-gcc4/tiff-3.9.1-bin_20100110.zip',
+		'libgd'         => '64bit-gcc4/gd-2.0.35-bin_20100110.zip',
+		'libfreetype'   => '64bit-gcc4/freetype-2.3.11-bin_20100110.zip',
+		'libopenssl'    => '64bit-gcc4/openssl-1.0.0-beta4-bin_20100110.zip',
+		'libpostgresql' => undef, # '64bit-gcc4/postgresql-8.4.1-bin_20100110.zip'
+		'libdb'         => '64bit-gcc4/db-4.8.24-bin_20100110.zip',
+		'libgdbm'       => '64bit-gcc4/gdbm-1.8.3-bin_20100112.zip',
+		'libxpm'        => '64bit-gcc4/libXpm-3.5.8-bin_20100110.zip',
+	},
+};
+
+sub get_library_file {
+	my $self = shift;
+	my $package = shift;
+
+	my $toolchain = $self->library_directory();
+
+	$self->trace_line( 3, "Searching for $package in $toolchain\n" );
+
+	if ( not exists $LIBRARIES_S{$toolchain} ) {
+		PDWiX->throw('Can only build 32 or 64-bit versions of perl');
+	}
+
+	if ( not exists $LIBRARIES_S{$toolchain}{$package} ) {
+		PDWiX->throw(
+			'get_library_file was called on a package that was not defined.'
+		);
+	}
+
+	my $package_file = $LIBRARIES_S{$toolchain}{$package};
+	if (defined $package_file) {
+		$self->trace_line( 3, "Pachage $package is in $package_file\n" );
+	} else {
+		$self->trace_line( 1, "Pachage $package does not exist for this toolchain.\n" );
+	}
+	
+	return $package_file;
+}
+
+sub get_library_file_versioned {
+	my $self = shift;
+	my $package = shift;
+
+	my $toolchain = $self->library_directory();
+	my $package_v = $package . $self->perl_version();
+	
+	$self->trace_line( 3, "Searching for $package in $toolchain\n" );
+
+	if ( not exists $LIBRARIES_S{$toolchain} ) {
+		PDWiX->throw('Can only build 32 or 64-bit versions of perl');
+	}
+
+	if ( not exists $LIBRARIES_S{$toolchain}{$package_v} ) {
+		PDWiX->throw(
+			'get_library_file was called on a package that was not defined.'
+		);
+	}
+
+	my $package_file = $LIBRARIES_S{$toolchain}{$package_v};
+	if (defined $package_file) {
+		$self->trace_line( 3, "Pachage $package is in $package_file\n" );
+	} else {
+		$self->trace_line( 1, "Pachage $package does not exist for this toolchain.\n" );
+	}
+	
+	return $package_file;
+}
 
 =pod
 
@@ -57,10 +204,8 @@ sub install_patch {
 
 	my $filelist = $self->install_binary(
 		name       => 'patch',
-		url        => $self->_binary_url('patch-2.5.9-7-bin.zip'),
-		install_to => {
-			'bin/patch.exe' => 'c/bin/patch.exe',
-		},
+		install_to => q{.},
+		url        => $self->_binary_url($self->get_library_file('patch')),
 	);
 	$self->{bin_patch} = File::Spec->catfile(
 		$self->image_dir, 'c', 'bin', 'patch.exe',
@@ -135,37 +280,26 @@ sub install_ppm {
 		}
 
 		# Install PPM itself
+		my $share = $self->dist_dir();
 		if ($self->portable()) {
-			$self->install_distribution(
-				mod_name         => 'PPM',
-				name             => 'RKOBES/PPM-0.01_01.tar.gz',
+			$self->install_distribution_from_file(
+				mod_name      => 'PPM',
+				file          => catfile($share, 'modules', 'PPM-0.01_02.tar.gz'),
 				makefilepl_param => ['INSTALLDIRS=site'],
-			);
+			);		
 		} else {
-			$self->install_distribution(
-				mod_name         => 'PPM',
-				name             => 'RKOBES/PPM-0.01_01.tar.gz',
+			$self->install_distribution_from_file(
+				mod_name      => 'PPM',
+				file          => catfile($share, 'modules', 'PPM-0.01_02.tar.gz'),
 				makefilepl_param => ['INSTALLDIRS=vendor'],
-			);
+			);		
 		}
 	}
 
 	unless ($self->portable()) {
-		# Unfortunately, PPM.pm does not check in vendor/lib for ppm.xml
-		my $xml_file_old = catfile($self->image_dir, qw(perl vendor lib ppm.xml));
-		my $xml_file_new = catfile($self->image_dir, qw(perl site lib ppm.xml));
-	
-		$self->_copy($xml_file_old, $xml_file_new);
-
 		# Add the readme file.
 		$self->add_to_fragment('PPM', $filelist->files());
-
-		# Add the ppm.xml file.
-		$self->add_to_fragment('PPM', [ $xml_file_new ]);
 	}
-	
-	# This is because the UWinnipeg repository is insane atm.
-	$self->_run3("ppm.bat", qw(set repository --remove UWinnipeg));
 	
 	return 1;
 }
@@ -239,62 +373,14 @@ Installs DBD::mysql from the PAR files on the Strawberry Perl web site.
 
 sub install_dbd_mysql {
 	my $self = shift;
-	my $filelist;
 
-	given ($self->perl_version()) {
-		when (m{\A510}) { # 5.10.0 and 5.10.1 are binary-compatible, supposedly.
-			$filelist = $self->install_par(
-			  name => 'DBD::mysql', 
-			  url => $self->_binary_url('DBD-mysql-4.012-MSWin32-x86-multi-thread-5.10.0.par')
-			);
-		}
+	my $url = $self->get_library_file_versioned('mysql');
+
+	my $filelist = $self->install_par(
+	  name => 'DBD::mysql', 
+	  url => $self->_binary_url($url)
+	);
 		
-		when ('589') {
-			$filelist = $self->install_par(
-			  name => 'DBD::mysql', 
-			  url => $self->_binary_url('DBD-mysql-4.012-MSWin32-x86-multi-thread-5.8.9.par')
-			);
-		}
-		
-		default {
-			PDWiX->throw('Could not install DBD::mysql - invalid version of perl');
-		}
-	}
-}
-
-=pod
-
-=head2 install_dbd_pg
-
-  $dist->install_dbd_pg;
-
-Installs DBD::Pg from the PAR files on the Strawberry Perl web site.
-
-=cut
-
-sub install_dbd_pg {
-	my $self = shift;
-	my $filelist;
-	
-	given ($self->perl_version()) {
-		when (m{\A510}) { # 5.10.0 and 5.10.1 are binary-compatible.
-			$filelist = $self->install_par(
-			  name => 'DBD::Pg', 
-			  url => $self->_binary_url('DBD-Pg-2.13.1-MSWin32-x86-multi-thread-5.10-5.10.0.par')
-			);
-		}
-		
-		when ('589') {
-			$filelist = $self->install_par(
-			  name => 'DBD::Pg', 
-			  url => $self->_binary_url('DBD-Pg-2.13.1-MSWin32-x86-multi-thread-5.8-5.8.9.par')
-			);
-		}
-		
-		default {
-			PDWiX->throw('Could not install DBD::Pg - invalid version of perl');
-		}
-	}
 }
 
 =pod
@@ -312,27 +398,13 @@ This method should only be called at during the install_modules phase.
 
 sub install_pari {
 	my $self = shift;
-	my $filelist;
 	
-	given ($self->perl_version()) {
-		when (m{\A510}) { # 5.10.0 and 5.10.1 are binary-compatible.
-			$self->install_par(
-			  name => 'Math::Pari', 
-			  url => $self->_binary_url('Math-Pari-2.010801-MSWin32-x86-multi-thread-5.10.0.par')
-			);
-		}
-		
-		when ('589') {
-			$self->install_par(
-			  name => 'Math::Pari', 
-			  url => $self->_binary_url('Math-Pari-2.010801-MSWin32-x86-multi-thread-5.8.9.par')
-			);
-		}
-		
-		default {
-			PDWiX->throw('Could not install Math::Pari - invalid version of perl');
-		}
-	}
+	my $url = $self->get_library_file_versioned('pari');
+	
+	my $filelist = $self->install_par(
+	  name => 'Math::Pari', 
+	  url => $self->_binary_url($url)
+	);
 
 	return 1;
 } ## end sub install_pari
@@ -361,7 +433,7 @@ sub install_zlib {
 	my $filelist = $self->install_binary(
 		name      => 'zlib',
 		install_to => q{.},
-		url       => $self->_binary_url('libzlib-1.2.3-bin_20090819.zip'),
+		url       => $self->_binary_url($self->get_library_file('zlib')),
 	);
 
 	$self->insert_fragment( 'zlib', $filelist );
@@ -389,7 +461,7 @@ sub install_libiconv {
 	my $filelist = $self->install_binary( 
 		name => 'libiconv', 
 		install_to => q{.},
-		url  => $self->_binary_url('libiconv-1.9.2-1-bin_20090831.zip'),
+		url  => $self->_binary_url($self->get_library_file('libiconv')),
 	);
 
 	$self->insert_fragment( 'libiconv', $filelist );
@@ -418,7 +490,7 @@ sub install_libxml {
 	my $filelist = $self->install_binary(
 		name       => 'libxml2',
 		install_to => q{.},
-		url        => $self->_binary_url('libxml2-2.7.3-bin_20090819.zip'),
+		url        => $self->_binary_url($self->get_library_file('libxml2')),
 	);
 
 	$self->insert_fragment( 'libxml', $filelist );
@@ -446,7 +518,7 @@ sub install_expat {
 	my $filelist = $self->install_binary(
 		name       => 'libexpat',
 		install_to => q{.},
-		url        => $self->_binary_url('libexpat-2.0.1-vanilla.zip'),
+		url        => $self->_binary_url($self->get_library_file('libexpat')),
 	);
 
 	$self->insert_fragment( 'libexpat', $filelist );
@@ -473,7 +545,8 @@ sub install_gmp {
 	# Comes as a single prepackaged vanilla-specific zip file
 	my $filelist = $self->install_binary( 
 		name => 'gmp', 
-		url  => $self->_binary_url('gmp-4.2.1-vanilla.zip'),
+		install_to => q{.},
+		url  => $self->_binary_url($self->get_library_file('gmp')),
 	);
 
 	$self->insert_fragment( 'gmp', $filelist );
@@ -487,13 +560,12 @@ sub install_libxslt {
 	my $filelist = $self->install_binary(
 		name       => 'libxslt',
 		install_to => q{.},
-		url        => $self->_binary_url('libxslt-1.1.24-bin_20090819.zip'),
+		url        => $self->_binary_url($self->get_library_file('libxslt')),
 	);
 
 	$self->insert_fragment( 'libxslt', $filelist );
 
 	return 1;
-
 }
 
 
@@ -503,7 +575,7 @@ sub install_libjpeg {
 
 	my $filelist = $self->install_binary(
 		name       => 'libjpeg',
-		url        => $self->_binary_url('libjpeg-6b-4-bin_20090821.zip'),
+		url        => $self->_binary_url($self->get_library_file('libjpeg')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libjpeg', $filelist);
@@ -517,7 +589,7 @@ sub install_libgif {
 
 	my $filelist = $self->install_binary(
 		name       => 'libgif',
-		url        => $self->_binary_url('libgif-4.1.4-1-bin_20090821.zip'),
+		url        => $self->_binary_url($self->get_library_file('libgif')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libgif', $filelist);
@@ -531,7 +603,7 @@ sub install_libpng {
 
 	my $filelist = $self->install_binary(
 		name       => 'libpng',
-		url        => $self->_binary_url('libpng-1.2.38-bin_20090828.zip'),
+		url        => $self->_binary_url($self->get_library_file('libpng')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libpng', $filelist);
@@ -546,7 +618,7 @@ sub install_libtiff {
 
 	my $filelist = $self->install_binary(
 		name       => 'libtiff',
-		url        => $self->_binary_url('libtiff-3.8.2-1-bin_20090821.zip'),
+		url        => $self->_binary_url($self->get_library_file('libtiff')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libtiff', $filelist);
@@ -561,7 +633,7 @@ sub install_libgd {
 
 	my $filelist = $self->install_binary(
 		name       => 'libgd',
-		url        => $self->_binary_url('libgd-2.0.33-1-bin_20090828.zip'),
+		url        => $self->_binary_url($self->get_library_file('libgd')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libgd', $filelist);
@@ -575,7 +647,7 @@ sub install_libfreetype {
 
 	my $filelist = $self->install_binary(
 		name       => 'libfreetype',
-		url        => $self->_binary_url('libfreetype-2.3.5-1-bin_20090828.zip'),
+		url        => $self->_binary_url($self->get_library_file('libfreetype')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libfreetype', $filelist);
@@ -588,7 +660,7 @@ sub install_libopenssl {
 
 	my $filelist = $self->install_binary(
 		name       => 'libopenssl',
-		url        => $self->_binary_url('libopenssl-0.9.8k-bin_20090820.zip'),
+		url        => $self->_binary_url($self->get_library_file('libopenssl')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libopenssl', $filelist);
@@ -602,7 +674,7 @@ sub install_libpostgresql {
 
 	my $filelist = $self->install_binary(
 		name       => 'libpostgresql',
-		url        => $self->_binary_url('libpostgresql-8.4.0-bin_20090821.zip'),
+		url        => $self->_binary_url($self->get_library_file('libpostgresql')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libpostgresql', $filelist);
@@ -629,7 +701,7 @@ sub install_libdb {
 
 	my $filelist = $self->install_binary(
 		name       => 'libdb',
-		url        => $self->_binary_url('libdb-4.8.24-bin_20091019.zip'),
+		url        => $self->_binary_url($self->get_library_file('libdb')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libdb', $filelist);
@@ -642,7 +714,7 @@ sub install_libgdbm {
 
 	my $filelist = $self->install_binary(
 		name       => 'libgdbm',
-		url        => $self->_binary_url('libgdbm-1.8.3_20091105.zip'),
+		url        => $self->_binary_url($self->get_library_file('libgdbm')),
 		install_to => q{.}
 	);
 	$self->insert_fragment('libgdbm', $filelist);
@@ -650,6 +722,19 @@ sub install_libgdbm {
 	return 1;
 }
 
+sub install_libxpm {
+	my $self = shift;
+
+	my $filelist = $self->install_binary(
+		name       => 'libxpm',
+		url        => $self->_binary_url($self->get_library_file('libxpm')),
+		install_to => q{.}
+	);
+	$self->insert_fragment('libxpm', $filelist);
+
+
+	return 1;
+}
 
 1;
 
