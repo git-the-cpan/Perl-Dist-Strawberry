@@ -129,7 +129,7 @@ use File::ShareDir                   qw();
 use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 
-our $VERSION = '2.02_04';
+our $VERSION = '2.02_05';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -139,7 +139,7 @@ $VERSION =~ s/_//ms;
 
 =head2 default_machine
 
-  Perl::Dist::Strawberry->default_machine->run;
+  Perl::Dist::Strawberry->default_machine(...)->run();
   
 The C<default_machine> class method is used to setup the most common
 machine for building Strawberry Perl.
@@ -196,7 +196,7 @@ sub new {
 	my $dist_dir = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
 	my $class = shift;
 	
-	if ($Perl::Dist::WiX::VERSION < '1.102100') {
+	if ($Perl::Dist::WiX::VERSION < '1.102102') {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -279,15 +279,7 @@ sub app_ver_name {
 
 sub add_forgotten_files {
 	my $self = shift;
-	
-	$self->add_to_fragment('IO_Scalar', 
-		[ catfile($self->image_dir(), qw( perl site lib auto IO Stringy .packlist )) ]
-	);
 
-	$self->add_to_fragment('Digest_HMAC_MD5', 
-		[ catfile($self->image_dir(), qw( perl site lib auto Digest HMAC .packlist )) ]
-	) if 32 == $self->bits();
-	
 	return 1;
 }
 
@@ -298,9 +290,10 @@ sub output_base_filename {
 	'strawberry-perl'
 		. '-' . $_[0]->perl_version_human()
 		. '.' . $_[0]->build_number()
-		. ($_[0]->image_dir() =~ /^d:/i ? '-ddrive' : '')
-		. ($_[0]->portable() ? '-portable' : '')
-		. ($_[0]->beta_number() ? '-beta-' . $_[0]->beta_number() : '')
+		. ($_[0]->image_dir() =~ /^d:/i ? '-ddrive' : q{})
+		. ($_[0]->portable() ? '-portable' : q{})
+		. (( 64 == $_[0]->bits() ) ? q{-64bit} : q{})
+		. ($_[0]->beta_number() ? '-beta-' . $_[0]->beta_number() : q{})
 }
 
 
@@ -496,7 +489,7 @@ sub install_strawberry_modules_2 {
 		Test::Tester
 		Test::NoWarnings
 		Test::Deep
-		IO::Scalar
+		IO::Stringy
 	} );
 	
 	if ($self->portable()) {
@@ -647,7 +640,7 @@ sub install_strawberry_modules_4 {
 	
 	$self->install_modules( qw{
 		Net::SSLeay
-		Digest::HMAC_MD5
+		Digest::HMAC
 		IO::Socket::SSL
 		Net::SMTP::TLS
 	});
@@ -802,10 +795,13 @@ sub install_strawberry_extras {
 	my $license_file_to = catfile($self->license_dir(), 'License.rtf');
 	my $readme_file = catfile($self->image_dir(), 'README.txt');
 
+	my $onion_ico_file = catfile($self->image_dir(), qw(win32 onion.ico));
+	my $strawberry_ico_file = catfile($self->image_dir(), qw(win32 strawberry.ico));
+	
 	$self->_copy($license_file_from, $license_file_to);	
 	if (not $self->portable()) {
 		$self->add_to_fragment( 'Win32Extras',
-			[ $license_file_to, $readme_file ] );
+			[ $license_file_to, $readme_file, $onion_ico_file, $strawberry_ico_file ] );
 	}
 
 	if ($self->relocatable()) {

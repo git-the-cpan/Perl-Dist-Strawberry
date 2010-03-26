@@ -43,6 +43,7 @@ perl\lib\auto\Module\Load\.packlist:backslash
 perl\lib\auto\Module\Load\Conditional\.packlist:backslash
 perl\lib\auto\Safe\.packlist:backslash
 perl\lib\auto\Term\ANSIColor\.packlist:backslash
+perl\lib\auto\Term\ReadLine\.packlist:backslash
 perl\lib\auto\Test\Harness\.packlist:backslash
 perl\lib\auto\threads\.packlist:backslash
 perl\lib\auto\threads\shared\.packlist:backslash
@@ -53,12 +54,16 @@ perl\lib\CORE\config.h:doublebackslash
 perl\lib\CPAN\Config.pm:doublebackslash
 perl\lib\CPAN\Config.pm:url
 perl\lib\perllocal.pod:backslash
+[% IF 64 != self.bits %]
 perl\vendor\bin\cpandb:backslash
 perl\vendor\bin\cpandb.bat:backslash
+[% ELSE %]
+perl\bin\cpandb:backslash
+perl\bin\cpandb.bat:backslash
+[% END %]
 perl\vendor\lib\auto\File\Slurp\.packlist:backslash
 perl\vendor\lib\auto\Archive\Zip\.packlist:backslash
 perl\vendor\lib\auto\BerkeleyDB\.packlist:backslash
-perl\vendor\lib\auto\Class\Loader\.packlist:backslash
 perl\vendor\lib\auto\common\sense\.packlist:backslash
 perl\vendor\lib\auto\Compress\Bzip2\.packlist:backslash
 perl\vendor\lib\auto\CPAN\Checksums\.packlist:backslash
@@ -110,7 +115,6 @@ perl\vendor\lib\auto\SOAP\Lite\.packlist:backslash
 perl\vendor\lib\auto\Sub\Uplevel\.packlist:backslash
 perl\vendor\lib\auto\Task\Weaken\.packlist:backslash
 perl\vendor\lib\auto\Term\ReadKey\.packlist:backslash
-perl\vendor\lib\auto\Term\ReadLine\.packlist:backslash
 perl\vendor\lib\auto\Test\Deep\.packlist:backslash
 perl\vendor\lib\auto\Test\NoWarnings\.packlist:backslash
 perl\vendor\lib\auto\Test\Script\.packlist:backslash
@@ -141,6 +145,7 @@ perl\vendor\lib\ppm.xml:backslash
 [% IF 64 != self.bits %]
 perl\vendor\lib\auto\Algorithm\Diff\.packlist:backslash
 perl\vendor\lib\auto\Class\ErrorHandler\.packlist:backslash
+perl\vendor\lib\auto\Class\Loader\.packlist:backslash
 perl\vendor\lib\auto\Convert\ASCII\Armour\.packlist:backslash
 perl\vendor\lib\auto\Convert\ASN1\.packlist:backslash
 perl\vendor\lib\auto\Convert\PEM\.packlist:backslash

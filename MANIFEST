@@ -51,6 +51,12 @@ share/strawberry/perl-5.11.5/lib/CPAN/Config.pm.tt
 share/strawberry/perl-5.11.5/win32/config.gc.tt
 share/strawberry/perl-5.11.5/win32/config_H.gc
 share/strawberry/perl-5.11.5/win32/FindExt.pm
+share/strawberry/perl-5.12.0-RC0/ext/GDBM_File/GDBM_File.pm
+share/strawberry/perl-5.12.0-RC0/ext/GDBM_File/GDBM_File.xs
+share/strawberry/perl-5.12.0-RC0/lib/CPAN/Config.pm.tt
+share/strawberry/perl-5.12.0-RC0/win32/config.gc.tt
+share/strawberry/perl-5.12.0-RC0/win32/config_H.gc
+share/strawberry/perl-5.12.0-RC0/win32/FindExt.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.xs
 share/strawberry/perl-5.8.9/lib/CPAN/Config.pm.tt
