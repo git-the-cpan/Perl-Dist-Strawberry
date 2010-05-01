@@ -128,8 +128,9 @@ use URI::file                        qw();
 use File::ShareDir                   qw();
 use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
+use Path::Class::Dir                 qw();
 
-our $VERSION = '2.02_05';
+our $VERSION = '2.10';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -168,17 +169,31 @@ sub default_machine {
 	    build_number => 5,
 	);
 	$machine->add_option('version',
+		perl_version => '589',
+	    build_number => 5,
+		image_dir    => 'D:\strawberry',
+		msi          => 1,
+		zip          => 0,
+	);
+	$machine->add_option('version',
 		perl_version => '5101',
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
-		image_dir => 'D:\strawberry',
-		msi       => 1,
-		zip       => 0,
+		image_dir    => 'D:\strawberry',
+		msi          => 1,
+		zip          => 0,
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
 		portable     => 1,
+	);
+	$machine->add_option('version',
+		perl_version => '5120',
+		relocatable  => 1,
+		gcc_version  => 4,
+		build_number => 0,
+		download_dir => 'C:\tmp\dl-gcc4',
 	);
 
 	return $machine;
@@ -193,7 +208,7 @@ sub default_machine {
 
 # Apply default paths
 sub new {
-	my $dist_dir = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
+	my $dist_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
 	my $class = shift;
 	
 	if ($Perl::Dist::WiX::VERSION < '1.102102') {
@@ -212,14 +227,14 @@ sub new {
 		
 		# Program version.
 		build_number         => 2,
-		beta_number          => 1,
+#		beta_number          => 0,
 		
 		# New options for msi building...
-		msi_license_file     => catfile($dist_dir, 'License-short.rtf'),
+		msi_license_file     => $dist_dir->file('License-short.rtf'),
 		msi_product_icon     => catfile(File::ShareDir::dist_dir('Perl-Dist-WiX'), 'win32.ico'),
 		msi_help_url         => 'http://www.strawberryperl.com/support.html',
-		msi_banner_top       => catfile($dist_dir, 'StrawberryBanner.bmp'),
-		msi_banner_side      => catfile($dist_dir, 'StrawberryDialog.bmp'),
+		msi_banner_top       => $dist_dir->file('StrawberryBanner.bmp'),
+		msi_banner_side      => $dist_dir->file('StrawberryDialog.bmp'),
 
 		# Set e-mail to something Strawberry-specific.
 		perl_config_cf_email => 'win32-vanilla@perl.org',
@@ -315,34 +330,47 @@ sub install_strawberry_c_libraries {
 	my $self = shift;
 
 	# XML Libraries
-	$self->install_zlib();
-	$self->install_libiconv();
-	$self->install_libxml();
-	$self->install_expat();
-	$self->install_libxslt();
+	$self->install_librarypacks(qw{
+		zlib
+		libiconv
+		libxml2
+		libexpat
+		libxslt
+	});
 
 	# Math Libraries
-	$self->install_gmp();
+	$self->install_librarypacks(qw{
+		gmp
+		mpc
+		mpfr
+	});
 
 	# Graphics libraries
-	$self->install_libjpeg();
-	$self->install_libgif();
-	$self->install_libtiff();
-	$self->install_libpng();
-	$self->install_libgd();
-	$self->install_libfreetype();
-	$self->install_libxpm();	
+	$self->install_librarypacks(qw{
+		libjpeg
+		libgif
+		libtiff
+		libpng
+		libgd
+		libfreetype
+		libxpm
+		freeglut
+	});	
 	
 	# Database Libraries
-	$self->install_libdb();
-	$self->install_libgdbm();
- 	if (32 == $self->bits()) {
-		$self->install_libpostgresql();
-	}
+	$self->install_librarypacks(qw{
+		libdb
+		libgdbm
+		libpostgresql
+		libmysql
+	});
+
+	# Extra compression libraries
+	$self->install_librarypack('libxz');
 
 	# Crypto libraries
-	$self->install_libopenssl();
-	
+	$self->install_librarypack('libopenssl');
+
 	return 1;
 }
 
@@ -387,12 +415,17 @@ sub install_perl_bin {
 	my $self   = shift;
 	my %params = @_;
 	my $patch  = delete($params{patch}) || [];
+	
+	# Patch this file so GDBM_File will build.
+	my @files_to_patch = ('win32/FindExt.pm');
+
+	# If we aren't a git checkout or a 5.12 version, patch up GDBM_File.
+	if ( $self->perl_version() !~ m/ \A512 | \Agit\z /msx) {
+		push @files_to_patch, qw(ext/GDBM_File/GDBM_File.xs ext/GDBM_File/GDBM_File.pm);
+	}
+
 	return $self->SUPER::install_perl_bin(
-		patch => [ qw{
-			win32/FindExt.pm
-			ext/GDBM_File/GDBM_File.xs
-			ext/GDBM_File/GDBM_File.pm
-		}, @$patch ],
+		patch => [ @files_to_patch, @$patch ],
 		%params,
 	);
 }
@@ -439,8 +472,8 @@ sub install_strawberry_modules_1 {
 			mod_name         => 'XML::Parser',
 			makefilepl_param => [
 				'INSTALLDIRS=site',
-				'EXPATLIBPATH=' . $self->_dir(qw{ c lib     }),
-				'EXPATINCPATH=' . $self->_dir(qw{ c include }),
+				'EXPATLIBPATH=' . $self->dir(qw{ c lib     }),
+				'EXPATINCPATH=' . $self->dir(qw{ c include }),
 			],
 		);
 	} else {
@@ -449,8 +482,8 @@ sub install_strawberry_modules_1 {
 			mod_name         => 'XML::Parser',
 			makefilepl_param => [
 				'INSTALLDIRS=vendor',
-				'EXPATLIBPATH=' . $self->_dir(qw{ c lib     }),
-				'EXPATINCPATH=' . $self->_dir(qw{ c include }),
+				'EXPATLIBPATH=' . $self->dir(qw{ c lib     }),
+				'EXPATINCPATH=' . $self->dir(qw{ c include }),
 			],
 		);
 	}
@@ -490,26 +523,12 @@ sub install_strawberry_modules_2 {
 		Test::NoWarnings
 		Test::Deep
 		IO::Stringy
+		Test::Exception
 	} );
-	
-	if ($self->portable()) {
-		$self->install_distribution(
-			name             => 'RKINYON/DBM-Deep-1.0013.tar.gz',
-			mod_name         => 'DBM::Deep',
-			makefilepl_param => ['INSTALLDIRS=site'],
-			buildpl_param    => ['--installdirs', 'site'],
-			force            => 1,
-		);
-	} else {
-		$self->install_distribution(
-			name             => 'RKINYON/DBM-Deep-1.0013.tar.gz',
-			mod_name         => 'DBM::Deep',
-			makefilepl_param => ['INSTALLDIRS=vendor'],
-			buildpl_param    => ['--installdirs', 'vendor'],
-			force            => 1,
-		);
-	}
-	
+	$self->install_module(
+		name => 'DBM::Deep',
+		force => 1, # RT#56512. (missing t\lib directory) Other tests pass.
+	);
 	$self->install_modules( qw{
 		YAML::Tiny
 		PAR
@@ -567,29 +586,31 @@ sub install_strawberry_modules_3 {
 	); 
 	$self->install_modules( qw{
 		BerkeleyDB
+		Win32::OLE
 		DBD::ODBC
+		DBD::ADO
 	} );
 
-	if (3 == $self->gcc_version()) {
-		$self->install_dbd_mysql();
-		
-		my $install_location = $self->portable() ? q{perl\site\lib} : q{perl\vendor\lib};	
-		my $mysql_url = $self->get_library_file('mysqllib');
-		
-		my $filelist = $self->install_binary(
-			name       => 'db_libraries',
-			url        => $self->_binary_url($mysql_url),
-			install_to => $install_location
+	if ($self->portable()) {
+		$self->install_distribution(
+			name     => 'CAPTTOFU/DBD-mysql-4.014.tar.gz',
+			mod_name => 'DBD::mysql',
+			force    => 1,
+			makefilepl_param => ['INSTALLDIRS=site', '--mysql_config=mysql_config'],
 		);
-		$self->insert_fragment( 'db_libraries', $filelist );
-	}
-	
-	if (32 == $self->bits()) {
-		$self->install_module(
-			name  => 'DBD::Pg',
-			force => 1,
+	} else {
+		$self->install_distribution(
+			name     => 'CAPTTOFU/DBD-mysql-4.014.tar.gz',
+			mod_name => 'DBD::mysql',
+			force    => 1,
+			makefilepl_param => ['INSTALLDIRS=vendor', '--mysql_config=mysql_config'],
 		);
 	}
+			
+	$self->install_module(
+		name  => 'DBD::Pg',
+		force => 1,
+	);
 	
 	# JSON and local library installation
 	$self->install_modules( qw{
@@ -600,7 +621,6 @@ sub install_strawberry_modules_3 {
 	} );	
 
 	# Graphics module installation.
-	$self->_remake_path(catdir($self->image_dir(), qw(cpan build))); 
 	$self->install_module( name => 'Imager' );
 	$self->install_module( name => 'GD' );
 	
@@ -692,7 +712,6 @@ sub install_strawberry_modules_4 {
 		Crypt::CAST5_PP
 		Crypt::RIPEMD160
 		Crypt::Twofish
-		Test::Exception
 		Crypt::OpenPGP
 		Algorithm::Diff
 		Text::Diff
@@ -709,14 +728,27 @@ sub install_strawberry_modules_5 {
 	$self->install_modules( qw{
 		File::Slurp
 		Task::Weaken
-	});
-	# This is fixed by a distropref.
-	$self->install_modules( qw{
 		SOAP::Lite
 	});
+	
+	# For the local-lib script.
+	$self->install_modules( qw{
+		IO::Interactive
+		App::local::lib::Win32Helper
+	});
 
+	# Additional compression modules
+	$self->install_module( name => 'Compress::Raw::Lzma' );
+	$self->install_module( name => 'IO::Compress::Lzma', force => 1 );
+	
+	# Additional math modules.
+	$self->install_modules( qw{
+		Math::MPFR
+		Math::MPC
+	});
+	
 	# Clear things out.
-	$self->_remake_path(catdir($self->image_dir(), qw(cpan build))); 
+	$self->remake_path($self->dir(qw(cpan build))); 
 
 	return 1;
 }
@@ -727,14 +759,20 @@ sub install_strawberry_files {
 	## Now let's copy individual files in.
 	
 	# Copy the module-version script in, and use the runperl.bat trick on it.
-	$self->_copy(catfile($self->dist_dir(), 'module-version'), catdir($self->image_dir(), qw(perl bin)));
-	$self->_copy(catfile($self->image_dir(), qw(perl bin runperl.bat)), catfile($self->image_dir(), qw(perl bin module-version.bat)));
+	$self->copy_file(
+		catfile($self->dist_dir(), 'module-version'), 
+		$self->file(qw(perl bin module-version))
+	);
+	$self->copy_file(
+		$self->file(qw(perl bin runperl.bat)), 
+		$self->file(qw(perl bin module-version.bat))
+	);
 	
 	# Make sure it gets installed.
 	$self->insert_fragment('module_version',
 		File::List::Object->new()->add_files(
-			catfile($self->image_dir(), qw(perl bin module-version)),
-			catfile($self->image_dir(), qw(perl bin module-version.bat)),				
+			$self->file(qw(perl bin module-version)),
+			$self->file(qw(perl bin module-version.bat)),				
 		),
 	);
 
@@ -745,7 +783,7 @@ sub install_strawberry_files {
 		# Make sure it gets installed.
 		$self->insert_fragment('relocation_info',
 			File::List::Object->new()->add_file(
-				catfile($self->image_dir(), 'strawberry-merge-module.reloc.txt'),				
+				$self->file('strawberry-merge-module.reloc.txt'),				
 			),
 		);
 	}
@@ -757,6 +795,10 @@ sub install_strawberry_files {
 
 #####################################################################
 # Customisations to Windows assets
+
+sub _dist_file {
+	return File::ShareDir::dist_file('Perl-Dist-Strawberry', @_);
+}
 
 sub install_strawberry_extras {
 	my $self = shift;
@@ -771,21 +813,25 @@ sub install_strawberry_extras {
 				name => 'Check installed versions of modules',
 				bin  => 'module-version',
 			);
+			$self->install_launcher(
+				name => 'Create local library areas',
+				bin  => 'llw32helper',
+			);
 			$self->install_website(
 				name       => 'Strawberry Perl Website',
 				url        => $self->strawberry_url(),
-				icon_file  => catfile($dist_dir, 'strawberry.ico')
+				icon_file  => _dist_file('strawberry.ico')
 			);
 			$self->install_website(
 				name       => 'Strawberry Perl Release Notes',
 				url        => $self->strawberry_release_notes_url(),
-				icon_file  => catfile($dist_dir, 'strawberry.ico')
+				icon_file  => _dist_file('strawberry.ico')
 			);
 			# Link to IRC.
 			$self->install_website(
 				name       => 'Live Support',
 				url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
-				icon_file  => catfile($dist_dir, 'onion.ico')
+				icon_file  => _dist_file('onion.ico')
 			);
 		}
 		$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
@@ -793,12 +839,12 @@ sub install_strawberry_extras {
 
 	my $license_file_from = catfile($dist_dir, 'License.rtf');
 	my $license_file_to = catfile($self->license_dir(), 'License.rtf');
-	my $readme_file = catfile($self->image_dir(), 'README.txt');
+	my $readme_file = $self->file('README.txt');
 
-	my $onion_ico_file = catfile($self->image_dir(), qw(win32 onion.ico));
-	my $strawberry_ico_file = catfile($self->image_dir(), qw(win32 strawberry.ico));
+	my $onion_ico_file = $self->file(qw(win32 onion.ico));
+	my $strawberry_ico_file = $self->file(qw(win32 strawberry.ico));
 	
-	$self->_copy($license_file_from, $license_file_to);	
+	$self->copy_file($license_file_from, $license_file_to);	
 	if (not $self->portable()) {
 		$self->add_to_fragment( 'Win32Extras',
 			[ $license_file_to, $readme_file, $onion_ico_file, $strawberry_ico_file ] );
@@ -811,7 +857,7 @@ sub install_strawberry_extras {
 		# Make sure it gets installed.
 		$self->insert_fragment('relocation_ui_info',
 			File::List::Object->new()->add_file(
-				catfile($self->image_dir(), 'strawberry-ui.reloc.txt'),				
+				$self->file('strawberry-ui.reloc.txt'),				
 			),
 		);
 	}
@@ -844,14 +890,49 @@ sub strawberry_release_notes_url {
 sub msi_relocation_commandline_files {
 	my $self = shift;
 	
-	return('relocation_ui_info', catfile($self->image_dir(), 'strawberry-ui.reloc.txt'));
+	return('relocation_ui_info', $self->file('strawberry-ui.reloc.txt'));
 }
 
 sub msm_relocation_commandline_files {
 	my $self = shift;
 	
-	return('relocation_info', catfile($self->image_dir(), 'strawberry-merge-module.reloc.txt'));
+	return('relocation_info', $self->file('strawberry-merge-module.reloc.txt'));
 }
+
+sub msi_relocation_idlist {
+	my $self = shift;
+
+	my $answer;
+	my %files = $self->msi_relocation_commandline_files();
+
+	my ( $fragment, $file, $id );
+	while ( ( $fragment, $file ) = each %files ) {
+		$id = $self->get_fragment_object($fragment)->find_file_id($file);
+		PDWiX->throw("Could not find file $file in fragment $fragment\n")
+		  if not defined $id;
+		$answer .= "[#$id]";
+	}
+
+	return $answer;
+} ## end sub msi_relocation_commandline
+
+sub msm_relocation_idlist {
+	my $self = shift;
+
+	my $answer;
+	my %files = $self->msm_relocation_commandline_files();
+
+	my ( $fragment, $file, $id );
+	while ( ( $fragment, $file ) = each %files ) {
+		$id = $self->get_fragment_object($fragment)->find_file_id($file);
+		PDWiX->throw("Could not find file $file in fragment $fragment\n")
+		  if not defined $id;
+		$answer .= "[#$id]";
+	}
+
+	return $answer;
+} ## end sub msi_relocation_commandline
+
 
 1;
 

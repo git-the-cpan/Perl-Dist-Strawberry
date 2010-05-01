@@ -9,7 +9,7 @@ build_requires:
   File::Spec: 3.2701
   LWP::Online: 1.07
   Test::More: 0.42
-  Test::Perl::Dist: 0.203
+  Test::Perl::Dist: 0.300
   URI::file: 4.20
 configure_requires:
   ExtUtils::MakeMaker: 6.42
@@ -26,9 +26,10 @@ no_index:
     - inc
     - share
     - t
+    - xt
 requires:
-  Perl::Dist::WiX: 1.102
+  Perl::Dist::WiX: 1.200
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.02_05
+version: 2.10
