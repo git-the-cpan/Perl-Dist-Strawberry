@@ -20,6 +20,7 @@ Makefile.PL
 MANIFEST			This list of files
 META.yml
 script/perldist_strawberry
+share/bootstrap/Main.wxs.tt
 share/bootstrap/perl-5.10.0/lib/CPAN/Config.pm
 share/cpan.ico
 share/License-short.rtf
@@ -29,7 +30,7 @@ share/minicpan_filters.txt
 share/module-version
 share/module-version.ico
 share/modules/Alien-WiX-0.300000.tar.gz
-share/modules/PPM-0.01_02.tar.gz
+share/modules/PPM-0.01_03.tar.gz
 share/onion.ico
 share/portable/perl-5.10.1/win32/config.gc.tt
 share/portable/perl-5.10.1/win32/config_H.gc

@@ -1,5 +1,5 @@
 ---
-abstract: 'Strawberry Perl for win32'
+abstract: 'Strawberry Perl for Win32'
 author:
   - 'Adam Kennedy <adamk@cpan.org>'
 build_requires:
@@ -28,8 +28,8 @@ no_index:
     - t
     - xt
 requires:
-  Perl::Dist::WiX: 1.200
+  Perl::Dist::WiX: 1.200001
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.10
+version: 2.1001
