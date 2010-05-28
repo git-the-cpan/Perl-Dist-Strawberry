@@ -32,6 +32,7 @@ share/module-version.ico
 share/modules/Alien-WiX-0.300000.tar.gz
 share/modules/PPM-0.01_03.tar.gz
 share/onion.ico
+share/perlhelp.ico
 share/portable/perl-5.10.1/win32/config.gc.tt
 share/portable/perl-5.10.1/win32/config_H.gc
 share/ppm/README.txt
@@ -53,6 +54,12 @@ share/strawberry/perl-5.12.0/win32/config.gc64nox.tt
 share/strawberry/perl-5.12.0/win32/config_H.gc
 share/strawberry/perl-5.12.0/win32/config_H.gc64nox
 share/strawberry/perl-5.12.0/win32/FindExt.pm
+share/strawberry/perl-5.12.1/lib/CPAN/Config.pm.tt
+share/strawberry/perl-5.12.1/win32/config.gc.tt
+share/strawberry/perl-5.12.1/win32/config.gc64nox.tt
+share/strawberry/perl-5.12.1/win32/config_H.gc
+share/strawberry/perl-5.12.1/win32/config_H.gc64nox
+share/strawberry/perl-5.12.1/win32/FindExt.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.pm
 share/strawberry/perl-5.8.9/ext/GDBM_File/GDBM_File.xs
 share/strawberry/perl-5.8.9/lib/CPAN/Config.pm.tt
@@ -61,10 +68,11 @@ share/strawberry/perl-5.8.9/win32/FindExt.pm
 share/strawberry/perl/lib/CPANPLUS/Config.pm.tt
 share/strawberry/README.txt.tt
 share/strawberry/release_notes.html.tt
-share/strawberry/strawberry-merge-module.reloc.txt.tt
-share/strawberry/strawberry-ui.reloc.txt.tt
+share/strawberry/strawberry-merge-module.reloc.txt.source
+share/strawberry/strawberry-ui.reloc.txt.source
 share/StrawberryBanner.bmp
 share/StrawberryDialog.bmp
+t/000_report_versions.t
 t/001_compile.t
 t/500_new.t
 t/data/cpan/authors/id/readme.txt

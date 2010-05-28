@@ -36,7 +36,7 @@ use warnings;
 use File::Spec::Functions qw( catfile catdir );
 use Readonly;
 
-our $VERSION = '2.1001';
+our $VERSION = '2.10_10';
 $VERSION =~ s/_//ms;
 
 Readonly my %LIBRARIES_S => {
@@ -47,12 +47,14 @@ Readonly my %LIBRARIES_S => {
 		'mysql5101'     => 'DBD-mysql-4.012-MSWin32-x86-multi-thread-5.10.0.par',
 		'mysql5115'     => undef,
 		'mysql5120'     => undef,
+		'mysql5121'     => undef,
 		'mysqllib'      => '32bit-gcc3/MySQLLibraries-20100121.zip',
 		'pari589'       => 'Math-Pari-2.010801-MSWin32-x86-multi-thread-5.8.9.par',
 		'pari5100'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.10.1.par',
 		'pari5101'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.10.1.par',
 		'pari5115'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.11.5.par',
 		'pari5120'      => undef,
+		'pari5121'      => undef,
 		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
 		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
 		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
@@ -75,6 +77,7 @@ Readonly my %LIBRARIES_S => {
 		'mpfr'          => '32bit-gcc4/mpfr-2.4.2-bin_20100306.zip',
 		'libmysql'      => '32bit-gcc4/mysql-5.1.44-bin_20100304.zip',
 		'freeglut'      => '32bit-gcc4/freeglut-2.6.0-bin_20100213.zip',
+		'libssh2'       => '32bit-gcc4/libssh2-1.2.5-bin_20100520.zip',
 	},
 	'32bit-gcc4' => {
 		'patch'         => '32bit-gcc4/patch-2.5.9-7-bin_20100110_20100303.zip',
@@ -83,12 +86,14 @@ Readonly my %LIBRARIES_S => {
 		'mysql5101'     => undef,
 		'mysql5115'     => undef,
 		'mysql5120'     => undef,
+		'mysql5121'     => undef,
 		'mysqllib'      => '32bit-gcc4/mysql-5.1.44-bin_20100304.zip',
 		'pari589'       => undef,
 		'pari5100'      => undef,
 		'pari5101'      => undef,
 		'pari5115'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.11.5.par',
 		'pari5120'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
+		'pari5121'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
 		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
 		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
 		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
@@ -111,6 +116,7 @@ Readonly my %LIBRARIES_S => {
 		'mpfr'          => '32bit-gcc4/mpfr-2.4.2-bin_20100306.zip',
 		'libmysql'      => '32bit-gcc4/mysql-5.1.44-bin_20100304.zip',
 		'freeglut'      => '32bit-gcc4/freeglut-2.6.0-bin_20100213.zip',
+		'libssh2'       => '32bit-gcc4/libssh2-1.2.5-bin_20100520.zip',
 	},
 	'64bit-gcc4' => {
 		'patch'         => '64bit-gcc4/patch-2.5.9-7-bin_20100110_20100303.zip',
@@ -119,12 +125,14 @@ Readonly my %LIBRARIES_S => {
 		'mysql5101'     => undef,
 		'mysql5115'     => undef,
 		'mysql5120'     => undef,
+		'mysql5121'     => undef,
 		'mysqllib'      => undef,
 		'pari589'       => undef,
 		'pari5100'      => undef,
 		'pari5101'      => undef,
 		'pari5115'      => undef,
 		'pari5120'      => undef,
+		'pari5121'      => undef,
 		'zlib'          => '64bit-gcc4/zlib-1.2.3-bin_20100110.zip',
 		'libiconv'      => '64bit-gcc4/libiconv-1.13.1-bin_20100110.zip',
 		'libxml2'       => '64bit-gcc4/libxml2-2.7.3-bin_20100110.zip',
@@ -147,6 +155,7 @@ Readonly my %LIBRARIES_S => {
 		'mpfr'          => '64bit-gcc4/mpfr-2.4.2-bin_20100306.zip',
 		'libmysql'      => '64bit-gcc4/mysql-5.1.44-bin_20100304.zip',
 		'freeglut'      => '64bit-gcc4/freeglut-2.6.0-bin_20100213.zip',
+		'libssh2'       => '64bit-gcc4/libssh2-1.2.5-bin_20100520.zip',
 	},
 };
 
@@ -305,7 +314,7 @@ sub install_ppm {
 
 		# Install PPM itself
 		my $share = $self->dist_dir();
-		if ($self->portable()) {
+		if ($self->portable() && (12 < $self->perl_major_version()) ) {
 			$self->install_distribution_from_file(
 				mod_name      => 'PPM',
 				file          => catfile($share, 'modules', 'PPM-0.01_03.tar.gz'),

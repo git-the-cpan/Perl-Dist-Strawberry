@@ -1,4 +1,3 @@
-[% self.image_dir %]\
 README.txt:backslash
 win32\CPAN Search.url:backslash
 win32\Live Support.url:backslash

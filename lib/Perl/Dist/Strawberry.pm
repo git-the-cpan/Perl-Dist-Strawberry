@@ -130,7 +130,7 @@ use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.1001';
+our $VERSION = '2.10_10';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -143,13 +143,13 @@ $VERSION =~ s/_//ms;
   Perl::Dist::Strawberry->default_machine(...)->run();
   
 The C<default_machine> class method is used to setup the most common
-machine for building Strawberry Perl.
+'machine' for building Strawberry Perl.
 
 The machine provided creates a standard 5.8.9 distribution (.zip and .msi),
 a standard 5.10.1 distribution (.zip and .msi) and a Portable-enabled 5.10.1 
 distribution (.zip only).
 
-Returns a L<Perl::Dist::WiX::Util::Machine> object.
+Returns a L<Perl::Dist::WiX::Util::Machine|Perl::Dist::WiX::Util::Machine> object.
 
 =cut
 
@@ -166,23 +166,29 @@ sub default_machine {
 	$machine->add_dimension('version');
 	$machine->add_option('version',
 		perl_version => '5101',
+		build_number => 3,
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
+		build_number => 3,
 		image_dir    => 'D:\strawberry',
 		msi          => 1,
 		zip          => 0,
 	);
 	$machine->add_option('version',
-		perl_version => '5101',
+		perl_version => '5121',
+		build_number => 0,
 		portable     => 1,
+		gcc_version  => 4,
+		download_dir => 'C:\tmp\dl-gcc4',
 	);
 	$machine->add_option('version',
-		perl_version => '5120',
-		relocatable  => 1,
-		gcc_version  => 4,
-		build_number => 0,
-		download_dir => 'C:\tmp\dl-gcc4',
+		perl_version       => '5121',
+		build_number       => 0,
+		relocatable        => 1,
+		use_dll_relocation => 1,
+		gcc_version        => 4,
+		download_dir       => 'C:\tmp\dl-gcc4',
 	);
 
 	return $machine;
@@ -200,7 +206,7 @@ sub new {
 	my $dist_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
 	my $class = shift;
 	
-	if ($Perl::Dist::WiX::VERSION < '1.102102') {
+	if ($Perl::Dist::WiX::VERSION < '1.200100') {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -212,11 +218,11 @@ sub new {
 		image_dir            => 'C:\strawberry',
 
 		# Perl version
-		perl_version         => '5101',
+		perl_version         => '5121',
 		
 		# Program version.
-		build_number         => 2,
-#		beta_number          => 0,
+		build_number         => 0,
+		beta_number          => 1,
 		
 		# New options for msi building...
 		msi_license_file     => $dist_dir->file('License-short.rtf'),
@@ -224,7 +230,9 @@ sub new {
 		msi_help_url         => 'http://www.strawberryperl.com/support.html',
 		msi_banner_top       => $dist_dir->file('StrawberryBanner.bmp'),
 		msi_banner_side      => $dist_dir->file('StrawberryDialog.bmp'),
-
+		msi_exit_text        => <<'EOT',
+Before you start using Strawberry Perl, read the Release Notes and the README file.  These are both available from the start menu under "Strawberry Perl".
+EOT
 		# Set e-mail to something Strawberry-specific.
 		perl_config_cf_email => 'win32-vanilla@perl.org',
 
@@ -357,7 +365,10 @@ sub install_strawberry_c_libraries {
 	$self->install_librarypack('libxz');
 
 	# Crypto libraries
-	$self->install_librarypack('libopenssl');
+	$self->install_librarypacks(qw{
+		libopenssl
+		libssh2
+	});
 
 	return 1;
 }
@@ -422,7 +433,7 @@ sub install_strawberry_modules_1 {
 	my $self = shift;
 
 	# Install LWP::Online so our custom minicpan code works
-	if ($self->portable()) {
+	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
 			name     => 'ADAMK/LWP-Online-1.07.tar.gz',
 			mod_name => 'LWP::Online',
@@ -453,7 +464,7 @@ sub install_strawberry_modules_1 {
 	} );
 	
 	# XML Modules
-	if ($self->portable()) {
+	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
 			name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
 			mod_name         => 'XML::Parser',
@@ -482,7 +493,7 @@ sub install_strawberry_modules_1 {
 		XML::LibXSLT
 	} );
 	
-	unless ($self->portable()) {
+	unless ($self->portable() && (12 < $self->perl_major_version()) ) {
 		# Insert ParserDetails.ini
 		my $ini_file = catfile($self->image_dir(), qw(perl vendor lib XML SAX ParserDetails.ini));
 		$self->add_to_fragment('XML_SAX', [ $ini_file ]);
@@ -586,7 +597,7 @@ sub install_strawberry_modules_3 {
 		DBD::ADO
 	} );
 
-	if ($self->portable()) {
+	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
 			name     => 'CAPTTOFU/DBD-mysql-4.014.tar.gz',
 			mod_name => 'DBD::mysql',
@@ -624,42 +635,44 @@ sub install_strawberry_modules_3 {
 
 sub install_strawberry_modules_4 {
 	my $self = shift;
-
-	# This is due to RT #52408.
-	return 1 if 64 == $self->bits();
 	
+#	if ($self->portable() && (12 < $self->perl_major_version()) ) {
+#		$self->install_distribution( 
+#			mod_name => 'Crypt::OpenSSL::Random',
+#			name     => 'IROBERTS/Crypt-OpenSSL-Random-0.04.tar.gz',
+#			makefilepl_param => [
+#				'LIBS="-lssl32 -leay32"' ,
+#			],
+#		);
+#	} else {
+#		$self->install_distribution( 
+#			mod_name => 'Crypt::OpenSSL::Random',
+#			name     => 'IROBERTS/Crypt-OpenSSL-Random-0.04.tar.gz',
+#			makefilepl_param => [
+#				'INSTALLDIRS=vendor', 'LIBS="-lssl32 -leay32"' ,
+#			],
+#		);
+#	}
+
 	# Required for Net::SSLeay.
-	local $ENV{'OPENSSL_PREFIX'} = catdir($self->image_dir, 'c');
+	local $ENV{'OPENSSL_PREFIX'} = catdir($self->image_dir(), 'c');
 	# This is required for IO::Socket::SSL.
 	local $ENV{'SKIP_RNG_TEST'} = 1;
 
-	# We have to tell the Makefile.PL where the OpenSSL 
-	# libraries are by passing a parameter for Crypt::SSLeay.
-	if ($self->portable()) {
-		$self->install_distribution( 
-			mod_name => 'Crypt::SSLeay',
-			name     => 'DLAND/Crypt-SSLeay-0.57.tar.gz',
-			makefilepl_param => [
-				'--lib', $ENV{'OPENSSL_PREFIX'} ,
-			],
-		);
-	} else {
-		$self->install_distribution( 
-			mod_name => 'Crypt::SSLeay',
-			name     => 'DLAND/Crypt-SSLeay-0.57.tar.gz',
-			makefilepl_param => [
-				'INSTALLDIRS=vendor', '--lib', $ENV{'OPENSSL_PREFIX'} ,
-			],
-		);
-	}
-	
+	# Crypt::SSLeay has been distropref'd to use the same environment
+	# variable that Net::SSLeay uses in order to make building easier.
 	$self->install_modules( qw{
-		Net::SSLeay
+		Crypt::SSLeay
 		Digest::HMAC
-		IO::Socket::SSL
-		Net::SMTP::TLS
 	});
 
+	# Net::SSLeay crashes at present on 64-bit during testing.
+	$self->install_modules( qw{	
+		Net::SSLeay
+		IO::Socket::SSL
+		Net::SMTP::TLS
+	}) if 32 == $self->bits();
+	
 	# The rest of the Net::SSH::Perl toolchain.
 	$self->install_module(
 		name  => 'Data::Random',
@@ -668,7 +681,12 @@ sub install_strawberry_modules_4 {
 	$self->install_modules( qw{
 		Math::GMP
 		Data::Buffer
+	});
+	# Check why this one isn't working.
+	$self->install_modules( qw{
 		Crypt::DSA
+	}) if 32 == $self->bits();
+	$self->install_modules( qw{
 		Class::ErrorHandler
 		Convert::ASN1
 		Crypt::CBC
@@ -685,15 +703,31 @@ sub install_strawberry_modules_4 {
 		Crypt::Blowfish
 		Tie::EncryptedHash
 		Class::Loader
+	});
+	# Requires Math::Pari.
+	$self->install_modules( qw{
 		Crypt::Random
+	}) if 32 == $self->bits();
+	$self->install_modules( qw{
 		Convert::ASCII::Armour
 		Digest::MD2
 		Sort::Versions
+	});
+	# These two require Crypt::Random. See above.
+	$self->install_modules( qw{
 		Crypt::Primes
 		Crypt::RSA
+	}) if 32 == $self->bits();
+	$self->install_modules( qw{
 		Digest::BubbleBabble
+	});
+	# Does not build 64-bit yet.
+	$self->install_modules( qw{
 		Crypt::IDEA
+	}) if 32 == $self->bits();
+	$self->install_modules( qw{
 		String::CRC32
+		Net::SSH2
 	});
 
 	# Since	Net::SSH::Perl does not work under Win32 yet, it
@@ -707,11 +741,20 @@ sub install_strawberry_modules_4 {
 		Crypt::CAST5_PP
 		Crypt::RIPEMD160
 		Crypt::Twofish
+	});
+	# Requires Crypt::DSA, Crypt::IDEA, 
+	# Crypt::RSA, and Math::Pari.
+	$self->install_modules( qw{
 		Crypt::OpenPGP
+	}) if 32 == $self->bits();
+	$self->install_modules( qw{
 		Algorithm::Diff
 		Text::Diff
-		Module::Signature
 	});
+	# Requires Crypt::OpenPGP - see above.
+	$self->install_modules( qw{
+		Module::Signature
+	}) if 32 == $self->bits();
 	
 	return 1;
 }
@@ -724,6 +767,9 @@ sub install_strawberry_modules_5 {
 		File::Slurp
 		Task::Weaken
 		SOAP::Lite
+		Class::Inspector
+		File::ShareDir
+		Alien::Tidyp
 	});
 	
 	# For the local-lib script.
@@ -773,7 +819,7 @@ sub install_strawberry_files {
 
 	if ($self->relocatable()) {
 		# Copy the relocation information in.
-		$self->patch_file('strawberry-merge-module.reloc.txt', $self->image_dir());
+		$self->make_relocation_file('strawberry-merge-module.reloc.txt');
 		
 		# Make sure it gets installed.
 		$self->insert_fragment('relocation_info',
@@ -803,6 +849,7 @@ sub install_strawberry_extras {
 	# Links to the Strawberry Perl website.
 	# Don't include this for non-Strawberry sub-classes
 	if ( ref($self) eq 'Perl::Dist::Strawberry' ) {
+		$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
 		if (not $self->portable()) {
 			$self->install_launcher(
 				name => 'Check installed versions of modules',
@@ -818,9 +865,20 @@ sub install_strawberry_extras {
 				icon_file  => _dist_file('strawberry.ico')
 			);
 			$self->install_website(
-				name       => 'Strawberry Perl Release Notes',
-				url        => $self->strawberry_release_notes_url(),
-				icon_file  => _dist_file('strawberry.ico')
+				name         => 'Strawberry Perl Release Notes',
+				url          => $self->strawberry_release_notes_url(),
+				icon_file    => _dist_file('strawberry.ico'),
+				directory_id => 'App_Menu',
+			);
+			$self->install_website(
+				name         => 'learn.perl.org (tutorials, links)',
+				url          => 'http://learn.perl.org/',
+				icon_file    => _dist_file('perlhelp.ico'),
+			);
+			$self->install_website(
+				name         => 'Beginning Perl (online book)',
+				url          => 'http://learn.perl.org/books/beginning-perl/',
+				icon_file    => _dist_file('perlhelp.ico'),
 			);
 			# Link to IRC.
 			$self->install_website(
@@ -828,8 +886,12 @@ sub install_strawberry_extras {
 				url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
 				icon_file  => _dist_file('onion.ico')
 			);
+#			$self->add_icon(
+#				name         => 'Strawberry Perl README',
+#				directory_id => 'App_Menu',
+#				filename     => $self->image_dir()->file('README.txt')->stringify(),
+#			);
 		}
-		$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
 	}
 
 	my $license_file_from = catfile($dist_dir, 'License.rtf');
@@ -847,7 +909,7 @@ sub install_strawberry_extras {
 
 	if ($self->relocatable()) {
 		# Copy the relocation information in.
-		$self->patch_file('strawberry-ui.reloc.txt', $self->image_dir());
+		$self->make_relocation_file('strawberry-ui.reloc.txt', 'strawberry-merge-module.reloc.txt');
 		
 		# Make sure it gets installed.
 		$self->insert_fragment('relocation_ui_info',
