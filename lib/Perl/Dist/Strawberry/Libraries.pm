@@ -450,6 +450,37 @@ sub install_librarypack {
 	return 1;
 }
 
+=head2 install_libmysql
+
+  $dist->install_libmysql()
+
+The C<install_libmysql> method installs a library defined in 
+C<%Perl::Dist::Strawberry::LIBRARIES_S>.
+
+=cut
+
+sub install_libmysql {
+	my $self = shift;
+	
+	my $filelist = $self->install_binary(
+		name       => 'libmysql',
+		url        => $self->_binary_url($self->get_library_file('libmysql')),
+		install_to => q{.}
+	);
+	$self->insert_fragment('libmysql', $filelist);
+
+	# Fix RT#58079.
+	my $source = $self->file(qw(c bin libmysql_.dll));
+	my $destination = $self->file(qw(perl vendor lib auto DBD mysql libmysql_.dll));
+	if (! -f $source) { # 64-bit package has __ instead of _...
+		$source = $self->file(qw(c bin libmysql__.dll));
+		$destination = $self->file(qw(perl vendor lib auto DBD mysql libmysql__.dll));
+	}
+	$self->copy_file($source, $destination);
+	$self->add_file(source => $destination, fragment => 'libmysql');
+	
+	return 1;
+}
 
 
 =pod

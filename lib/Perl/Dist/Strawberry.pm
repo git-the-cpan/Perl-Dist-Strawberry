@@ -130,7 +130,7 @@ use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.10_10';
+our $VERSION = '2.10_11';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -206,7 +206,7 @@ sub new {
 	my $dist_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
 	my $class = shift;
 	
-	if ($Perl::Dist::WiX::VERSION < '1.200100') {
+	if ($Perl::Dist::WiX::VERSION < '1.200101') {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -222,7 +222,7 @@ sub new {
 		
 		# Program version.
 		build_number         => 0,
-		beta_number          => 1,
+		beta_number          => 2,
 		
 		# New options for msi building...
 		msi_license_file     => $dist_dir->file('License-short.rtf'),
@@ -233,6 +233,8 @@ sub new {
 		msi_exit_text        => <<'EOT',
 Before you start using Strawberry Perl, read the Release Notes and the README file.  These are both available from the start menu under "Strawberry Perl".
 EOT
+		msi_run_readme_txt   => 1,
+		
 		# Set e-mail to something Strawberry-specific.
 		perl_config_cf_email => 'win32-vanilla@perl.org',
 
@@ -358,8 +360,8 @@ sub install_strawberry_c_libraries {
 		libdb
 		libgdbm
 		libpostgresql
-		libmysql
 	});
+	$self->install_libmysql();
 
 	# Extra compression libraries
 	$self->install_librarypack('libxz');
@@ -599,14 +601,14 @@ sub install_strawberry_modules_3 {
 
 	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.014.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.016.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=site', '--mysql_config=mysql_config'],
 		);
 	} else {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.014.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.016.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=vendor', '--mysql_config=mysql_config'],
@@ -766,8 +768,8 @@ sub install_strawberry_modules_5 {
 	$self->install_modules( qw{
 		File::Slurp
 		Task::Weaken
-		SOAP::Lite
 		Class::Inspector
+		SOAP::Lite
 		File::ShareDir
 		Alien::Tidyp
 	});
@@ -868,7 +870,7 @@ sub install_strawberry_extras {
 				name         => 'Strawberry Perl Release Notes',
 				url          => $self->strawberry_release_notes_url(),
 				icon_file    => _dist_file('strawberry.ico'),
-				directory_id => 'App_Menu',
+				directory_id => 'D_App_Menu',
 			);
 			$self->install_website(
 				name         => 'learn.perl.org (tutorials, links)',
@@ -886,11 +888,11 @@ sub install_strawberry_extras {
 				url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
 				icon_file  => _dist_file('onion.ico')
 			);
-#			$self->add_icon(
-#				name         => 'Strawberry Perl README',
-#				directory_id => 'App_Menu',
-#				filename     => $self->image_dir()->file('README.txt')->stringify(),
-#			);
+			$self->add_icon(
+				name         => 'Strawberry Perl README',
+				directory_id => 'D_App_Menu',
+				filename     => $self->image_dir()->file('README.txt')->stringify(),
+			);
 		}
 	}
 
