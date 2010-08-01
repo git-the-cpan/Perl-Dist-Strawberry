@@ -7,7 +7,7 @@ use warnings;
 use Module::Install::Base ();
 
 our @ISA     = qw(Module::Install::Base);
-our $VERSION = '1.000';
+our $VERSION = '1.001';
 $VERSION =~ s/_//ms;
 
 sub use_ptar {
@@ -21,7 +21,7 @@ sub use_ptar {
 
 	my %args = (
 		TAR      => 'ptar',
-		TARFLAGS => '-c -f',
+		TARFLAGS => '-c -C -f',
 		COMPRESS =>
 q{perl -MIO::Compress::Gzip=gzip,:constants -e"my $$in = $$ARGV[0]; gzip($$in => qq($$in.gz), q(Level) => Z_BEST_COMPRESSION, q(BinModeIn) => 1) or die q(gzip failed); unlink $$in;"},
 	);

@@ -28,8 +28,8 @@ no_index:
     - t
     - xt
 requires:
-  Perl::Dist::WiX: 1.200101
+  Perl::Dist::WiX: 1.250
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.10_11
+version: 2.11

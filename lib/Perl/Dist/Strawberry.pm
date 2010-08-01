@@ -130,7 +130,7 @@ use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.10_11';
+our $VERSION = '2.11';
 $VERSION =~ s/_//ms;
 
 #####################################################################
@@ -206,7 +206,7 @@ sub new {
 	my $dist_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
 	my $class = shift;
 	
-	if ($Perl::Dist::WiX::VERSION < '1.200101') {
+	if ($Perl::Dist::WiX::VERSION < '1.250') {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -222,7 +222,7 @@ sub new {
 		
 		# Program version.
 		build_number         => 0,
-		beta_number          => 2,
+#		beta_number          => 2,
 		
 		# New options for msi building...
 		msi_license_file     => $dist_dir->file('License-short.rtf'),
@@ -882,6 +882,12 @@ sub install_strawberry_extras {
 				url          => 'http://learn.perl.org/books/beginning-perl/',
 				icon_file    => _dist_file('perlhelp.ico'),
 			);
+			$self->install_website(
+				name         => q{Ovid's CGI Course},
+				url          => 'http://jdporter.perlmonk.org/cgi_course/',
+				icon_file    => _dist_file('perlhelp.ico'),
+			);
+			
 			# Link to IRC.
 			$self->install_website(
 				name       => 'Live Support',

@@ -36,7 +36,7 @@ use warnings;
 use File::Spec::Functions qw( catfile catdir );
 use Readonly;
 
-our $VERSION = '2.10_10';
+our $VERSION = '2.11';
 $VERSION =~ s/_//ms;
 
 Readonly my %LIBRARIES_S => {
@@ -312,18 +312,22 @@ sub install_ppm {
 			die("Failed to create '$ppmdir' directory");
 		}
 
-		# Install PPM itself
+		# Install PPM itself.
+		# See http://www.perhammer.com/2008/07/subversion-in-url-revision-browsing.html
+		# for description of strange URL.
 		my $share = $self->dist_dir();
 		if ($self->portable() && (12 < $self->perl_major_version()) ) {
 			$self->install_distribution_from_file(
 				mod_name      => 'PPM',
 				file          => catfile($share, 'modules', 'PPM-0.01_03.tar.gz'),
+				url           => 'http://svn.ali.as/cpan/!svn/bc/12117/trunk/' . 'Perl-Dist-Strawberry/share/modules/PPM-0.01_03.tar.gz',
 				makefilepl_param => ['INSTALLDIRS=site'],
 			);		
 		} else {
 			$self->install_distribution_from_file(
 				mod_name      => 'PPM',
 				file          => catfile($share, 'modules', 'PPM-0.01_03.tar.gz'),
+				url           => 'http://svn.ali.as/cpan/!svn/bc/12117/trunk/' . 'Perl-Dist-Strawberry/share/modules/PPM-0.01_03.tar.gz',
 				makefilepl_param => ['INSTALLDIRS=vendor'],
 			);		
 		}
@@ -411,12 +415,15 @@ This method should only be called at during the install_modules phase.
 
 sub install_pari {
 	my $self = shift;
-	
-	my $url = $self->get_library_file_versioned('pari');
+
+	my $file = $self->get_library_file_versioned('pari');
+
+	my ($version) = $file =~ m{-(2 [.] \d+)-}msx;
 	
 	my $filelist = $self->install_par(
-	  name => 'Math::Pari', 
-	  url => $self->_binary_url($url)
+	  name      => 'Math::Pari', 
+	  url       => $self->_binary_url($file),
+	  dist_info => "ILYAZ/modules/Math-Pari-$version.tar.gz",
 	);
 
 	return 1;
