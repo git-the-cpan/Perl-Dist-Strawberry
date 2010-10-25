@@ -23,7 +23,7 @@ Strawberry Perl includes:
 
 =item *
 
-Perl 5.8.9, Perl 5.10.0 or 5.10.1
+Perl 5.10.0 or 5.10.1
 
 =item *
 
@@ -90,7 +90,7 @@ modules that have been newly included as core Perl modules in the
 Additionally, a stub CPAN Config.pm file is added.  This provides a
 complete zero-conf preconfiguration for CPAN, using a stable
 L<http://cpan.strawberryperl.com/> redirector to bounce to a
-known-reliable mirrors.
+known-reliable mirror.
 
 A more-thorough network-aware zero-conf capability is currently being
 developed and will be included at a later time.
@@ -100,15 +100,18 @@ perl.exe binary.
 
 =head1 CONFIGURATION
 
-At present, Strawberry Perl must be installed in C:\strawberry.  The
-executable installer adds the following environment variable changes:
+At present, Strawberry Perl 5.10.1 must be installed in C:\strawberry.
+5.12.1 is relocatable, and can be installed anywhere.
+
+The executable installer adds the following environment variable changes:
 
   * Adds directories to PATH
     - C:\strawberry\perl\bin  
+    - C:\strawberry\perl\site\bin  
     - C:\strawberry\c\bin  
 
 Users installing Strawberry Perl without the installer will need to
-add the environment entries manually.
+add the environment entries manually, or using the provided script.
 
 =head1 METHODS
 
@@ -120,18 +123,21 @@ core.
 =cut
 
 use 5.010;
+use Moose;
 use strict;
-use parent                           qw( Perl::Dist::WiX 
-                                         Perl::Dist::Strawberry::Libraries );
 use File::Spec::Functions            qw( catfile catdir  );
 use URI::file                        qw();
 use File::ShareDir                   qw();
+use File::ShareDir::PathClass        qw();
 use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.11';
+our $VERSION = '2.11_10';
 $VERSION =~ s/_//ms;
+
+extends 'Perl::Dist::WiX'                   => { -version => '1.250_100', },
+        'Perl::Dist::Strawberry::Libraries' => { -version => '2.11_10', };
 
 #####################################################################
 # Build Machine Generator
@@ -166,24 +172,24 @@ sub default_machine {
 	$machine->add_dimension('version');
 	$machine->add_option('version',
 		perl_version => '5101',
-		build_number => 3,
+		build_number => 4,
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
-		build_number => 3,
+		build_number => 4,
 		image_dir    => 'D:\strawberry',
 		msi          => 1,
 		zip          => 0,
 	);
 	$machine->add_option('version',
-		perl_version => '5121',
+		perl_version => '5122',
 		build_number => 0,
 		portable     => 1,
 		gcc_version  => 4,
 		download_dir => 'C:\tmp\dl-gcc4',
 	);
 	$machine->add_option('version',
-		perl_version       => '5121',
+		perl_version       => '5122',
 		build_number       => 0,
 		relocatable        => 1,
 		use_dll_relocation => 1,
@@ -194,100 +200,98 @@ sub default_machine {
 	return $machine;
 }
 
+around BUILDARGS => sub {
+	my $orig = shift;
+	my $class = shift;
+	my %args;
+
+	if ( @_ == 1 && 'HASH' eq ref $_[0] ) {
+		%args = %{ $_[0] };
+	} elsif ( 0 == @_ % 2 ) {
+		%args = (@_);
+	} else {
+		PDWiX->throw( 'Parameters incorrect (not a hashref or hash)'
+			  . 'for Perl::Dist::Strawberry' );
+	}
+
+	$args{app_id}            //= 'strawberryperl';
+	$args{app_name}          //= 'Strawberry Perl';
+	$args{app_publisher}     //= 'Vanilla Perl Project';
+	$args{app_publisher_url} //= URI->new('http://www.strawberryperl.com/');
+	$args{image_dir}         //= Path::Class::Dir->new('C:\strawberry');
+
+# Strawberry Perl version.
+	$args{perl_version} //= '5122';
+	$args{build_number} //= 1;
+	$args{beta_number}  //= 1;
+
+# New options for msi building...
+	$args{msi_product_icon}   //= File::ShareDir::PathClass->dist_dir('Perl-Dist-WiX')->file('win32.ico');
+	$args{msi_license_file}   //= dist_dir()->file('License-short.rtf');
+	$args{msi_banner_top}     //= dist_dir()->file('StrawberryBanner.bmp');
+	$args{msi_banner_side}    //= dist_dir()->file('StrawberryDialog.bmp');
+	$args{msi_run_readme_txt} //= 1;
+	$args{msi_help_url}       //= 'http://www.strawberryperl.com/support.html';
+	$args{msi_exit_text}      //= <<'EOT';
+Before you start using Strawberry Perl, read the Release Notes and the README file.  These are both available from the start menu under "Strawberry Perl".
+EOT
+
+# Set e-mail to something Strawberry-specific.
+	$args{perl_config_cf_email} //= 'win32-vanilla@perl.org';
+
+# Build both msi and zip versions
+	$args{msi} //= 1;
+	$args{zip} //= 1;
+
+	return $class->$orig(\%args);
+}; ## end sub BUILDARGS
 
 
-
+sub _build_tasklist { return [
+	'final_initialization',
+	'install_c_toolchain',
+	'install_strawberry_c_toolchain',
+	'install_strawberry_c_libraries',
+	'install_perl',
+	'install_perl_toolchain',
+	'install_cpan_upgrades',
+	'install_strawberry_modules_1',
+	'install_strawberry_modules_2',
+	'install_strawberry_modules_3',
+	'install_strawberry_modules_4',
+	'install_strawberry_modules_5',
+	'install_strawberry_files',
+	'install_relocatable',
+	'regenerate_fragments',
+	'find_relocatable_fields',
+	'write_merge_module',
+	'install_win32_extras',
+	'install_strawberry_extras',
+	'install_portable',
+	'remove_waste',
+	'create_distribution_list',
+	'regenerate_fragments',
+	'write',
+	'create_release_notes',
+	];
+}
 
 #####################################################################
 # Configuration
 
-# Apply default paths
-sub new {
-	my $dist_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
-	my $class = shift;
-	
-	if ($Perl::Dist::WiX::VERSION < '1.250') {
-		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
-	}
-
-	$class->SUPER::new(
-		app_id               => 'strawberryperl',
-		app_name             => 'Strawberry Perl',
-		app_publisher        => 'Vanilla Perl Project',
-		app_publisher_url    => 'http://www.strawberryperl.com/',
-		image_dir            => 'C:\strawberry',
-
-		# Perl version
-		perl_version         => '5121',
-		
-		# Program version.
-		build_number         => 0,
-#		beta_number          => 2,
-		
-		# New options for msi building...
-		msi_license_file     => $dist_dir->file('License-short.rtf'),
-		msi_product_icon     => catfile(File::ShareDir::dist_dir('Perl-Dist-WiX'), 'win32.ico'),
-		msi_help_url         => 'http://www.strawberryperl.com/support.html',
-		msi_banner_top       => $dist_dir->file('StrawberryBanner.bmp'),
-		msi_banner_side      => $dist_dir->file('StrawberryDialog.bmp'),
-		msi_exit_text        => <<'EOT',
-Before you start using Strawberry Perl, read the Release Notes and the README file.  These are both available from the start menu under "Strawberry Perl".
-EOT
-		msi_run_readme_txt   => 1,
-		
-		# Set e-mail to something Strawberry-specific.
-		perl_config_cf_email => 'win32-vanilla@perl.org',
-
-		# Build both msi and zip versions
-		msi                  => 1,
-		zip                  => 1,
-
-		# Tasks to complete to create Strawberry
-		tasklist => [
-			'final_initialization',
-			'install_c_toolchain',
-			'install_strawberry_c_toolchain',
-			'install_strawberry_c_libraries',
-			'install_perl',
-			'install_perl_toolchain',
-			'install_cpan_upgrades',
-			'install_strawberry_modules_1',
-			'install_strawberry_modules_2',
-			'install_strawberry_modules_3',
-			'install_strawberry_modules_4',
-			'install_strawberry_modules_5',
-			'install_strawberry_files',
-			'install_relocatable',
-			'regenerate_fragments',
-			'find_relocatable_fields',
-			'write_merge_module',
-			'install_win32_extras',
-			'install_strawberry_extras',
-			'install_portable',
-			'remove_waste',
-			'create_distribution_list',
-			'regenerate_fragments',
-			'write',
-			'create_release_notes',
-		],
-		
-		@_,
-	);
-}
-
 sub dist_dir {
-	return File::ShareDir::dist_dir('Perl-Dist-Strawberry');
+	return File::ShareDir::PathClass::dist_dir('Perl-Dist-Strawberry');
 }
 
 # Lazily default the full name.
 # Supports building multiple versions of Perl.
-sub app_ver_name {
-	$_[0]->{app_ver_name} or
-	$_[0]->app_name
-		. ($_[0]->portable ? ' Portable' : '')
-		. ' ' . $_[0]->perl_version_human
-		. '.' . $_[0]->build_number
-		. ($_[0]->beta_number ? ' Beta ' . $_[0]->beta_number : '');
+sub _build_app_ver_name {
+	my $self = shift;
+	return $self->app_name()
+		. ($self->portable() ? ' Portable' : '')
+		. ' ' . $self->perl_version_human()
+		. '.' . $self->build_number()
+		. ($self->beta_number() ? ' Beta ' . $self->beta_number() : '');
 }
 
 sub add_forgotten_files {
@@ -298,15 +302,15 @@ sub add_forgotten_files {
 
 # Lazily default the file name.
 # Supports building multiple versions of Perl.
-sub output_base_filename {
-	$_[0]->{output_base_filename} or
-	'strawberry-perl'
-		. '-' . $_[0]->perl_version_human()
-		. '.' . $_[0]->build_number()
-		. ($_[0]->image_dir() =~ /^d:/i ? '-ddrive' : q{})
-		. ($_[0]->portable() ? '-portable' : q{})
-		. (( 64 == $_[0]->bits() ) ? q{-64bit} : q{})
-		. ($_[0]->beta_number() ? '-beta-' . $_[0]->beta_number() : q{})
+sub _build_output_base_filename {
+	my $self = shift;
+	return 'strawberry-perl'
+		. '-' . $self->perl_version_human()
+		. '.' . $self->build_number()
+		. ($self->image_dir() =~ /^d:/i ? '-ddrive' : q{})
+		. ($self->portable() ? '-portable' : q{})
+		. (( 64 == $self->bits() ) ? q{-64bit} : q{})
+		. ($self->beta_number() ? '-beta-' . $self->beta_number() : q{})
 }
 
 
@@ -412,25 +416,6 @@ sub patch_include_path {
 	}
 }
 
-sub install_perl_bin {
-	my $self   = shift;
-	my %params = @_;
-	my $patch  = delete($params{patch}) || [];
-	
-	# Patch this file so GDBM_File will build.
-	my @files_to_patch = ('win32/FindExt.pm');
-
-	# If we aren't a git checkout or a 5.12 version, patch up GDBM_File.
-	if ( $self->perl_version() !~ m/ \A512 | \Agit\z /msx) {
-		push @files_to_patch, qw(ext/GDBM_File/GDBM_File.xs ext/GDBM_File/GDBM_File.pm);
-	}
-
-	return $self->SUPER::install_perl_bin(
-		patch => [ @files_to_patch, @$patch ],
-		%params,
-	);
-}
-
 sub install_strawberry_modules_1 {
 	my $self = shift;
 
@@ -468,7 +453,7 @@ sub install_strawberry_modules_1 {
 	# XML Modules
 	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
-			name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
+			name             => 'CHORNY/XML-Parser-2.40.tar.gz',
 			mod_name         => 'XML::Parser',
 			makefilepl_param => [
 				'INSTALLDIRS=site',
@@ -478,7 +463,7 @@ sub install_strawberry_modules_1 {
 		);
 	} else {
 		$self->install_distribution(
-			name             => 'MSERGEANT/XML-Parser-2.36.tar.gz',
+			name             => 'CHORNY/XML-Parser-2.40.tar.gz',
 			mod_name         => 'XML::Parser',
 			makefilepl_param => [
 				'INSTALLDIRS=vendor',
@@ -562,8 +547,11 @@ sub install_strawberry_modules_2 {
 		CPAN::Inject
 		File::pushd
 		pler
-		pip
 	} );
+	$self->install_module( 
+		name => 'pip', 
+		force => $self->offline(), 
+	);
 	
 	return 1;
 }
@@ -601,14 +589,14 @@ sub install_strawberry_modules_3 {
 
 	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.016.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.017.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=site', '--mysql_config=mysql_config'],
 		);
 	} else {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.016.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.017.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=vendor', '--mysql_config=mysql_config'],
@@ -771,9 +759,14 @@ sub install_strawberry_modules_5 {
 		Class::Inspector
 		SOAP::Lite
 		File::ShareDir
-		Alien::Tidyp
 	});
 	
+	# Install this one only on 5.10 and up. 
+	# Too many modules to install otherwise.
+	$self->install_modules( qw{
+		Alien::Tidyp
+	}) if $self->perl_version !~ m{\A58}ms;
+
 	# For the local-lib script.
 	$self->install_modules( qw{
 		IO::Interactive
