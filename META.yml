@@ -12,7 +12,8 @@ build_requires:
   URI::file: 4.20
 configure_requires:
   Module::Build: 0.36
-generated_by: 'Module::Build version 0.3607'
+dynamic_config: 1
+generated_by: 'Module::Build version 0.3705, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -21,22 +22,22 @@ name: Perl-Dist-Strawberry
 provides:
   Perl::Dist::Bootstrap:
     file: lib/Perl/Dist/Bootstrap.pm
-    version: 2.11
+    version: 2.50
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 2.11_10
+    version: 2.50
   Perl::Dist::Strawberry::Libraries:
     file: lib/Perl/Dist/Strawberry/Libraries.pm
-    version: 2.11_10
+    version: 2.50
 requires:
   File::ShareDir: 1.00
   File::ShareDir::PathClass: 1.101620
-  Perl::Dist::WiX: 1.250_100
+  Perl::Dist::WiX: 1.500
   perl: 5.010
 resources:
-  IRC: irc://irc.perl.org/#win32
   bugtracker: http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry
   homepage: http://csjewell.comyr.com/perl/
   license: http://dev.perl.org/licenses/
-  repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
-version: 2.11_10
+  repository: http://hg.curtisjewell.name/Perl-Dist-Strawberry/
+  x_IRC: irc://irc.perl.org/#win32
+version: 2.50

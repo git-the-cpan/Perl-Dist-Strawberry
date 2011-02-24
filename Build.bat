@@ -24,7 +24,7 @@ sub magic_number_matches {
   open FH, '_build\\magicnum' or return 0;
   my $filenum = <FH>;
   close FH;
-  return $filenum == 414794;
+  return $filenum == 686309;
 }
 
 my $progname;
@@ -33,7 +33,7 @@ BEGIN {
   $^W = 1;  # Use warnings
   $progname = basename($0);
   $orig_dir = Cwd::cwd();
-  my $base_dir = 'C:\\DOCUME~1\\ADMINI~1\\DESKTOP\\PEA42C~1';
+  my $base_dir = 'C:\\REPOSI~1\\PEA42C~1';
   if (!magic_number_matches()) {
     unless (chdir($base_dir)) {
       die ("Couldn't chdir($base_dir), aborting\n");
@@ -44,13 +44,14 @@ BEGIN {
   }
   unshift @INC,
     (
-     'C:\\Documents and Settings\\Administrator\\Desktop\\Perl-Dist-Strawberry\\_build\\lib'
+     'C:\\Repositories\\Perl-Dist-Strawberry\\_build\\lib'
     );
 }
 
 close(*DATA) unless eof(*DATA); # ensure no open handles to this script
 
 use My::Builder;
+Module::Build->VERSION(q{0.36});
 
 # Some platforms have problems setting $^X in shebang contexts, fix it up here
 $^X = Module::Build->find_perl_interpreter;

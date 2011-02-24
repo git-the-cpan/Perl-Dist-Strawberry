@@ -2,20 +2,20 @@
 
 # A copy of perldist that does some strawberry-specific actions
 
-use 5.008001;
+use 5.010;
 use strict;
 use warnings;
 use Pod::Usage;
-use File::HomeDir                 qw();
-use Getopt::Long                  qw();
-use URI                           qw();
-use Perl::Dist::Strawberry 2.0001 qw();
-use English                       qw( -no_match_vars );
-use Carp                          qw( croak          );
+use File::HomeDir               qw();
+use Getopt::Long                qw();
+use URI                         qw();
+use Perl::Dist::Strawberry 2.50 qw();
+use English                     qw( -no_match_vars );
+use Carp                        qw( croak          );
 
-our $VERSION = '2.01';
+our $VERSION = '2.50';
 our $VERSION_STRING = $VERSION;
-$VERSION = eval $VERSION_STRING;
+$VERSION =~ s/_//ms;
 
 
 #####################################################################
@@ -26,7 +26,7 @@ my $OUTPUT       = undef;
 my $FORCE        = 0;
 my $TRACE        = undef;
 my $OFFLINE      = 0;
-my @SKIP         = undef;
+my @SKIP         = ();
 my $result       = Getopt::Long::GetOptions(
 	"cpan=s"         => \$CPAN,
 	"output=s"       => \$OUTPUT,
@@ -73,11 +73,11 @@ if ( defined $OFFLINE ) {
 if ( defined $TRACE ) {
 	$options{trace} = $TRACE;
 }
-if ( 1 < scalar @SKIP ) {
-	push @SKIP, 6;
-} else {
-	@SKIP = ( 6 );
-}
+#if ( 1 < scalar @SKIP ) {
+#	push @SKIP, 6;
+#} else {
+#	@SKIP = ( 6 );
+#}
 
 # Create the machine
 my $machine = Perl::Dist::Strawberry->default_machine( 
@@ -105,7 +105,7 @@ sub version {
 This is $PROGRAM_NAME, version $VERSION_STRING, a distribution builder 
 for Perl::Dist::Strawberry.
 
-Copyright 2009 Curtis Jewell and Adam Kennedy.
+Copyright 2007-2009, 2011 Curtis Jewell and Adam Kennedy.
 
 This script may be copied only under the terms of either the Artistic License
 or the GNU General Public License, which may be found in the Perl 5 
@@ -144,7 +144,7 @@ perldist_strawberry - a distribution builder for Perl::Dist::Strawberry.
 
 =head1 VERSION
 
-This document describes perldist_strawberry version 2.00_01.
+This document describes perldist_strawberry version 2.50.
 
 =head1 DESCRIPTION
 
@@ -163,7 +163,6 @@ This script builds Strawberry Perl.
     --cpan <URL>      Specifies the CPAN mirror to download to.
                       Defaults to http://cpan.strawberryperl.com/.
     --skip <NUM>...   Specifies a list of which builds need skipped.
-                      6 (D-drive & portable) is added automatically.
     --trace <NUM>     Specifies the trace level.
                       Defaults to 1, range is between 0 and 5.
 
@@ -202,15 +201,13 @@ Specifies which builds need skipped from the list below:
 
 =over
 
-=item 1. 5.8.9 C: drive (.msi & .zip)
+=item 1. 5.10.1 C: drive (.msi & .zip)
 
-=item 2. 5.10.1 C: drive (.msi & .zip)
+=item 2. 5.10.1 D: drive (.msi)
 
-=item 3. 5.10.1 Portable (.zip)
+=item 3. 5.12.3 relocatable (.msi & .zip)
 
-=item 4. 5.8.9 D: drive (.msi)
-
-=item 5. 5.10.1 D: drive (.msi)
+=item 4. 5.12.3 portable (.zip)
 
 =back
 
@@ -261,7 +258,7 @@ execution of this script.
 
 =head1 DEPENDENCIES
 
-Perl 5.8.1 is the mimimum version of perl that this script will run on.
+Perl 5.10.0 is the mimimum version of perl that this script will run on.
 
 Other modules that this script depends on are L<File::HomeDir|File::HomeDir> 
 L<URI|URI>, and L<Perl::Dist::Strawberry|Perl::Dist::Strawberry>.
@@ -278,7 +275,7 @@ Adam Kennedy, E<lt>adamk@cpan.orgE<gt>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 Curtis Jewell.
+Copyright 2009, 2011 Curtis Jewell.
 
 Copyright 2007-2009 Adam Kennedy.
 

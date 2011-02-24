@@ -133,11 +133,11 @@ use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.11_10';
+our $VERSION = '2.50';
 $VERSION =~ s/_//ms;
 
-extends 'Perl::Dist::WiX'                   => { -version => '1.250_100', },
-        'Perl::Dist::Strawberry::Libraries' => { -version => '2.11_10', };
+extends 'Perl::Dist::WiX'                   => { -version => '1.500', },
+        'Perl::Dist::Strawberry::Libraries' => { -version => '2.50', };
 
 #####################################################################
 # Build Machine Generator
@@ -172,24 +172,24 @@ sub default_machine {
 	$machine->add_dimension('version');
 	$machine->add_option('version',
 		perl_version => '5101',
-		build_number => 4,
+		build_number => 5,
 	);
 	$machine->add_option('version',
 		perl_version => '5101',
-		build_number => 4,
+		build_number => 5,
 		image_dir    => 'D:\strawberry',
 		msi          => 1,
 		zip          => 0,
 	);
 	$machine->add_option('version',
-		perl_version => '5122',
+		perl_version => '5123',
 		build_number => 0,
 		portable     => 1,
 		gcc_version  => 4,
 		download_dir => 'C:\tmp\dl-gcc4',
 	);
 	$machine->add_option('version',
-		perl_version       => '5122',
+		perl_version       => '5123',
 		build_number       => 0,
 		relocatable        => 1,
 		use_dll_relocation => 1,
@@ -221,8 +221,8 @@ around BUILDARGS => sub {
 	$args{image_dir}         //= Path::Class::Dir->new('C:\strawberry');
 
 # Strawberry Perl version.
-	$args{perl_version} //= '5122';
-	$args{build_number} //= 1;
+	$args{perl_version} //= '5123';
+	$args{build_number} //= 0;
 	$args{beta_number}  //= 1;
 
 # New options for msi building...
@@ -267,6 +267,7 @@ sub _build_tasklist { return [
 	'write_merge_module',
 	'install_win32_extras',
 	'install_strawberry_extras',
+	'install_relocation_information',
 	'install_portable',
 	'remove_waste',
 	'create_distribution_list',
@@ -589,14 +590,14 @@ sub install_strawberry_modules_3 {
 
 	if ($self->portable() && (12 < $self->perl_major_version()) ) {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.017.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.018.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=site', '--mysql_config=mysql_config'],
 		);
 	} else {
 		$self->install_distribution(
-			name     => 'CAPTTOFU/DBD-mysql-4.017.tar.gz',
+			name     => 'CAPTTOFU/DBD-mysql-4.018.tar.gz',
 			mod_name => 'DBD::mysql',
 			force    => 1,
 			makefilepl_param => ['INSTALLDIRS=vendor', '--mysql_config=mysql_config'],
@@ -616,6 +617,9 @@ sub install_strawberry_modules_3 {
 		local::lib
 	} );	
 
+	# Now that we have JSON::XS, use it as Parse::CPAN::Meta's JSON backend.
+	$self->add_env('PERL_JSON_BACKEND', 'JSON::XS');
+	
 	# Graphics module installation.
 	$self->install_module( name => 'Imager' );
 	$self->install_module( name => 'GD' );
@@ -841,86 +845,106 @@ sub install_strawberry_extras {
 
 	my $dist_dir = File::ShareDir::dist_dir('Perl-Dist-Strawberry');
 
-	# Links to the Strawberry Perl website.
-	# Don't include this for non-Strawberry sub-classes
-	if ( ref($self) eq 'Perl::Dist::Strawberry' ) {
-		$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
-		if (not $self->portable()) {
-			$self->install_launcher(
-				name => 'Check installed versions of modules',
-				bin  => 'module-version',
-			);
-			$self->install_launcher(
-				name => 'Create local library areas',
-				bin  => 'llw32helper',
-			);
-			$self->install_website(
-				name       => 'Strawberry Perl Website',
-				url        => $self->strawberry_url(),
-				icon_file  => _dist_file('strawberry.ico')
-			);
-			$self->install_website(
-				name         => 'Strawberry Perl Release Notes',
-				url          => $self->strawberry_release_notes_url(),
-				icon_file    => _dist_file('strawberry.ico'),
-				directory_id => 'D_App_Menu',
-			);
-			$self->install_website(
-				name         => 'learn.perl.org (tutorials, links)',
-				url          => 'http://learn.perl.org/',
-				icon_file    => _dist_file('perlhelp.ico'),
-			);
-			$self->install_website(
-				name         => 'Beginning Perl (online book)',
-				url          => 'http://learn.perl.org/books/beginning-perl/',
-				icon_file    => _dist_file('perlhelp.ico'),
-			);
-			$self->install_website(
-				name         => q{Ovid's CGI Course},
-				url          => 'http://jdporter.perlmonk.org/cgi_course/',
-				icon_file    => _dist_file('perlhelp.ico'),
-			);
-			
-			# Link to IRC.
-			$self->install_website(
-				name       => 'Live Support',
-				url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
-				icon_file  => _dist_file('onion.ico')
-			);
-			$self->add_icon(
-				name         => 'Strawberry Perl README',
-				directory_id => 'D_App_Menu',
-				filename     => $self->image_dir()->file('README.txt')->stringify(),
-			);
-		}
-	}
-
 	my $license_file_from = catfile($dist_dir, 'License.rtf');
 	my $license_file_to = catfile($self->license_dir(), 'License.rtf');
+
+	$self->copy_file($license_file_from, $license_file_to);
+	
+	if (not $self->portable()) {
+		$self->add_to_fragment( 'Win32Extras', [ $license_file_to, ] );
+	}
+	
+	# Don't include the rest of this for non-Strawberry sub-classes if we 
+	# can avoid it.
+	my $class = $self->_original_class_name();
+	if ('Perl::Dist::Strawberry' ne $class) {
+		$self->trace_line(2, 
+		  "Did not install the Strawberry extras in a $class");
+		return 1;
+	}
+	
+	$self->patch_file( 'README.txt' => $self->image_dir(), { dist => $self } );
+
+	if (not $self->portable()) {
+		$self->install_launcher(
+			name => 'Check installed versions of modules',
+			bin  => 'module-version',
+		);
+		$self->install_launcher(
+			name => 'Create local library areas',
+			bin  => 'llw32helper',
+		);
+
+		$self->install_website(
+			name       => 'Strawberry Perl Website',
+			url        => $self->strawberry_url(),
+			icon_file  => _dist_file('strawberry.ico')
+		);
+		$self->install_website(
+			name         => 'Strawberry Perl Release Notes',
+			url          => $self->strawberry_release_notes_url(),
+			icon_file    => _dist_file('strawberry.ico'),
+			directory_id => 'D_App_Menu',
+		);
+		$self->install_website(
+			name         => 'learn.perl.org (tutorials, links)',
+			url          => 'http://learn.perl.org/',
+			icon_file    => _dist_file('perlhelp.ico'),
+		);
+		$self->install_website(
+			name         => 'Beginning Perl (online book)',
+			url          => 'http://learn.perl.org/books/beginning-perl/',
+			icon_file    => _dist_file('perlhelp.ico'),
+		);
+		$self->install_website(
+			name         => q{Ovid's CGI Course},
+			url          => 'http://jdporter.perlmonk.org/cgi_course/',
+			icon_file    => _dist_file('perlhelp.ico'),
+		);
+		
+		# Link to IRC.
+		$self->install_website(
+			name       => 'Live Support',
+			url        => 'http://widget.mibbit.com/?server=irc.perl.org&channel=%23win32',
+			icon_file  => _dist_file('onion.ico')
+		);
+		$self->add_icon(
+			name         => 'Strawberry Perl README',
+			directory_id => 'D_App_Menu',
+			filename     => $self->image_dir()->file('README.txt')->stringify(),
+		);
+	}
+
 	my $readme_file = $self->file('README.txt');
 
 	my $onion_ico_file = $self->file(qw(win32 onion.ico));
 	my $strawberry_ico_file = $self->file(qw(win32 strawberry.ico));
 	
-	$self->copy_file($license_file_from, $license_file_to);	
+	$self->copy_file($license_file_from, $license_file_to);
+	
 	if (not $self->portable()) {
 		$self->add_to_fragment( 'Win32Extras',
-			[ $license_file_to, $readme_file, $onion_ico_file, $strawberry_ico_file ] );
+			[ $readme_file, $onion_ico_file, $strawberry_ico_file ] );
 	}
 
-	if ($self->relocatable()) {
-		# Copy the relocation information in.
-		$self->make_relocation_file('strawberry-ui.reloc.txt', 'strawberry-merge-module.reloc.txt');
-		
-		# Make sure it gets installed.
-		$self->insert_fragment('relocation_ui_info',
-			File::List::Object->new()->add_file(
-				$self->file('strawberry-ui.reloc.txt'),				
-			),
-		);
-	}
+	return 1;
+}
+ 
+sub install_relocation_information {
+	my $self = shift;
 
+	return 1 if not $self->relocatable();
+
+	# Copy the relocation information in.
+	$self->make_relocation_file('strawberry-ui.reloc.txt', 'strawberry-merge-module.reloc.txt');
 	
+	# Make sure it gets installed.
+	$self->insert_fragment('relocation_ui_info',
+		File::List::Object->new()->add_file(
+			$self->file('strawberry-ui.reloc.txt'),				
+		),
+	);
+
 	return 1;
 }
 
@@ -1008,7 +1032,6 @@ should be reported to their respective distributions.
 
 For more support information and places for discussion, see the
 Strawberry Perl Support page L<http://strawberryperl.com/support.html>.
-Strawberry Perl Support page L<http://strawberryperl.com/support.html>.
 
 =head1 AUTHOR
 
@@ -1020,7 +1043,7 @@ Curtis Jewell E<lt>csjewell@cpan.orgE<gt>
 
 Copyright 2007 - 2009 Adam Kennedy.  
 
-Copyright 2009 - 2010 Curtis Jewell.
+Copyright 2009 - 2011 Curtis Jewell.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

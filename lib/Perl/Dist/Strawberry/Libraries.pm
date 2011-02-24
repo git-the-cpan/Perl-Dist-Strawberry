@@ -36,7 +36,7 @@ use warnings;
 use File::Spec::Functions qw( catfile catdir );
 use Readonly;
 
-our $VERSION = '2.11_10';
+our $VERSION = '2.50';
 $VERSION =~ s/_//ms;
 
 Readonly my %LIBRARIES_S => {
@@ -49,6 +49,7 @@ Readonly my %LIBRARIES_S => {
 		'mysql5120'     => undef,
 		'mysql5121'     => undef,
 		'mysql5122'     => undef,
+		'mysql5123'     => undef,
 		'mysqllib'      => '32bit-gcc3/MySQLLibraries-20100121.zip',
 		'pari589'       => 'Math-Pari-2.010801-MSWin32-x86-multi-thread-5.8.9.par',
 		'pari5100'      => '32bit-gcc3/Math-Pari-2.01080603-MSWin32-x86-multi-thread-5.10.1.par',
@@ -57,11 +58,12 @@ Readonly my %LIBRARIES_S => {
 		'pari5120'      => undef,
 		'pari5121'      => undef,
 		'pari5122'      => undef,
+		'pari5123'      => undef,
 		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
 		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
 		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
 		'libexpat'      => '32bit-gcc4/expat-2.0.1-bin_20091126.zip',
-		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20100306.zip',
+		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20110218.zip',
 		'libxslt'       => '32bit-gcc4/libxslt-1.1.26-bin_20091126.zip',
 		'libjpeg'       => '32bit-gcc4/jpeg-6b-gnuwin32-bin_20091126.zip',
 		'libgif'        => '32bit-gcc4/giflib-4.1.6-bin_20091126.zip',
@@ -89,6 +91,8 @@ Readonly my %LIBRARIES_S => {
 		'mysql5115'     => undef,
 		'mysql5120'     => undef,
 		'mysql5121'     => undef,
+		'mysql5122'     => undef,
+		'mysql5123'     => undef,
 		'mysqllib'      => '32bit-gcc4/mysql-5.1.44-bin_20100304.zip',
 		'pari589'       => undef,
 		'pari5100'      => undef,
@@ -97,11 +101,12 @@ Readonly my %LIBRARIES_S => {
 		'pari5120'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
 		'pari5121'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
 		'pari5122'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
+		'pari5123'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.3.par',
 		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
 		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
 		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
 		'libexpat'      => '32bit-gcc4/expat-2.0.1-bin_20091126.zip',
-		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20100306.zip',
+		'gmp'           => '32bit-gcc4/gmp-5.0.1-419f6a4cc606-bin_20110218.zip',
 		'libxslt'       => '32bit-gcc4/libxslt-1.1.26-bin_20091126.zip',
 		'libjpeg'       => '32bit-gcc4/jpeg-6b-gnuwin32-bin_20091126.zip',
 		'libgif'        => '32bit-gcc4/giflib-4.1.6-bin_20091126.zip',
@@ -130,6 +135,7 @@ Readonly my %LIBRARIES_S => {
 		'mysql5120'     => undef,
 		'mysql5121'     => undef,
 		'mysql5122'     => undef,
+		'mysql5123'     => undef,
 		'mysqllib'      => undef,
 		'pari589'       => undef,
 		'pari5100'      => undef,
@@ -138,6 +144,7 @@ Readonly my %LIBRARIES_S => {
 		'pari5120'      => undef,
 		'pari5121'      => undef,
 		'pari5122'      => undef,
+		'pari5123'      => undef,
 		'zlib'          => '64bit-gcc4/zlib-1.2.3-bin_20100110.zip',
 		'libiconv'      => '64bit-gcc4/libiconv-1.13.1-bin_20100110.zip',
 		'libxml2'       => '64bit-gcc4/libxml2-2.7.3-bin_20100110.zip',
@@ -545,7 +552,7 @@ Curtis Jewell E<lt>csjewell@cpan.orgE<gt>
 
 Copyright 2007 - 2009 Adam Kennedy.  
 
-Copyright 2009 - 2010 Curtis Jewell.
+Copyright 2009 - 2011 Curtis Jewell.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

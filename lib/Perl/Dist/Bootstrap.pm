@@ -21,7 +21,7 @@ use parent                  qw( Perl::Dist::Strawberry );
 use File::Spec::Functions   qw( catfile catdir         );
 use File::ShareDir          qw();
 
-our $VERSION = '2.11';
+our $VERSION = '2.50';
 $VERSION =~ s/_//ms;
 
 
@@ -32,10 +32,10 @@ $VERSION =~ s/_//ms;
 # Apply some default paths
 sub new {
 
-	if ($Perl::Dist::Strawberry::VERSION < 2.1010) {
+	if ($Perl::Dist::Strawberry::VERSION < 2.50) {
 		PDWiX->throw('Perl::Dist::Strawberry version is not high enough.')
 	}
-	if ($Perl::Dist::WiX::VERSION < 1.200100) {
+	if ($Perl::Dist::WiX::VERSION < 1.500) {
 		PDWiX->throw('Perl::Dist::WiX version is not high enough.')
 	}
 
@@ -325,7 +325,7 @@ Curtis Jewell E<lt>csjewell@cpan.orgE<gt>
 
 Copyright 2007 - 2009 Adam Kennedy.  
 
-Copyright 2009 - 2010 Curtis Jewell.
+Copyright 2009 - 2011 Curtis Jewell.
 
 This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.

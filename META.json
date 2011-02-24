@@ -1,0 +1,71 @@
+{
+   "abstract" : "Strawberry Perl for Win32",
+   "author" : [
+      "Curtis Jewell <CSJewell@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "Module::Build version 0.3705, CPAN::Meta::Converter version 2.110440",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Perl-Dist-Strawberry",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "File::Path" : "2.04",
+            "File::Remove" : "1.42",
+            "File::Spec" : "3.2701",
+            "LWP::Online" : "1.07",
+            "Test::More" : "0.86",
+            "Test::Perl::Dist" : "0.300",
+            "URI::file" : "4.20"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.36"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "File::ShareDir" : "1.00",
+            "File::ShareDir::PathClass" : "1.101620",
+            "Perl::Dist::WiX" : "1.500",
+            "perl" : "5.010"
+         }
+      }
+   },
+   "provides" : {
+      "Perl::Dist::Bootstrap" : {
+         "file" : "lib/Perl/Dist/Bootstrap.pm",
+         "version" : "2.50"
+      },
+      "Perl::Dist::Strawberry" : {
+         "file" : "lib/Perl/Dist/Strawberry.pm",
+         "version" : "2.50"
+      },
+      "Perl::Dist::Strawberry::Libraries" : {
+         "file" : "lib/Perl/Dist/Strawberry/Libraries.pm",
+         "version" : "2.50"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry"
+      },
+      "homepage" : "http://csjewell.comyr.com/perl/",
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ],
+      "repository" : {
+         "url" : "http://hg.curtisjewell.name/Perl-Dist-Strawberry/"
+      },
+      "x_IRC" : "irc://irc.perl.org/#win32"
+   },
+   "version" : "2.50"
+}
