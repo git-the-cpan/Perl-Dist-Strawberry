@@ -1,5 +1,5 @@
 ---
-abstract: 'Strawberry Perl for Win32'
+abstract: Strawberry Perl for Win32
 author:
   - 'Curtis Jewell <CSJewell@cpan.org>'
 build_requires:
@@ -13,7 +13,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.36
 dynamic_config: 1
-generated_by: 'Module::Build version 0.3705, CPAN::Meta::Converter version 2.110440'
+generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,14 +25,15 @@ provides:
     version: 2.50
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 2.50
+    version: 2.5001
   Perl::Dist::Strawberry::Libraries:
     file: lib/Perl/Dist/Strawberry/Libraries.pm
-    version: 2.50
+    version: 2.5001
 requires:
   File::ShareDir: 1.00
   File::ShareDir::PathClass: 1.101620
-  Perl::Dist::WiX: 1.500
+  Module::Build: 0.38
+  Perl::Dist::WiX: 1.500001
   perl: 5.010
 resources:
   bugtracker: http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Dist-Strawberry
@@ -40,4 +41,4 @@ resources:
   license: http://dev.perl.org/licenses/
   repository: http://hg.curtisjewell.name/Perl-Dist-Strawberry/
   x_IRC: irc://irc.perl.org/#win32
-version: 2.50
+version: 2.5001

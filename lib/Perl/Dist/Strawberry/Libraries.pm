@@ -36,7 +36,7 @@ use warnings;
 use File::Spec::Functions qw( catfile catdir );
 use Readonly;
 
-our $VERSION = '2.50';
+our $VERSION = '2.5001';
 $VERSION =~ s/_//ms;
 
 Readonly my %LIBRARIES_S => {
@@ -102,6 +102,7 @@ Readonly my %LIBRARIES_S => {
 		'pari5121'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
 		'pari5122'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.0.par',
 		'pari5123'      => '32bit-gcc4/Math-Pari-2.01080604-MSWin32-x86-multi-thread-5.12.3.par',
+		'pari5140'      => '32bit-gcc4/Math-Pari-2.01080605-MSWin32-x86-multi-thread-5.14.0.par',
 		'zlib'          => '32bit-gcc4/zlib-1.2.3-bin_20091126.zip',
 		'libiconv'      => '32bit-gcc4/libiconv-1.13.1-bin_20091126.zip',
 		'libxml2'       => '32bit-gcc4/libxml2-2.7.3-bin_20091126.zip',
@@ -185,15 +186,15 @@ sub get_library_file {
 
 	if ( not exists $LIBRARIES_S{$toolchain}{$package} ) {
 		PDWiX->throw(
-			'get_library_file was called on a package that was not defined.'
+			"get_library_file was called on a package '$package' that was not defined."
 		);
 	}
 
 	my $package_file = $LIBRARIES_S{$toolchain}{$package};
 	if (defined $package_file) {
-		$self->trace_line( 3, "Pachage $package is in $package_file\n" );
+		$self->trace_line( 3, "Package $package is in $package_file\n" );
 	} else {
-		$self->trace_line( 1, "Pachage $package does not exist for this toolchain.\n" );
+		$self->trace_line( 1, "Package $package does not exist for this toolchain.\n" );
 	}
 	
 	return $package_file;
@@ -214,15 +215,15 @@ sub get_library_file_versioned {
 
 	if ( not exists $LIBRARIES_S{$toolchain}{$package_v} ) {
 		PDWiX->throw(
-			'get_library_file was called on a package that was not defined.'
+			"get_library_file was called on a package '$package' that was not defined."
 		);
 	}
 
 	my $package_file = $LIBRARIES_S{$toolchain}{$package_v};
 	if (defined $package_file) {
-		$self->trace_line( 3, "Pachage $package is in $package_file\n" );
+		$self->trace_line( 3, "Package $package is in $package_file\n" );
 	} else {
-		$self->trace_line( 1, "Pachage $package does not exist for this toolchain.\n" );
+		$self->trace_line( 1, "Package $package does not exist for this toolchain.\n" );
 	}
 	
 	return $package_file;

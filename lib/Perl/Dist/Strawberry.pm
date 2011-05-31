@@ -76,7 +76,7 @@ construction toolkit works.
 =head1 CHANGES FROM CORE PERL
 
 Strawberry Perl is and will continue to be based on the latest "stable"
-releases of Perl, currently 5.8.9, and 5.10.0.
+releases of Perl, currently 5.10.1, and 5.12.3.
 
 Some additional modifications are included that improve general
 compatibility with the Win32 platform or improve "turnkey" operation on
@@ -101,7 +101,7 @@ perl.exe binary.
 =head1 CONFIGURATION
 
 At present, Strawberry Perl 5.10.1 must be installed in C:\strawberry.
-5.12.1 is relocatable, and can be installed anywhere.
+5.12.3 is relocatable, and can be installed anywhere.
 
 The executable installer adds the following environment variable changes:
 
@@ -133,11 +133,11 @@ use Perl::Dist::WiX::Util::Machine   qw();
 use File::List::Object               qw();
 use Path::Class::Dir                 qw();
 
-our $VERSION = '2.50';
+our $VERSION = '2.5001';
 $VERSION =~ s/_//ms;
 
-extends 'Perl::Dist::WiX'                   => { -version => '1.500', },
-        'Perl::Dist::Strawberry::Libraries' => { -version => '2.50', };
+extends 'Perl::Dist::WiX'                   => { -version => '1.500001', },
+        'Perl::Dist::Strawberry::Libraries' => { -version => '2.5001', };
 
 #####################################################################
 # Build Machine Generator
@@ -223,7 +223,7 @@ around BUILDARGS => sub {
 # Strawberry Perl version.
 	$args{perl_version} //= '5123';
 	$args{build_number} //= 0;
-	$args{beta_number}  //= 1;
+	$args{beta_number}  //= 0;
 
 # New options for msi building...
 	$args{msi_product_icon}   //= File::ShareDir::PathClass->dist_dir('Perl-Dist-WiX')->file('win32.ico');
@@ -255,6 +255,7 @@ sub _build_tasklist { return [
 	'install_perl',
 	'install_perl_toolchain',
 	'install_cpan_upgrades',
+	'verify_msi_file_contents',
 	'install_strawberry_modules_1',
 	'install_strawberry_modules_2',
 	'install_strawberry_modules_3',
@@ -264,6 +265,7 @@ sub _build_tasklist { return [
 	'install_relocatable',
 	'regenerate_fragments',
 	'find_relocatable_fields',
+	'verify_msi_file_contents',
 	'write_merge_module',
 	'install_win32_extras',
 	'install_strawberry_extras',
@@ -272,6 +274,7 @@ sub _build_tasklist { return [
 	'remove_waste',
 	'create_distribution_list',
 	'regenerate_fragments',
+	'verify_msi_file_contents',
 	'write',
 	'create_release_notes',
 	];
@@ -306,8 +309,8 @@ sub add_forgotten_files {
 sub _build_output_base_filename {
 	my $self = shift;
 	return 'strawberry-perl'
-		. '-' . $self->perl_version_human()
-		. '.' . $self->build_number()
+		. '-' . $self->perl_version_human() . q{.}
+		. ($self->smoketest() ? 'smoketest-' . $self->output_date_string() : $self->build_number())
 		. ($self->image_dir() =~ /^d:/i ? '-ddrive' : q{})
 		. ($self->portable() ? '-portable' : q{})
 		. (( 64 == $self->bits() ) ? q{-64bit} : q{})
@@ -441,8 +444,11 @@ sub install_strawberry_modules_1 {
 		File::Remove
 		Win32::File::Object
 		Parse::Binary
-		Win32::EventLog
 	} );
+	$self->install_module(
+		name => 'Win32::EventLog',
+		force => 1, # Tests fail on only one computer, will be reported later
+	);
 	$self->install_modules('Win32::API') if not 64 == $self->bits();
 
 	# Install additional math modules
@@ -551,7 +557,7 @@ sub install_strawberry_modules_2 {
 	} );
 	$self->install_module( 
 		name => 'pip', 
-		force => $self->offline(), 
+		force => $self->offline() || 0,
 	);
 	
 	return 1;
@@ -581,9 +587,14 @@ sub install_strawberry_modules_3 {
 		name  => 'DB_File',
 		force => 1,
 	); 
+
+	#problems on Russian Windows, RT#67609 and #67611
+	$self->install_module(
+		name  => 'Win32::OLE',
+		force => 1,
+	); 
 	$self->install_modules( qw{
 		BerkeleyDB
-		Win32::OLE
 		DBD::ODBC
 		DBD::ADO
 	} );
@@ -745,10 +756,16 @@ sub install_strawberry_modules_4 {
 		Algorithm::Diff
 		Text::Diff
 	});
+
 	# Requires Crypt::OpenPGP - see above.
-	$self->install_modules( qw{
-		Module::Signature
-	}) if 32 == $self->bits();
+	$self->install_distribution(
+		name     => 'FLORA/Module-Signature-0.66.tar.gz',
+		mod_name => 'Module::Signature',
+		makefilepl_param => [ 'INSTALLDIRS=vendor', ],
+	) if 32 == $self->bits();
+	# version 0.67 of Module::Signature can have serious problems on Windows
+	# See https://rt.cpan.org/Ticket/Display.html?id=46339
+	# IPC::Run is a prereq only for 0.67
 	
 	return 1;
 }
