@@ -26,11 +26,7 @@ sub new {
 
 sub check {
   my $self = shift;
-  
-  if ($self->global->{bits} != 32 && $self->global->{bits} != 64) { #XXX-TODO MOVE SOMEWHERE ELSE
-    die "ERROR: invalid 'bits' value [".$self->global->{bits}."]\n";
-  }
-  
+    
   my $pkgs = $self->{config}->{install_packages};
   my $invalid_url_found = 0;
   for my $p (keys %$pkgs) {
@@ -53,18 +49,15 @@ sub check {
 sub run {
   my $self = shift;
 
-  #my %files;
+  my $files;
   my $pkgs = $self->{config}->{install_packages};
   for my $p (keys %$pkgs) {
-    my $f = $self->_install($p, $pkgs->{$p});
-    #XXX remove File::List::Object
-    #XXX $self->boss->message(5, "pkg='$p' files_count=".$f->count."\n");
-    #XXX $files{$p} = $f;
+    $files = $self->_install($p, $pkgs->{$p});
     $self->boss->message(5, "pkg='$p'");
   }
   
   #store results
-  #XXX-FIXME: $self->{data}->{output}->{files} = \%files;
+  #XXX-TODO: $self->{data}->{output}->{files} = $files;
 }
 
 sub _install {
@@ -95,9 +88,7 @@ sub _install {
     push @files, $self->_extract_filemap($tgz, $licenses, catdir($self->global->{image_dir}, 'licenses'), 1);
   }
 
-  #XXX-REMOVE File::List::Object
-  #XXX my $filelist = File::List::Object->new()->load_array(@files)->filter( $self->_filters ); #XXX-FIXME reimplement without moose
-  #XXX return $filelist;
+  return \@files;
 }
 
 sub _filters {

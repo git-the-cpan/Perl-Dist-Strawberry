@@ -69,6 +69,9 @@ my $builder = $class->new(
         resources => {
             repository  => 'http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/',
         },
+        no_index => {
+            directory => [ 'share', 'HelperCA.dll_src' ],
+        }
     },
 );
 

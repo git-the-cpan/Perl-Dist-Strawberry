@@ -73,7 +73,6 @@ sub _make_relocation_file1 {
   my @filelist;
   my %files_already_relocating;
 
-  #XXX-FIXME - not testes
   foreach my $file_already_processed (@files_already_processed) {
     @filelist = read_file( catfile($self->global->{image_dir}, $file_already_processed) );
     shift @filelist; # the first line is 'image_dir'

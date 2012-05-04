@@ -75,7 +75,6 @@ sub _do_job {
       $tt_vars = {} unless defined $tt_vars;
       my %tt = ( 
         %{$self->global},
-        dist_list => join("\n", qw/XXX YYY ZZZ/), #XXX-FIME XXXXXXXXXXXXXXXX
         %$tt_vars,
       );
 
@@ -103,10 +102,6 @@ sub _do_job {
       write_file($dst, $outdata);
       $self->_restore_ro($dst, $r);
       write_file("$dst.diff", diff("$dst.backup", $dst)) if -f "$dst.backup";
-    }
-    elsif ($cmd eq 'apply_sed') {
-      $self->boss->message(4, "gonna apply_sed");
-      die "XXX-FIXME not implemented";
     }
     elsif ($cmd eq 'removefile') {
       for (@$args) {
@@ -143,6 +138,10 @@ sub _do_job {
       $self->boss->message(4, "gonna dircopy '$src' >> '$dst'");
       dircopy($src, $dst) or die "dircopy failed";
     }
+    else {
+      #XXX-TODO
+      #die "FATAL: '$cmd' not implemented";
+    }
   }
 }
 
@@ -154,7 +153,7 @@ sub _create_dir_for_file {
 }
 
 sub _check_valid_prefix {
-  #XXX-TODO
+  #XXX-TODO implement or remove
 }
 
 1;

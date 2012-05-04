@@ -56,7 +56,7 @@ sub insert_fragment {
   my ($self, $name, $filelist) = @_;
 }
 
-sub _push_dir { #XXX-FIXME duplicated
+sub _push_dir { #XXX-FIXME maybe without leading _
   my $self = shift;
   my $dir  = catdir(@_);
   $self->boss->message(6, "Lexically changing directory to '$dir'");
@@ -137,7 +137,6 @@ sub _extract_filemap {
 
 sub _extract_filemap_zip {
   my ( $self, $archive, $filemap, $basedir, $file_only ) = @_;
-  $self->boss->message(2, "XXX_DEBUG: _extract_filemap_zip: archive='$archive', filemap='$filemap', basedir='$basedir', file_only='$file_only'\n");
 
   my @files;
   my $zip = Archive::Zip->new($archive);
@@ -161,7 +160,7 @@ sub _extract_filemap_zip {
   return @files;
 }
 
-sub _extract { #XXX-FIXME duplicated
+sub _extract { #XXX-FIXME maybe remove leading _
   my ( $self, $from, $to ) = @_;
   File::Path::mkpath($to);
   my $wd = $self->_push_dir($to);
@@ -221,7 +220,7 @@ sub _convert_name {
 }
 
 sub _insert_fragment {
-warn "xxx-todo _insert_fragment\n";
+#XXX-FIXME remove this method
 }
 
 sub get_path_string {
@@ -335,7 +334,7 @@ sub _patch_file {
   }
 }
 
-sub _unset_ro { #XXX-todo used from more modules
+sub _unset_ro { #XXX-todo used from more modules, perhaps remove leading _
   my ($self, $to) = @_;
   return undef unless -f $to;
   my $file = Win32::File::Object->new($to, 1);
@@ -363,8 +362,8 @@ sub sha1_file {
 
 sub workaround_get_dist_list {
 # XXX-FIXME ugly workaround for getting the list of distributions installed  via CPANPLUS
-# XXX-FIXME used by UpgradeCpanModules and InstallModules
-# XXX-FIXME implement something more clever in the future
+# used by UpgradeCpanModules and InstallModules
+# implement something more clever in the future
   my $self = shift;
   my $script_pl = $self->boss->resolve_name("<dist_sharedir>/utils/CPANPLUS_list_build_cache.pl");
   my $prefix = "cpan_dist_list.".time;

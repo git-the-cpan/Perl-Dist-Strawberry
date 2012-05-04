@@ -38,9 +38,6 @@ sub run {
   my $dir = catdir($image_dir, 'perl');
   make_path($dir) unless -d $dir;
 
-  #XXX remove File::List::Object
-  #my $fl2 = File::List::Object->new->readdir($dir);
-
   # Download the perl tarball if needed.
   my $tgz = $self->boss->mirror_url( $self->{config}->{url}, $self->global->{download_dir} );
 
@@ -107,8 +104,10 @@ sub run {
     # necessary workaround for building 32bit perl on 64bit Windows
     my @make_args = ("INST_DRV=$INST_DRV", "INST_TOP=$INST_TOP", "CCHOME=$CCHOME", "EMAIL=$cf_email");
     push @make_args, 'GCC_4XX=define', 'GCCHELPERDLL=$(CCHOME)\bin\libgcc_s_sjlj-1.dll'; #perl-5.12/14 only
-    push @make_args, 'CFG=Debug' if $self->{xxx_fixme};
-    push @make_args, "EMAIL=xxx" if $self->{xxx_fixme};
+
+    #XXX-FIXME remove debug stuff
+    #push @make_args, 'CFG=Debug' if $self->{xxx_fixme};
+    #push @make_args, "EMAIL=xxx" if $self->{xxx_fixme};
 
     $new_env->{USERNAME} = (split /@/, $cf_email)[0]; # trick to set cotrect cf_by
     if ($self->global->{bits} == 64) {
@@ -172,21 +171,12 @@ sub run {
             catdir($image_dir, qw/perl site bin/),
             catdir($image_dir, qw/perl site lib/) );
   for (@d) { make_path($_) unless -d $_; }
-
-  # Create the perl_licenses fragment.
-  #XXX remove File::List::Object
-  #my $fl_lic = File::List::Object->new()->readdir( catdir($image_dir, 'licenses', 'perl' ) );
-  #$self->_insert_fragment( 'perl_licenses', $fl_lic );
-
-  # Now create the perl fragment.
-  #XXX remove File::List::Object
-  #my $fl = File::List::Object->new()->readdir( catdir($image_dir, 'perl' ) );
-  #XXX-FIXME
-  #$fl->subtract($fl2)->filter( $self->_filters );
-  
+ 
   # store some output data
   $self->{data}->{output}->{perl_version} = $version;
-  #$self->_insert_fragment( 'perl', $fl, 1 );
+  
+  #XXX-TODO store perl -V
+  #$self->{data}->{output}->{perl_version} = `perl -V`;
 
   return 1;
 }

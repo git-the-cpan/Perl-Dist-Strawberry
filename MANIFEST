@@ -25,7 +25,6 @@ lib/Perl/Dist/Strawberry/Step/InstallPerlCore.pm
 lib/Perl/Dist/Strawberry/Step/OutputMSM_MSI.pm
 lib/Perl/Dist/Strawberry/Step/OutputPortableZIP.pm
 lib/Perl/Dist/Strawberry/Step/OutputZIP.pm
-lib/Perl/Dist/Strawberry/Step/SetupPerlToolchain.pm
 lib/Perl/Dist/Strawberry/Step/SetupPortablePerl.pm
 lib/Perl/Dist/Strawberry/Step/UpgradeCpanModules.pm
 LICENSE

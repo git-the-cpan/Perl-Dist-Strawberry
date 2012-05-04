@@ -1,5 +1,5 @@
 ---
-abstract: 'build strawberry-perl-like distribution for MS Windows'
+abstract: 'Build strawberry-perl-like distribution for MS Windows'
 author:
   - 'KMX <kmx@cpan.org>'
 build_requires:
@@ -42,10 +42,14 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Perl-Dist-Strawberry
+no_index:
+  directory:
+    - share
+    - HelperCA.dll_src
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 3.001_1
+    version: 3.001_2
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
     version: 0
@@ -73,9 +77,6 @@ provides:
   Perl::Dist::Strawberry::Step::OutputZIP:
     file: lib/Perl/Dist/Strawberry/Step/OutputZIP.pm
     version: 0
-  Perl::Dist::Strawberry::Step::SetupPerlToolchain:
-    file: lib/Perl/Dist/Strawberry/Step/SetupPerlToolchain.pm
-    version: 0
   Perl::Dist::Strawberry::Step::SetupPortablePerl:
     file: lib/Perl/Dist/Strawberry/Step/SetupPortablePerl.pm
     version: 0
@@ -89,4 +90,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
-version: 3.001_1
+version: 3.001_2

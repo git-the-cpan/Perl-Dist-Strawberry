@@ -237,6 +237,7 @@ sub _get_short_basename {
   my ($self, $name) = @_;
   my $result = basename(Win32::GetShortPathName($name));;
   $result =~ s/~/!/g; # this replacement is necessary, otherwise wix3 will croak
+  #XXX-FIXME occasionally Win32::GetShortPathName does not produce valid 8.3 name!!!
   return $result;
 }
 sub _gen_component_id {

@@ -18,7 +18,7 @@ use Pod::Usage            qw(pod2usage);
 use LWP::UserAgent;
 
 # following recommendation from http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
-our $VERSION = "3.001_1";
+our $VERSION = "3.001_2";
 $VERSION = eval $VERSION;
 
 sub new {
@@ -138,6 +138,7 @@ sub do_job {
   for (@{$self->{build_job_steps}}) {    
     $self->message(1, "checking [step:$i] ".ref($_));
     $_->check unless $_->{data}->{done}; # dies on error
+    $i++;
   }; 
 
   #run
@@ -170,10 +171,12 @@ sub do_job {
 }
 
 sub build_job_pre {
-  # validity $self->global->{bits}
-  # -d $self->global->{image_dir}
-  # ...
-  my $self = shift;
+  my $self = shift;  
+  
+  if ($self->global->{bits} != 32 && $self->global->{bits} != 64) {
+    die "ERROR: invalid 'bits' value [".$self->global->{bits}."]\n";
+  }
+  #XXX-FIXME maybe add more checks
 }
 
 sub build_job_post {
@@ -215,7 +218,7 @@ sub create_dirs {
 
   my $idir = $self->global->{image_dir};
   if (-d $idir) {
-    remove_tree($idir) or remove_tree($idir) or die "ERROR: cannot delete '$idir'\n";
+    remove_tree($idir) or die "ERROR: cannot delete '$idir'\n";
   }
   make_path($idir) or die "ERROR: cannot create '$idir'\n";
 
@@ -284,12 +287,10 @@ sub prepare_build_ENV {
     PATH              => join(';', @new_path),
   };
   
-  # Create batch file '<debug_dir>/cmd_with_env.bat' for debugging #XXX-FIXME maybe move somewhere else
-  #XXXmy $set_strawberry_path = "set PATH=$image_dir\\perl\\site\\bin;$image_dir\\perl\\bin;$image_dir\\c\\bin;\%SystemRoot\%\\system32;\%SystemRoot\%";
+  # Create batch file '<debug_dir>/cmd_with_env.bat' for debugging #XXX-FIXME maybe move this somewhere else
   my $env = $self->global->{build_ENV};
   my $set_env = '';
   $set_env .= "set $_=" . (defined $env->{$_} ? $env->{$_} : '') . "\n" for (sort keys %$env);
-  #XXXwrite_file(catfile($self->global->{debug_dir}, 'cmd_with_env.bat'), "\@echo off\n$set_strawberry_path\n\n$set_env\ncmd /K\n\n$orig");
   write_file(catfile($self->global->{debug_dir}, 'cmd_with_env.bat'), "\@echo off\n\n$set_env\ncmd /K\n");
 
 }
@@ -478,7 +479,6 @@ sub zip_dir {
   my $zip = Archive::Zip->new();
   for my $fs_name (@items) {
     (my $archive_name = $fs_name) =~ s|^\Q$dir\E[/\\]*||i;
-    #xxx$archive_name =~ s|\\|/|g;
     next if $archive_name eq '';
     my $m = $zip->addFileOrDirectory($fs_name, $archive_name);
     $m->desiredCompressionLevel($level); # 1 = fastest compression
@@ -557,7 +557,7 @@ sub ask_about_restorepoint {
 
 =head1 NAME
 
-Perl::Dist::Strawberry - build strawberry-perl-like distribution for MS Windows
+Perl::Dist::Strawberry - Build strawberry-perl-like distribution for MS Windows
 
 =head1 DESCRIPTION
 
@@ -565,10 +565,13 @@ Strawberry Perl is a binary distribution of Perl for the Windows operating
 system.  It includes a bundled compiler and pre-installed modules that offer
 the ability to install XS CPAN modules directly from CPAN.
 
+You can download Strawberry Perl from L<http://strawberryperl.com|http://strawberryperl.com>
+
 The purpose of the Strawberry Perl series is to provide a practical Win32 Perl
 environment for experienced Perl developers to experiment with and test the
 installation of various CPAN modules under Win32 conditions, and to provide a
 useful platform for doing real work.
 
 L<Perl::Dist::Strawberry|Perl::Dist::Strawberry> is just a helper module for 
-the main script L<perldist_strawberry|perldist_strawberry>.
+the main script L<perldist_strawberry|perldist_strawberry> used for building
+Strawberry perl release packages (MSI, ZIP).

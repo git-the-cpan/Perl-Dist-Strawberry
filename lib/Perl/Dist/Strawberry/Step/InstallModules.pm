@@ -79,7 +79,7 @@ sub _install_module {
   my $env = { PERL_MM_USE_DEFAULT=>1, AUTOMATED_TESTING=>undef, RELEASE_TESTING=>undef };
   if (defined $args{env} && ref $args{env} eq 'HASH') {
     for my $var (keys %{$args{env}}) { 
-      $env->{$var} = $self->boss->resolve_name($args{env}->{$var}); #XXX-FIXME use generic resolve()
+      $env->{$var} = $self->boss->resolve_name($args{env}->{$var});
     }
   }
   my %params = ( '-url' => $self->global->{cpan_url}, '-install_to' => 'vendor', '-module' => $args{module} ); #XXX-TODO multiple modules?

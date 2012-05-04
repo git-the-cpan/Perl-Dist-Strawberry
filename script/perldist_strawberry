@@ -11,7 +11,7 @@ __END__
 
 =head1 NAME
 
-perldist_strawberry - build strawberry-perl-like distribution for MS Windows
+perldist_strawberry - Build strawberry-perl-like distribution for MS Windows
 
 =head1 DESCRIPTION
 
