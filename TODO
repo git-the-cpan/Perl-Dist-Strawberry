@@ -1,0 +1,11 @@
+### test 64bit 5.14.2.1 build
+- needs new *.pp file
+
+### test MSI major upgrade feature
+- it did not work in official 5.14.2.1 MSI (so not critical)
+
+### ppm.xml
+- old 5.12 repos
+- perhaps different xml for 32/64bit versions
+
+### check for XXX FIXME TODO in the code

@@ -1,0 +1,5 @@
+<?xml version='1.0'?>
+
+<WixLocalization Culture="en-US" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+  <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Welcome to the [ProductName] [Version4digit] Setup Wizard</String>
+</WixLocalization>
