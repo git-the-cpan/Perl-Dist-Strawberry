@@ -1,5 +1,10 @@
-Strawberry Perl Portable README
-===============================
+[%-IF beta==0 %]
+[%app_fullname%] Portable [%app_version%]-[%bits%]bit README
+==============================================
+[-%ELSE]
+[%app_fullname%] Portable [%app_version%]-beta[%beta]-[%bits%]bit README
+====================================================
+[-%END]
 
 What is Strawberry Perl Portable?
 ---------------------------------

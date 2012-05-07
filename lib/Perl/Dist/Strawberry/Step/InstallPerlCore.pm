@@ -63,6 +63,7 @@ sub run {
   # some handy variables
   my $app_id = $self->global->{app_simplename} // 'perl';
   my $app_ver = $self->global->{app_version} // $version;
+  $app_ver .= "-beta".$self->global->{beta} if $self->global->{beta};
   my $now = scalar(localtime);
   my $arch = $self->global->{bits} == 64 ? 'x64' : 'i386';
   my $cf_email = $self->{config}->{cf_email} // 'builder@somewhere.com',

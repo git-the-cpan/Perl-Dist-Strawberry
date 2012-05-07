@@ -1,5 +1,5 @@
 --- C:\strawberry_build\build\perl_core\perl-5.14.2\win32\config.gc.backup	Mon Sep 26 11:44:34 2011
-+++ C:\strawberry_build\build\perl_core\perl-5.14.2\win32\config.gc	Mon Apr 23 06:44:55 2012
++++ C:\strawberry_build\build\perl_core\perl-5.14.2\win32\config.gc	Mon May  7 08:06:20 2012
 @@ -48,8 +48,8 @@
  ccname='~cc~'
  ccsymbols=''
@@ -128,7 +128,7 @@
  mydomain=''
  myhostname=''
 -myuname=''
-+myuname='Win32 perl 5.14.2 #1 Mon Apr 23 06:44:54 2012 i386'
++myuname='Win32 strawberry-perl 5.14.2.1 #1 Mon May  7 08:06:20 2012 x64'
  n='-n'
  need_va_copy='undef'
  netdb_hlen_type='int'

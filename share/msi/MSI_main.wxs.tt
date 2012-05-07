@@ -2,44 +2,6 @@
 
 <?include Variables.wxi ?>
 
-<!--
-[MUST] What GUID need to be changed on next version?
-
-Major Upgrade does not delete SiteFolder
-
-- - - - - - - - - -
-TODO: is it necessary to call CA_ClearFolders_msm in MSM?
-
-TODO: properly handle Key path
-http://stackoverflow.com/questions/2003043/what-is-the-wix-keypath-attribute
-
-TODO:: one component per file + * as GUID
-- !!! If a component has multiple files, then only one file can be the keypath.
-http://stackoverflow.com/questions/1602831/wix-one-file-per-component-or-several-files-per-component/1604348#1604348
-http://stackoverflow.com/questions/10358989/wix-using-keypath-on-components-directories-files-registry-etc-etc
-
-- - - - - - - - - -
-
-<WixLocalization Culture="en-US" xmlns="http://schemas.microsoft.com/wix/2006/localization">
-    <String Id="WelcomeDlgTitle">{\WixUI_Font_Bigger}Welcome to the [ProductName] [ProductVersion] Setup Wizard</String>
-</WixLocalization>
-
-TODO: ukazat verzi na welcome screenu
-
-Better feature + removefolder definition
-http://robmensching.com/blog/posts/2010/5/2/The-WiX-toolsets-Remember-Property-pattern
-
-Read:
-http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-http://stackoverflow.com/questions/471424/wix-tricks-and-tips
-http://www.dizzymonkeydesign.com/blog/misc/adding-and-customizing-dlgs-in-wix-3/
-
-
-http://www.merlinia.com/mdt/WiXTutorial1.msl
-http://www.joyofsetup.com/2008/03/18/new-wix-feature-internet-shortcuts/
-
--->
-
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product Id="$(var.ProductGUID)" UpgradeCode="$(var.UpgradeCode)"
            Language='1033'  Codepage="1252"  Manufacturer='strawberryperl.com project'
@@ -52,7 +14,7 @@ http://www.joyofsetup.com/2008/03/18/new-wix-feature-internet-shortcuts/
     <Media Id='1' Cabinet='Perl.cab' CompressionLevel='high' EmbedCab='yes' />
     
     <Property Id='INSTALLDIR' Value="$(var.DefaultInstallDir)" />
-    <Property Id="ARPCOMMENTS" Value="$(var.ProductName) version $(var.Version4digit)" />
+    <Property Id="ARPCOMMENTS" Value="$(var.ProductName) version [%app_version%]" />
     <Property Id="ARPCONTACT" Value="$(var.Manufacturer)" />
     <Property Id="ARPURLINFOABOUT" Value="$(var.URLAbout)" />
     <Property Id="ARPHELPLINK" Value="$(var.URLHelp)" />
@@ -63,7 +25,6 @@ http://www.joyofsetup.com/2008/03/18/new-wix-feature-internet-shortcuts/
     <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Before you start using $(var.ProductName), read the Release Notes and the README file. These are both available from the start menu under &quot;$(var.ProductName)&quot;." />
     <Property Id="WixShellExecTarget" Value="[#f_readme_txt]" />
     <Property Id="MergeModuleID" Value="$(var.MergeModuleID)" /> <!-- BEWARE: needed for ClearSite/ClearFolders hack (see HelperCA sources) -->
-    <Property Id="Version4digit" Value="$(var.Version4digit)" /> <!-- BEWARE: used in MSI_strings.xwl -->
 
     <Property Id="UPGRADEDIR">
       <RegistrySearch Id="InstallDir" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\[OLDERVERSIONBEINGUPGRADED]" Name="InstallLocation" Type="raw" />

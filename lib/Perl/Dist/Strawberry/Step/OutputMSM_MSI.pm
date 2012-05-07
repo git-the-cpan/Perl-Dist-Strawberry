@@ -13,9 +13,9 @@ use File::Basename;
 use Data::Dump            qw(pp);
 use Data::UUID;
 use Template;
-use Win32;
 use IPC::Run3;
 use Digest::SHA1;
+use Win32::TieRegistry qw( KEY_READ );
 
 sub new {
   my $class = shift;
@@ -24,6 +24,132 @@ sub new {
   $self->{id_counter} = 1000;  
   return $self;
 }
+
+sub check {
+  my $self = shift;
+  #global: app_version
+  #global: app_name
+  my $bdir = canonpath(catdir($self->global->{build_dir}, 'msm_msi'));
+  -d $bdir or make_path($bdir) or die "ERROR: cannot create '$bdir'";
+  
+  my $d = $self->global->{wixbin_dir} // $self->_detect_wix_dir;
+  if (!$d) {
+    warn "ERROR: cannot find WiX utils (candle.exe+light.exe) installed\n";
+    warn "  you need to install WiX toolset v3.5 from http://wix.sourceforge.net\n";
+    warn "  or consider using option -wixbin_dir=<path_to_wix_dir>\n\n";
+    die;
+  }
+  $self->{candle_exe} = canonpath("$d/candle.exe");
+  $self->{light_exe} = canonpath("$d/light.exe");
+
+}
+
+sub run {
+  my $self = shift;
+ 
+  my $bdir = catdir($self->global->{build_dir}, 'msm_msi');
+  
+  # create WXS parts to be inserted into MSM_main.wxs.tt & MSI_main.wxs.tt 
+  my $xml_env = $self->_generate_wxml_for_environment();
+  my ($xml_start_menu, $xml_start_menu_icons) = $self->_generate_wxml_for_start_menu();
+  my ($xml_msm, $xml_msi, $id_list_msm, $id_list_msi) = $self->_generate_wxml_for_directory($self->global->{image_dir});
+  #debug:
+  write_file("$bdir/debug.xml_msi.xml", $xml_msi);
+  write_file("$bdir/debug.xml_msm.xml", $xml_msm);
+  write_file("$bdir/debug.xml_start_menu.xml", $xml_start_menu);
+  write_file("$bdir/debug.xml_start_menu_icons.xml", $xml_start_menu_icons);
+
+  # prepare MSI/MSM filenames 
+  my $output_basename = $self->global->{output_basename} // 'perl-output';
+  my $msm_file = catfile($self->global->{output_dir}, "$output_basename.msm");
+  my $msi_file = catfile($self->global->{output_dir}, "$output_basename.msi");
+  my $wixpdb_file = catfile($self->global->{output_dir}, "$output_basename.wixpdb");
+
+  # compute msi_version which has to be 3-numbers (otherwise major upgrade feature does not work)
+  my ($v1, $v2, $v3, $v4) = split /\./, $self->global->{app_version};
+  $v3 = $v3*1000 + $v4 if defined $v4; #turn 5.14.2.1 to 5.12.2001
+
+  # compute MSM id from MSM guid
+  my $msi_guid = $self->{data_uuid}->create_str(); # get random GUID
+  my $msm_guid = $self->{data_uuid}->create_str(); # get random GUID
+  (my $msm_id = $msm_guid) =~ s/-/_/g;
+  
+  # resolve values (only scalars) from config
+  for (keys %{$self->{config}}) {
+    if (!ref $self->{config}->{$_}) {
+      $self->{config}->{$_} = $self->boss->resolve_name($self->{config}->{$_});
+    }
+  }
+  my %vars = (
+    # global info taken from 'boss'
+    %{$self->global},
+    # OutputMSM_MSI config info    
+    %{$self->{config}},
+    # the following items are computed
+    msi_product_guid => $msi_guid,
+    msm_package_guid => $msm_guid,
+    msm_package_id   => $msm_id,
+    msi_version      => sprintf("%d.%d.%d", $v1, $v2, $v3), # e.g. 5.12.2001
+    msi_upgr_version => sprintf("%d.%d.%d", $v1, $v2, 0),   # e.g. 5.12.0
+    msm_filename     => $msm_file,
+    # WXS data
+    xml_msm_dirtree     => $xml_msm,
+    xml_msi_dirtree     => $xml_msi,
+    xml_env             => $xml_env,
+    xml_startmenu       => $xml_start_menu,
+    xml_startmenu_icons => $xml_start_menu_icons,
+  );
+
+  my $f1 = catfile($self->global->{dist_sharedir}, 'msi\MSM_main.wxs.tt');
+  my $f2 = catfile($self->global->{dist_sharedir}, 'msi\MSI_main.wxs.tt');
+  my $f3 = catfile($self->global->{dist_sharedir}, 'msi\Variables.wxi.tt');
+  my $f4 = catfile($self->global->{dist_sharedir}, 'msi\MSI_strings.wxl.tt');  
+  my $t = Template->new(ABSOLUTE=>1);
+  write_file(catfile($self->global->{debug_dir}, 'TTvars_OutputMSM_MSI_'.time.'.txt'), pp(\%vars)); #debug dump
+  $t->process($f1, \%vars, catfile($bdir, 'MSM_main.wxs')) || die $t->error();
+  $t->process($f2, \%vars, catfile($bdir, 'MSI_main.wxs')) || die $t->error();
+  $t->process($f3, \%vars, catfile($bdir, 'Variables.wxi')) || die $t->error();
+  $t->process($f4, \%vars, catfile($bdir, 'MSI_strings.wxl')) || die $t->error();
+  
+  my $rv;
+  my $candle_exe = $self->{candle_exe};
+  my $light_exe = $self->{light_exe};
+  
+  my $candle1_cmd = [$candle_exe, "$bdir\\MSM_main.wxs", '-out', "$bdir\\MSM_main.wixobj", '-v'];
+  my $light1_cmd  = [$light_exe,  "$bdir\\MSM_main.wixobj", '-out', $msm_file, '-pdbout', "$bdir\\MSM_main.wixpdb", qw/-ext WixUIExtension -ext WixUtilExtension -v/];
+  my $candle2_cmd = [$candle_exe, "$bdir\\MSI_main.wxs", '-out', "$bdir\\MSI_main.wixobj", '-v'];
+  my $light2_cmd  = [$light_exe,  "$bdir\\MSI_main.wixobj", '-out', $msi_file, '-pdbout', "$bdir\\MSI_main.wixpdb", '-loc', "$bdir\\MSI_strings.wxl", qw/-ext WixUIExtension -ext WixUtilExtension -sice:ICE38 -sice:ICE43 -sice:ICE48 -sice:ICE47 -v/];
+
+  # backup already existing <output_dir>/*.msm and <output_dir>/*.msi
+  $self->backup_file($msi_file);
+  $self->backup_file($msm_file);
+
+  $self->boss->message(2, "MSM: gonna run $candle1_cmd->[0]");
+  $rv = $self->execute_standard($candle1_cmd, catfile($self->global->{debug_dir}, "MSM_candle.log.txt"));
+  die "ERROR: MSM candle" unless(defined $rv && $rv == 0);
+  
+  $self->boss->message(2, "MSM: gonna run $light1_cmd->[0]");
+  $rv = $self->execute_standard($light1_cmd, catfile($self->global->{debug_dir}, "MSM_light.log.txt"));
+  die "ERROR: MSM light" unless(defined $rv && $rv == 0);
+  
+  $self->boss->message(2, "MSI: gonna run $candle2_cmd->[0]");
+  $rv = $self->execute_standard($candle2_cmd, catfile($self->global->{debug_dir}, "MSI_candle.log.txt"));
+  die "ERROR: MSI candle" unless(defined $rv && $rv == 0);
+  
+  $self->boss->message(2, "MSI: gonna run $light2_cmd->[0]");
+  $rv = $self->execute_standard($light2_cmd, catfile($self->global->{debug_dir}, "MSI_light.log.txt"));
+  die "ERROR: MSI light" unless(defined $rv && $rv == 0);
+  
+  #store results
+  $self->{data}->{output}->{msi} = $msi_file;
+  $self->{data}->{output}->{msm} = $msm_file;
+  $self->{data}->{output}->{msm_sha1} = $self->sha1_file($msm_file);
+  $self->{data}->{output}->{msi_sha1} = $self->sha1_file($msi_file); # will change after we sign MSI
+  $self->{data}->{output}->{msi_guid} = $msi_guid;
+  $self->{data}->{output}->{msm_guid} = $msm_guid;
+  $self->{data}->{output}->{msm_id}   = $msm_id;
+
+} 
 
 sub _generate_wxml_for_environment {
   my ($self) = @_;
@@ -233,13 +359,43 @@ sub _tree2xml {  # !!!BEWARE!!! this sub is called recursively
   return $result;
 }
 
+#XXX-FIXME occasionally Win32::GetShortPathName does not produce valid 8.3 name!!!
+#sub _get_short_basename {
+#  my ($self, $name) = @_;
+#  my $result = basename(Win32::GetShortPathName($name));;
+#  $result =~ s/~/!/g; # this replacement is necessary, otherwise wix3 will croak
+#  
+#  return $result;
+#}
+
+sub _random_shortname {
+  my $self = shift;
+  my @ch = ('A'..'Z', 0..9, split(//,'!@#^(){}_-'));
+  my $r;
+  $r .= $ch[int(rand(scalar(@ch)))] for (1..8);
+  return $r;
+}
+
 sub _get_short_basename {
   my ($self, $name) = @_;
-  my $result = basename(Win32::GetShortPathName($name));;
-  $result =~ s/~/!/g; # this replacement is necessary, otherwise wix3 will croak
-  #XXX-FIXME occasionally Win32::GetShortPathName does not produce valid 8.3 name!!!
-  return $result;
+  my $base = basename($name);;
+  
+  my ($n, $e) = $base =~ /^(.*?)(\..*)?$/;
+  if ($n =~ /^[A-Z0-9\Q!#@^(){}_-\E]{1,8}$/i && (!defined $e || $e =~ /^\.[A-Z0-9\Q!#@^(){}_-\E]{1,3}$/i)) {
+    return $base;
+  }
+  else {
+    $n =~ s/[^A-Z0-9\Q!#@^(){}_-\E]//gi;
+    $n = substr(substr($n, 0, 4) . $self->_random_shortname, 0, 8);
+    if (defined $e) {   
+      $e =~ s/[^A-Z0-9\Q!#@^(){}_-\E]//gi;
+      $e = substr(substr($e, 0, 3) . $self->_random_shortname, 0, 3);
+      return "$n.$e";
+    }
+    return $n;
+  }
 }
+
 sub _gen_component_id {
   my ($self, $subj) = @_;
   my $i = "i" . $self->{id_counter}++;
@@ -273,125 +429,18 @@ sub _gen_dir_id {
   return $r // "d" . $self->{id_counter}++;
 }
 
-sub check {
+sub _detect_wix_dir {
   my $self = shift;
-  #global: app_version
-  #global: app_name
-  my $bdir = canonpath(catdir($self->global->{build_dir}, 'msm_msi'));
-  -d $bdir or make_path($bdir) or die "ERROR: cannot create '$bdir'";
+  for my $v (qw/3.0 3.5 3.6/) {
+    my $WIX_REGISTRY_KEY = "HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows Installer XML/$v";
+    # 0x200 = KEY_WOW64_32KEY
+    my $r = Win32::TieRegistry->new($WIX_REGISTRY_KEY => { Access => KEY_READ|0x200, Delimiter => q{/} });
+    next unless $r;
+    my $d = $r->TiedRef->{'InstallRoot'};
+    next unless $d && -d $d && -f "$d/candle.exe" && -f "$d/light.exe";
+    return $d;
+  }
+  return;
 }
-
-sub run {
-  my $self = shift;
-
-  if ($self->global->{target} !~ /msi/) {
-    $self->boss->message(2, "skipping as 'msi' target disabled");
-    return;
-  }
-  
-  my $bdir = catdir($self->global->{build_dir}, 'msm_msi');
-  
-  # create WXS parts to be inserted into MSM_main.wxs.tt & MSI_main.wxs.tt 
-  my $xml_env = $self->_generate_wxml_for_environment();
-  my ($xml_start_menu, $xml_start_menu_icons) = $self->_generate_wxml_for_start_menu();
-  my ($xml_msm, $xml_msi, $id_list_msm, $id_list_msi) = $self->_generate_wxml_for_directory($self->global->{image_dir});
-  #debug:
-  write_file("$bdir/debug.xml_msi.xml", $xml_msi);
-  write_file("$bdir/debug.xml_msm.xml", $xml_msm);
-  write_file("$bdir/debug.xml_start_menu.xml", $xml_start_menu);
-  write_file("$bdir/debug.xml_start_menu_icons.xml", $xml_start_menu_icons);
-
-  # prepare MSI/MSM filenames 
-  my $output_basename = $self->global->{output_basename} // 'perl-output';
-  my $msm_file = catfile($self->global->{output_dir}, "$output_basename.msm");
-  my $msi_file = catfile($self->global->{output_dir}, "$output_basename.msi");
-  my $wixpdb_file = catfile($self->global->{output_dir}, "$output_basename.wixpdb");
-
-  # compute msi_version which has to be 3-numbers (otherwise major upgrade feature does not work)
-  my ($v1, $v2, $v3, $v4) = split /\./, $self->global->{app_version};
-  $v3 = $v3*1000 + $v4 if defined $v4; #turn 5.14.2.1 to 5.12.2001
-
-  # compute MSM id from MSM guid
-  my $msi_guid = $self->{data_uuid}->create_str(); # get random GUID
-  my $msm_guid = $self->{data_uuid}->create_str(); # get random GUID
-  (my $msm_id = $msm_guid) =~ s/-/_/g;
-  
-  # resolve values (only scalars) from config
-  for (keys %{$self->{config}}) {
-    if (!ref $self->{config}->{$_}) {
-      $self->{config}->{$_} = $self->boss->resolve_name($self->{config}->{$_});
-    }
-  }
-  my %vars = (
-    # global info taken from 'boss'
-    %{$self->global},
-    # OutputMSM_MSI config info    
-    %{$self->{config}},
-    # the following items are computed
-    msi_product_guid => $msi_guid,
-    msm_package_guid => $msm_guid,
-    msm_package_id   => $msm_id,
-    msi_version      => sprintf("%d.%d.%d", $v1, $v2, $v3), # e.g. 5.12.2001
-    msi_upgr_version => sprintf("%d.%d.%d", $v1, $v2, 0),   # e.g. 5.12.0
-    msi_platform     => ($self->global->{bits}==32 ? 'x86' : 'x64'),
-    msm_filename     => $msm_file,
-    # WXS data
-    xml_msm_dirtree     => $xml_msm,
-    xml_msi_dirtree     => $xml_msi,
-    xml_env             => $xml_env,
-    xml_startmenu       => $xml_start_menu,
-    xml_startmenu_icons => $xml_start_menu_icons,
-  );
-
-  my $f1 = catfile($self->global->{dist_sharedir}, 'msi\MSM_main.wxs.tt');
-  my $f2 = catfile($self->global->{dist_sharedir}, 'msi\MSI_main.wxs.tt');
-  my $f3 = catfile($self->global->{dist_sharedir}, 'msi\Variables.wxi.tt');
-  my $f4 = catfile($self->global->{dist_sharedir}, 'msi\MSI_strings.wxl');
-  my $t = Template->new(ABSOLUTE=>1);
-  write_file(catfile($self->global->{debug_dir}, 'TTvars_OutputMSM_MSI_'.time.'.txt'), pp(\%vars)); #debug dump
-  $t->process($f1, \%vars, catfile($bdir, 'MSM_main.wxs')) || die $t->error();
-  $t->process($f2, \%vars, catfile($bdir, 'MSI_main.wxs')) || die $t->error();
-  $t->process($f3, \%vars, catfile($bdir, 'Variables.wxi')) || die $t->error();
-  copy($f4, catfile($bdir, 'MSI_strings.wxl')) || die $t->error();
-  
-  my $rv;
-  my $candle_exe = catfile($self->global->{wixbin_dir}, 'candle.exe');
-  my $light_exe = catfile($self->global->{wixbin_dir}, 'light.exe');  
-  
-  my $candle1_cmd = [$candle_exe, "$bdir\\MSM_main.wxs", '-out', "$bdir\\MSM_main.wixobj", '-v'];
-  my $light1_cmd  = [$light_exe,  "$bdir\\MSM_main.wixobj", '-out', $msm_file, '-pdbout', "$bdir\\MSM_main.wixpdb", qw/-ext WixUIExtension -ext WixUtilExtension -v/];
-  my $candle2_cmd = [$candle_exe, "$bdir\\MSI_main.wxs", '-out', "$bdir\\MSI_main.wixobj", '-v'];
-  my $light2_cmd  = [$light_exe,  "$bdir\\MSI_main.wixobj", '-out', $msi_file, '-pdbout', "$bdir\\MSI_main.wixpdb", '-loc', "$bdir\\MSI_strings.wxl", qw/-ext WixUIExtension -ext WixUtilExtension -sice:ICE38 -sice:ICE43 -sice:ICE48 -sice:ICE47 -v/];
-
-  # backup already existing <output_dir>/*.msm and <output_dir>/*.msi
-  $self->backup_file($msi_file);
-  $self->backup_file($msm_file);
-
-  $self->boss->message(2, "MSM: gonna run $candle1_cmd->[0]");
-  $rv = $self->execute_standard($candle1_cmd, catfile($self->global->{debug_dir}, "MSM_candle.log.txt"));
-  die "ERROR: MSM candle" unless(defined $rv && $rv == 0);
-  
-  $self->boss->message(2, "MSM: gonna run $light1_cmd->[0]");
-  $rv = $self->execute_standard($light1_cmd, catfile($self->global->{debug_dir}, "MSM_light.log.txt"));
-  die "ERROR: MSM light" unless(defined $rv && $rv == 0);
-  
-  $self->boss->message(2, "MSI: gonna run $candle2_cmd->[0]");
-  $rv = $self->execute_standard($candle2_cmd, catfile($self->global->{debug_dir}, "MSI_candle.log.txt"));
-  die "ERROR: MSI candle" unless(defined $rv && $rv == 0);
-  
-  $self->boss->message(2, "MSI: gonna run $light2_cmd->[0]");
-  $rv = $self->execute_standard($light2_cmd, catfile($self->global->{debug_dir}, "MSI_light.log.txt"));
-  die "ERROR: MSI light" unless(defined $rv && $rv == 0);
-  
-  #store results
-  $self->{data}->{output}->{msi} = $msi_file;
-  $self->{data}->{output}->{msm} = $msm_file;
-  $self->{data}->{output}->{msm_sha1} = $self->sha1_file($msm_file);
-  $self->{data}->{output}->{msi_sha1} = $self->sha1_file($msi_file); # will change after we sign MSI
-  $self->{data}->{output}->{msi_guid} = $msi_guid;
-  $self->{data}->{output}->{msm_guid} = $msm_guid;
-  $self->{data}->{output}->{msm_id}   = $msm_id;
-
-} 
 
 1;

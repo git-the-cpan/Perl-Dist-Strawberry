@@ -49,7 +49,7 @@ sub boss {
 }
 
 sub global { # accessor to global data
-  shift->{boss}->{'!global!'};
+  return shift->{boss}->global;
 }
 
 sub insert_fragment {

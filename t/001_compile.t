@@ -18,7 +18,6 @@ use Perl::Dist::Strawberry::Step::InstallPerlCore;
 use Perl::Dist::Strawberry::Step::OutputMSM_MSI;
 use Perl::Dist::Strawberry::Step::OutputPortableZIP;
 use Perl::Dist::Strawberry::Step::OutputZIP;
-use Perl::Dist::Strawberry::Step::SetupPerlToolchain;
 use Perl::Dist::Strawberry::Step::SetupPortablePerl;
 use Perl::Dist::Strawberry::Step::UpgradeCpanModules;
 

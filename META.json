@@ -43,15 +43,15 @@
             "IPC::Run3" : 0,
             "LWP::UserAgent" : 0,
             "Pod::Usage" : 0,
-            "Portable::Dist" : 0,
+            "Portable::Dist" : "1.05",
             "Storable" : 0,
             "Template" : 0,
             "Test::More" : "0.86",
             "Text::Diff" : 0,
             "Text::Patch" : 0,
             "URI::file" : 0,
-            "Win32" : 0,
-            "Win32::File::Object" : 0
+            "Win32::File::Object" : 0,
+            "Win32::TieRegistry" : 0
          }
       },
       "configure" : {
@@ -70,7 +70,7 @@
    "provides" : {
       "Perl::Dist::Strawberry" : {
          "file" : "lib/Perl/Dist/Strawberry.pm",
-         "version" : "3.001_2"
+         "version" : "3.002"
       },
       "Perl::Dist::Strawberry::Step" : {
          "file" : "lib/Perl/Dist/Strawberry/Step.pm",
@@ -117,14 +117,20 @@
          "version" : 0
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
+      "bugtracker" : {
+         "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=Perl-Dist-Strawberry"
+      },
+      "homepage" : "http://strawberryperl.com/",
       "license" : [
          "http://dev.perl.org/licenses/"
       ],
       "repository" : {
          "url" : "http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/"
-      }
+      },
+      "x_Chat" : "irc://irc.perl.org/#win32",
+      "x_MailingList" : "http://groups.google.com/group/perl.win32.vanilla"
    },
-   "version" : "3.001_2"
+   "version" : "3.002"
 }

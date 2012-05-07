@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <!-- InstanceBeginEditable name="title" -->
-<title>Strawberry Perl for Windows - [% dist.distribution_version_human %] Release Notes</title>
+<title>Strawberry Perl for Windows - [%app_version%]-[%bits%]bit Release Notes</title>
 <!-- InstanceEndEditable -->
 <link rel="shortcut icon" type="image/vnd.microsoft.icon" href="http://strawberryperl.com/favicon.ico">
 <link rel="stylesheet" type="text/css" href="http://strawberryperl.com/common.css">
@@ -21,10 +21,10 @@
 <!-- InstanceBeginEditable name="body" -->
 <img src="http://strawberryperl.com/images/320554_9491.jpg" alt="strawberries" width="357" height="728" border="0" align="right">
 <br /><h2>Strawberry Perl Release Notes</h2>
-<p><i>Version [% dist.distribution_version_human %], released [% dist_date %]</i></p>
+<p><i>Version [%app_version%]-[%bits%]bit, released [%build_date_XXX%]</i></p>
 <p>Check out what is new, what known issues there are, and frequently asked questions about this version of Strawberry Perl. As always, you're encouraged to tell us what you think.</p>
 
-<h3>What's new in Strawberry Perl [% dist.distribution_version_human %]: <span class="switch"><a href="javascript:unhide('whatsnew', 'whatsnew_switch')" id="whatsnew_switch">Collapse</a><br /></span>
+<h3>What's new in Strawberry Perl [%app_version%]-[%bits%]bit: <span class="switch"><a href="javascript:unhide('whatsnew', 'whatsnew_switch')" id="whatsnew_switch">Collapse</a><br /></span>
 <hr /></h3>
 <div id="whatsnew">
 <!-- p>Put blurb here and uncomment.</p -->
@@ -38,19 +38,19 @@
 </ul -->
 </div>
 <br />
-<h3>List of distributions added to Perl [% dist.perl_version_human %]: <span class="switch"><a href="javascript:unhide('distlist', 'distlist_switch')" id="distlist_switch">Collapse</a></span>
+<h3>List of distributions added to Perl [%app_version%]-[%bits%]bit: <span class="switch"><a href="javascript:unhide('distlist', 'distlist_switch')" id="distlist_switch">Collapse</a></span>
 <hr /></h3>
 <div id="distlist" class="unhidden">
 <table>
 <tr><td><b>Distribution</b></td><td><b>Version</b></td><td><b>Link</b></td></tr>
-[% dist_list %]
+[% dist_list_XXX %]
 </table>
 
 <p>The list of packages related to gcc-toolchain and external libraries included in Strawberry Perl:</p>
 
 <table>
 <tr><td><b>Package</b></td><td><b>Homepage</b></td><td><b>Link</b></td><td><b>Comment</b></td></tr>
-[% dist_pkgs %]
+[% dist_pkgs_XXX %]
 </table>
 
 </div>

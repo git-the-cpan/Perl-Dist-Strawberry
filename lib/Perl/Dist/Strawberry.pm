@@ -18,13 +18,13 @@ use Pod::Usage            qw(pod2usage);
 use LWP::UserAgent;
 
 # following recommendation from http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
-our $VERSION = "3.001_2";
+our $VERSION = "3.002";
 $VERSION = eval $VERSION;
 
 sub new {
   my $class = shift;
   return bless {
-    '!global!' => {
+    global => {
         # set defaults
         target        => 'msi+zip+portable',
         working_dir   => 'c:\strawberry_build',
@@ -35,8 +35,6 @@ sub new {
         test_core     => 0,
         offline       => 0,
         perl_debug    => 0,
-        msi_debug     => 0,
-        smoketest     => 0,
         verbosity     => 3,
         interactive   => 1,
         restorepoints => 0,
@@ -53,7 +51,6 @@ sub parse_options {
 
   Getopt::Long::GetOptions(
     'j|job=s'           => \$self->global->{job},
-    'target=s'          => \$self->global->{target},        #<target> target: 'zip' | 'zip+msi' | 'zip+mzi+portable' (default)
     'working_dir=s'     => \$self->global->{working_dir},   #<dir>    default: c:\buildtmp
     'wixbin_dir=s'      => \$self->global->{wixbin_dir},    #<dir>    default: undef
     'image_dir=s'       => \$self->global->{image_dir},     #<dir>    default: c:\strawberry (BEWARE: dir will be destroyed!!)
@@ -62,8 +59,6 @@ sub parse_options {
     'test_core!'        => \$self->global->{test_core},     #<flag>   default: 0 (0 = skip tests when installing perl core)
     'offline=s'         => \$self->global->{offline},       #<flag>   default: 0 (1 = internet connection unavailable during build)
     'perl_debug=s'      => \$self->global->{perl_debug},    #<flag>   default: 0 (1 = build perl core with debug enabled)
-    'msi_debug=s'       => \$self->global->{msi_debug},     #<flag>   default: 0 (1 = build MSI with debug output)
-    'smoketest=s'       => \$self->global->{smoketest},     #<flag>   default: 0 (1 = build MSI with debug output)
     'verbosity=s'       => \$self->global->{verbosity},     #<level>  default: 2 (you can use values 1/silent to 5/verbose)
     'package_url=s'     => \$self->global->{package_url},   #<url>    default: http://strawberryperl.com/package/ (or use e.g. file://C|/pkgmirror/)
     'interactive!'      => \$self->global->{interactive},   #<flag>   default: 1 (0 = no interactive questions)
@@ -84,32 +79,20 @@ sub parse_options {
   $self->global->{debug_dir}       = canonpath(catdir($self->global->{working_dir}, "debug"));
   $self->global->{download_dir}    = canonpath(catdir($self->global->{working_dir}, "download"));
   $self->global->{env_dir}         = canonpath(catdir($self->global->{working_dir}, "env"));
-  $self->global->{fragments_dir}   = canonpath(catdir($self->global->{working_dir}, "fragments"));
   $self->global->{output_dir}      = canonpath(catdir($self->global->{working_dir}, "output"));
   $self->global->{restore_dir}     = canonpath(catdir($self->global->{working_dir}, "restore"));
   
-  if (!defined $self->global->{wixbin_dir}) {
-    for my $d (split /;/,$ENV{PATH}) {
-      if (-f "$d/candle.exe" && -f "$d/light.exe") {
-        $self->global->{wixbin_dir} = canonpath($d);
-      }
-    }
-    warn "ERROR: cannot find WIX utils (candle.exe, light.exe) in PATH\n";
-    warn "  you need to have WiX toolset [wix.sourceforge.net] installed\n";
-    warn "  maybe consider option -wixbin_dir=<path_to_wix_dir>\n";
-    die;
-  }
-  else {
+  if (defined $self->global->{wixbin_dir}) {
     my $d = $self->global->{wixbin_dir};
     unless (-f "$d/candle.exe" && -f "$d/light.exe") {
-      die "ERROR: invalid wixbin_dir (candle.exe, light.exe not found)\n";
+      die "ERROR: invalid wixbin_dir '$d' (candle.exe+light.exe not found)\n";
     }
   }
-  
+
 }
 
 sub global { # accessor to global data
-  return shift->{'!global!'};
+  return shift->{global};
 }
 
 sub do_job {
@@ -121,7 +104,7 @@ sub do_job {
   
   #ask user couple of questions
   $self->ask_about_dirs; # only ask, die if user do not want to continue
-  my $restorepoint = $self->ask_about_restorepoint(); # only ask user, no real restore yet
+  my $restorepoint = $self->ask_about_restorepoint($self->global->{image_dir}, $job->{bits}); # only ask user, no real restore yet
   $self->ask_about_build_details($restorepoint);
   
   warn "\n### STARTING THE JOB (long running task, go for a coffee) ###\n\n";
@@ -148,6 +131,7 @@ sub do_job {
   $i = 0;
   for (@{$self->{build_job_steps}}) {
     my $me = ref($_);
+    $me =~ s/^Perl::Dist::Strawberry::Step:://;
     if ($_->{data}->{done}) {
       # loaded from restorepoint
       $self->message(0, "[step:$i] no need to run '$me'");
@@ -158,7 +142,7 @@ sub do_job {
       $_->test; # dies on error
       $_->{data}->{done} = 1; # mark as sucessfully finished      
       $self->message(0, "[step:$i] finished '$me'");
-      $self->make_restorepoint("[step:$i] $me") if $self->global->{restorepoints};
+      $self->make_restorepoint("[step:$i/".$self->global->{bits}."bit] $me") if $self->global->{restorepoints};
       $self->message(0, "[step:$i] restorepoint saved");
       write_file(catfile($self->global->{debug_dir}, "global_dump_".time.".txt"), pp($self->global)); #debug dump
     }
@@ -203,7 +187,6 @@ sub ask_about_build_details {
   $note2 = "NOTE: use -nointeractive to disable" if $self->global->{interactive};
   my $continue = lc $self->prompt("Important job details:\n".
                                   " * job=".$self->global->{job}."\n".
-                                  " * target=".$self->global->{target}."\n".
                                   " * verbosity=".$self->global->{verbosity}."\n".
                                   " * restorepoints=".$self->global->{restorepoints}." $note1\n".
                                   " * interactive=".$self->global->{interactive}."   $note2\n".
@@ -230,11 +213,9 @@ sub create_dirs {
   #clean other working directories
   !-d $self->global->{build_dir}     or remove_tree($self->global->{build_dir})     or die "ERROR: cannot delete '".$self->global->{build_dir}."'\n";
   !-d $self->global->{debug_dir}     or remove_tree($self->global->{debug_dir})     or die "ERROR: cannot delete '".$self->global->{debug_dir}."'\n";
-  !-d $self->global->{fragments_dir} or remove_tree($self->global->{fragments_dir}) or die "ERROR: cannot delete '".$self->global->{fragments_dir}."'\n";  
   !-d $self->global->{env_dir}       or remove_tree($self->global->{env_dir})       or die "ERROR: cannot delete '".$self->global->{env_dir}."'\n";  #XXX-FIXME maybe only warn not die
   make_path($self->global->{build_dir})     or die "ERROR: cannot create '".$self->global->{build_dir}."'\n";
   make_path($self->global->{debug_dir})     or die "ERROR: cannot create '".$self->global->{debug_dir}."'\n";
-  make_path($self->global->{fragments_dir}) or die "ERROR: cannot create '".$self->global->{fragments_dir}."'\n";
   make_path(catdir($self->global->{env_dir}, 'temp'));
   make_path(catdir($self->global->{env_dir}, 'home'));
   make_path(catdir($self->global->{env_dir}, 'AppDataRoaming'));
@@ -312,7 +293,7 @@ sub create_buildmachine {
   }
   $counter += scalar(@$h);
     
-  # store more job data into global-hash
+  # store remaining job data into global-hash
   while (my ($k, $v) = each %$job) {
     $self->global->{$k} = $v;
   }
@@ -376,7 +357,11 @@ sub merge_output_into_global {
 
 sub load_jobfile {
   my $self = shift;
-  die "ERROR: undefined jobfile\n" unless defined $self->global->{job};
+  if(!defined $self->global->{job}) {
+    warn "ERROR: undefined jobfile (probably mission -job param)\n";
+    warn "       use --help option to see more info\n\n";
+    die;
+  }
   my $ppfile = $self->resolve_name($self->global->{job});
   die "ERROR: non existing jobfile '$ppfile'\n" unless -f $ppfile;
   my $job = do($ppfile);
@@ -507,11 +492,12 @@ sub make_restorepoint {
   my $now = scalar(localtime);
   (my $a = pp($self->global->{argv})) =~ s/[\r\n]+/\n#/g;
   my $comment = "# time : $now\n".
-                "# stage: $text\n".
+                "# stage: after '$text'\n".
                 "# argv : $a\n\n";
 
   my %data_to_save = (
     image_dir => $self->global->{image_dir},
+    bits => $self->global->{bits},
     restorepoint_info => "$now - saved after '$text'",
     restorepoint_zip_image_dir => $zip_image_dir,
     restorepoint_zip_debug_dir => $zip_debug_dir,
@@ -525,18 +511,19 @@ sub make_restorepoint {
 }
 
 sub ask_about_restorepoint {
-  my $self = shift;
+  my ($self, $image_dir, $bits) = @_;
   my @points;
   my $list;
   my $i = 0;
   for my $pp (sort(bsd_glob($self->global->{restore_dir}."/*.pp"))) {
     my $d = eval { do($pp) };
-    warn "INVALID/1 data in $pp\n" and next unless defined $d && ref($d) eq 'HASH';
-    warn "INVALID/2 data in $pp\n" and next unless defined $d->{build_job_steps};
-    warn "INVALID/3 data in $pp\n" and next unless defined $d->{restorepoint_info};
-    warn "INVALID/4 data in $pp\n" and next unless $d->{restorepoint_zip_image_dir} && -f $d->{restorepoint_zip_image_dir};
-    warn "INVALID/5 data in $pp\n" and next unless $d->{restorepoint_zip_debug_dir} && -f $d->{restorepoint_zip_debug_dir};
-    warn "INVALID/6 data in $pp\n" and next unless canonpath($d->{image_dir}) eq canonpath($self->global->{image_dir});
+    warn "SKIPPING/1 $pp\n" and next unless defined $d && ref($d) eq 'HASH';
+    warn "SKIPPING/2 $pp\n" and next unless defined $d->{build_job_steps};
+    warn "SKIPPING/3 $pp\n" and next unless defined $d->{restorepoint_info};
+    warn "SKIPPING/4 $pp\n" and next unless $d->{restorepoint_zip_image_dir} && -f $d->{restorepoint_zip_image_dir};
+    warn "SKIPPING/5 $pp\n" and next unless $d->{restorepoint_zip_debug_dir} && -f $d->{restorepoint_zip_debug_dir};
+    warn "SKIPPING/6 $pp\n" and next unless canonpath($d->{image_dir}) eq canonpath($image_dir);
+    warn "SKIPPING/7 $pp\n" and next unless $d->{bits} == $bits;
     $list .= "[$i] $d->{restorepoint_info}\n";
     push @points, $d;
     $i++;

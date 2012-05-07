@@ -14,12 +14,7 @@ sub new {
 
 sub run {
   my $self = shift;
-  
-  if ($self->global->{target} !~ /portable/) {
-    $self->boss->message(2, "skipping as 'portable' target disabled");
-    return;
-  }
-  
+    
   my $output_basename = $self->global->{output_basename}."-portable" // 'perl-output-portable';
   my $zip_file = catfile($self->global->{output_dir}, "$output_basename.zip");
   

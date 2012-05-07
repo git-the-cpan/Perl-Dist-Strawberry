@@ -1,10 +1,8 @@
 Changes for Perl extension Perl-Dist-Strawberry
 
-3.001_2 2012/05/04
-        - MSI improvements
-
-3.001_1 2012/05/04
-        - the first CPAN release of 3.x series
-        - tested with 5.14.2.1/32bit build
+3.002   2012/05/07
+        - completely new build system
+        - capable of building 5.14.2.1/64bit (MSI,ZIP,Portable/ZIP)
+        - capable of building 5.14.2.1/32bit (MSI,ZIP,Portable/ZIP)
 
 Completely new 3.x series was started by KMX in April 2012.

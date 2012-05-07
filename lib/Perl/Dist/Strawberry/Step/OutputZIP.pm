@@ -14,12 +14,7 @@ sub new {
 
 sub run {
   my $self = shift;
-  
-  if ($self->global->{target} !~ /zip/) {
-    $self->boss->message(2, "skipping as 'zip' target disabled");
-    return;
-  }
-  
+    
   my $output_basename = $self->global->{output_basename} // 'perl-output';
   my $zip_file = catfile($self->global->{output_dir}, "$output_basename.zip");
   
