@@ -13,7 +13,7 @@ use File::Copy             qw(copy);
 use File::Slurp;
 use Text::Patch;
 use Text::Diff;
-use Win32;
+#use Win32;
 
 sub new {
   my $class = shift;
@@ -106,9 +106,8 @@ sub run {
     my @make_args = ("INST_DRV=$INST_DRV", "INST_TOP=$INST_TOP", "CCHOME=$CCHOME", "EMAIL=$cf_email");
     push @make_args, 'GCC_4XX=define', 'GCCHELPERDLL=$(CCHOME)\bin\libgcc_s_sjlj-1.dll'; #perl-5.12/14 only
 
-    #XXX-FIXME remove debug stuff
-    #push @make_args, 'CFG=Debug' if $self->{xxx_fixme};
-    #push @make_args, "EMAIL=xxx" if $self->{xxx_fixme};
+    # enable debug build
+    push @make_args, 'CFG=Debug' if $self->{config}->{perl_debug};
 
     $new_env->{USERNAME} = (split /@/, $cf_email)[0]; # trick to set cotrect cf_by
     if ($self->global->{bits} == 64) {
@@ -128,9 +127,19 @@ sub run {
     write_file('_do_dmake_test.bat', $set_simple_path."\n".join(' ', 'dmake', @make_args, 'test'));
 
     # Compile perl.
+    my $rv;
     $self->boss->message( 1, "Building perl $version ...\n" );
     $log = catfile($self->global->{debug_dir}, 'perl_dmake_all.log.txt');
-    $self->execute_special(['dmake', @make_args, 'all'], $log, $log, $new_env);
+
+    if ($self->global->{bits} == 64) {
+      #XXX-FIXME-XXX 'dmake all' fails with redirected output for 64bit build via IPC::Run3
+      $rv = $self->execute_special(['dmake', @make_args, 'all'], undef, undef, $new_env);
+    }
+    else {
+      $rv = $self->execute_special(['dmake', @make_args, 'all'], $log, $log, $new_env);
+    }
+
+    die "FATAL: dmake all FAILED!" unless(defined $rv && $rv == 0);
 
     # Get information required for testing and installing perl.
     #my $long_build = Win32::GetLongPathName( rel2abs( $self->global->{build_dir} ) );
@@ -141,12 +150,14 @@ sub run {
       $self->boss->message( 1, "Testing perl $version ...\n" );
       $log = catfile($self->global->{debug_dir}, 'perl_dmake_test.log.txt');
       $self->execute_special(['dmake', @make_args, 'test'], $log, $log, $new_env);
+      $self->boss->message( 1, "dmake test FAILED!") unless(defined $rv && $rv == 0);
     }
 
     # Installing perl.
     $self->boss->message( 1, "Installing perl $version ...\n" );
     $log = catfile($self->global->{debug_dir}, 'perl_dmake_install.log.txt');
-    $self->execute_special(['dmake', @make_args, 'install', 'UNINST=1'], $log, $log, $new_env);
+    $rv = $self->execute_special(['dmake', @make_args, 'install', 'UNINST=1'], $log, $log, $new_env);
+    die "FATAL: dmake install FAILED!" unless(defined $rv && $rv == 0);
   }
 
   # Delete unwanted dirs
@@ -167,6 +178,8 @@ sub run {
     unlink $a or die "ERROR: Could not delete '$a'";
   }
 
+  die "FATAL: perl.exe not properly installed" unless -f catfile($image_dir, qw/perl bin perl.exe/);
+  
   # Create some missing directories
   my @d = ( catdir($image_dir, qw/perl vendor lib/),
             catdir($image_dir, qw/perl site bin/),

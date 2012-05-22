@@ -17,6 +17,7 @@ use Text::Diff;
 use Win32;
 use Win32::File::Object;
 use IPC::Run3;
+use Digest::SHA1;
 
 ##### manatory methods for all Step-like classess - new(), check(), run(), test()
 
@@ -284,7 +285,7 @@ sub backup_file {
   my ($v, $d, $f) = splitpath(canonpath($file));
   my $now = time;
   my $new = File::Spec->catpath($v, $d, "OLD_$now.$f");
-  $self->boss->message(3, "backup_file '$file' > '$new'");
+  $self->boss->message(3, "backup_file '$new'");
   rename($file, $new);
 }
 
@@ -301,7 +302,7 @@ sub _patch_file {
     my $outdata = '';
     my $template = Template->new();
     write_file(catfile($self->global->{debug_dir}, 'TTvars_patch_file_'.time.'.txt'), pp($tt_vars)); #debug dump
-    $template->process(\$indata, $tt_vars, \$outdata);
+    $template->process(\$indata, $tt_vars, \$outdata) || die $template->error();
     
     my $r = $self->_unset_ro($dst);
     write_file($dst, $outdata);
@@ -358,6 +359,7 @@ sub sha1_file {
   binmode FILE;
   $sha1->addfile(*FILE);
   close FILE;
+  return $sha1->hexdigest;
 }
 
 sub workaround_get_dist_list {
@@ -365,12 +367,13 @@ sub workaround_get_dist_list {
 # used by UpgradeCpanModules and InstallModules
 # implement something more clever in the future
   my $self = shift;
+  my $env = { PERL5_CPANPLUS_HOME=>$self->global->{build_ENV}->{APPDATA} }; #workaround for CPANPLUS
   my $script_pl = $self->boss->resolve_name("<dist_sharedir>/utils/CPANPLUS_list_build_cache.pl");
   my $prefix = "cpan_dist_list.".time;
   my $log = catfile($self->global->{debug_dir}, "$prefix.log.txt");
   my $dumper = catfile($self->global->{debug_dir}, "$prefix.dumper.txt");
   my $nstore = catfile($self->global->{debug_dir}, "$prefix.nstore.txt");
-  my $rv = $self->execute_special(['perl', $script_pl, '-out_nstore', $nstore, '-out_dumper', $dumper ], $log);
+  my $rv = $self->execute_special(['perl', $script_pl, '-out_nstore', $nstore, '-out_dumper', $dumper ], $log, $log, $env);
   die "ERROR: exec '$script_pl' failed" unless defined $rv && $rv == 0;
   die "ERROR: missing file '$nstore'" unless -f $nstore;
   my $data = retrieve($nstore) or die "ERROR: retrieve failed, probably error while executing '$script_pl'";

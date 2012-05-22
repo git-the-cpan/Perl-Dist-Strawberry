@@ -18,7 +18,7 @@ use Pod::Usage            qw(pod2usage);
 use LWP::UserAgent;
 
 # following recommendation from http://www.dagolden.com/index.php/369/version-numbers-should-be-boring/
-our $VERSION = "3.002";
+our $VERSION = "3.003";
 $VERSION = eval $VERSION;
 
 sub new {
@@ -66,12 +66,6 @@ sub parse_options {
     'h|help'            => sub { pod2usage(-exitstatus=>0, -verbose=>2) },
   ) or pod2usage(-verbose=>2);
   
-  # set other computed values
-  (my $idq = $self->global->{image_dir}) =~ s|\\|\\\\|g;
-  (my $idu = $self->global->{image_dir}) =~ s|\\|/|g;
-  $self->global->{image_dir_quotemeta} = $idq;
-  $self->global->{image_dir_url}       = "file:///$idu";
-
   $self->global->{working_dir}     = canonpath($self->global->{working_dir});
   $self->global->{image_dir}       = canonpath($self->global->{image_dir});
   $self->global->{dist_sharedir}   = canonpath(File::ShareDir::dist_dir('Perl-Dist-Strawberry'));
@@ -81,6 +75,12 @@ sub parse_options {
   $self->global->{env_dir}         = canonpath(catdir($self->global->{working_dir}, "env"));
   $self->global->{output_dir}      = canonpath(catdir($self->global->{working_dir}, "output"));
   $self->global->{restore_dir}     = canonpath(catdir($self->global->{working_dir}, "restore"));
+
+  # set other computed values
+  (my $idq = $self->global->{image_dir}) =~ s|\\|\\\\|g;
+  (my $idu = $self->global->{image_dir}) =~ s|\\|/|g;
+  $self->global->{image_dir_quotemeta} = $idq;
+  $self->global->{image_dir_url}       = "file:///$idu";
   
   if (defined $self->global->{wixbin_dir}) {
     my $d = $self->global->{wixbin_dir};
@@ -217,7 +217,6 @@ sub create_dirs {
   make_path($self->global->{build_dir})     or die "ERROR: cannot create '".$self->global->{build_dir}."'\n";
   make_path($self->global->{debug_dir})     or die "ERROR: cannot create '".$self->global->{debug_dir}."'\n";
   make_path(catdir($self->global->{env_dir}, 'temp'));
-  make_path(catdir($self->global->{env_dir}, 'home'));
   make_path(catdir($self->global->{env_dir}, 'AppDataRoaming'));
   make_path(catdir($self->global->{env_dir}, 'AppDataLocal'));
   make_path(catdir($self->global->{env_dir}, 'UserProfile'));
@@ -229,7 +228,7 @@ sub create_dirs {
 sub prepare_build_ENV {
   my $self = shift;
 
-  my ($home_d, $home_p) = splitpath(catfile($self->global->{env_dir}, qw/home fakefile/));
+  my ($home_d, $home_p) = splitpath(catfile($self->global->{env_dir}, qw/UserProfile fakefile/));
   my @path = split /;/ms, $ENV{PATH};
   my @new_path = ( catdir($self->global->{image_dir}, qw/perl site bin/),
                    catdir($self->global->{image_dir}, qw/perl bin/),
@@ -467,6 +466,7 @@ sub zip_dir {
     next if $archive_name eq '';
     my $m = $zip->addFileOrDirectory($fs_name, $archive_name);
     $m->desiredCompressionLevel($level); # 1 = fastest compression
+    $m->unixFileAttributes( 0777 ) if $fs_name =~ /\.(exe|bat|dll)$/i; # necessary for correct unzipping on cygwin
   }
   die 'ERROR: ZIP failure' unless ($zip->writeToFileNamed($zip_filename) == AZ_OK);
 }

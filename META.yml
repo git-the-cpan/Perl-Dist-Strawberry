@@ -1,5 +1,5 @@
 ---
-abstract: 'Build strawberry-perl-like distribution for MS Windows'
+abstract: Build strawberry-perl-like distribution for MS Windows
 author:
   - 'KMX <kmx@cpan.org>'
 build_requires:
@@ -20,6 +20,7 @@ build_requires:
   File::Spec: 3.2701
   File::pushd: 0
   Getopt::Long: 0
+  HTML::Entities: 0
   IO::Capture: 0
   IPC::Run3: 0
   LWP::UserAgent: 0
@@ -49,12 +50,15 @@ no_index:
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 3.002
+    version: 3.003
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
     version: 0
   Perl::Dist::Strawberry::Step::BinaryToolsAndLibs:
     file: lib/Perl/Dist/Strawberry/Step/BinaryToolsAndLibs.pm
+    version: 0
+  Perl::Dist::Strawberry::Step::CreateReleaseNotes:
+    file: lib/Perl/Dist/Strawberry/Step/CreateReleaseNotes.pm
     version: 0
   Perl::Dist::Strawberry::Step::CreateRelocationFile:
     file: lib/Perl/Dist/Strawberry/Step/CreateRelocationFile.pm
@@ -67,6 +71,9 @@ provides:
     version: 0
   Perl::Dist::Strawberry::Step::InstallPerlCore:
     file: lib/Perl/Dist/Strawberry/Step/InstallPerlCore.pm
+    version: 0
+  Perl::Dist::Strawberry::Step::OutputLogZIP:
+    file: lib/Perl/Dist/Strawberry/Step/OutputLogZIP.pm
     version: 0
   Perl::Dist::Strawberry::Step::OutputMSM_MSI:
     file: lib/Perl/Dist/Strawberry/Step/OutputMSM_MSI.pm
@@ -94,4 +101,4 @@ resources:
   repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
   x_Chat: irc://irc.perl.org/#win32
   x_MailingList: http://groups.google.com/group/perl.win32.vanilla
-version: 3.002
+version: 3.003

@@ -6,45 +6,48 @@
 # <image_dir>     is placeholder for c:\strawberry
 
 {
-  app_version     => '5.14.2.1',
+  app_version     => '5.14.2.1', #BEWARE: do not use '.0.0' in the last two version digits
   bits            => 64,
   beta            => 0,
-  app_fullname    => 'Strawberry Perl',
+  app_fullname    => 'Strawberry Perl (64-bit)',
   app_simplename  => 'strawberry-perl',
   build_job_steps => [
     ### STEP 1 ###########################
     {
         plugin  => 'Perl::Dist::Strawberry::Step::BinaryToolsAndLibs',
         install_packages => {
+            #tools
             'dmake'         => '<package_url>/kmx/64_tools/64bit_dmake-SVN20091127-bin_20111107.zip',
             'mingw-make'    => '<package_url>/kmx/64_tools/64bit_gmake-3.82-bin_20110503.zip',
             'pexports'      => '<package_url>/kmx/64_tools/64bit_pexports-0.44-bin_20100110.zip',
             'patch'         => '<package_url>/kmx/64_tools/64bit_patch-2.5.9-7-bin_20100110_UAC.zip',
+            #gcc
             'gcc-toolchain' => { url=>'<package_url>/kmx/64_gcctoolchain/mingw64-w64-gcc4.4.7-pre_20111101.zip', install_to=>'c' },
             'gcc-license'   => '<package_url>/kmx/64_gcctoolchain/mingw64-w64-gcc4.4.7-pre_20111101-lic.zip',
-            'libdb'         => '<package_url>/kmx/64_libs/5.14/64bit_db-5.1.25-bin_20110506.zip',
-            'libexpat'      => '<package_url>/kmx/64_libs/5.14/64bit_expat-2.0.1-sezero20110428-bin_20110506.zip',
-            'freeglut'      => '<package_url>/kmx/64_libs/5.14/64bit_freeglut-2.6.0-bin_20110506.zip',
-            'libfreetype'   => '<package_url>/kmx/64_libs/5.14/64bit_freetype-2.4.4-bin_20110506.zip',
-            'libgd'         => '<package_url>/kmx/64_libs/5.14/64bit_gd-2.0.35(OLD-jpg-png)-bin_20110506.zip',
-            'libgdbm'       => '<package_url>/kmx/64_libs/5.14/64bit_gdbm-1.8.3-bin_20110506.zip',
-            'libgif'        => '<package_url>/kmx/64_libs/5.14/64bit_giflib-4.1.6-bin_20110506.zip',
-            'gmp'           => '<package_url>/kmx/64_libs/5.14/64bit_gmp-5.0.1-bin_20110506.zip',
-            'libjpeg'       => '<package_url>/kmx/64_libs/5.14/64bit_jpeg-8c-bin_20110506.zip',
-            'libxpm'        => '<package_url>/kmx/64_libs/5.14/64bit_libXpm-3.5.9-bin_20110506.zip',
-            'libiconv'      => '<package_url>/kmx/64_libs/5.14/64bit_libiconv-1.13.1-sezero20110428-bin_20110506.zip',
-            'libpng'        => '<package_url>/kmx/64_libs/5.14/64bit_libpng-1.5.2-bin_20110506.zip',
-            'libssh2'       => '<package_url>/kmx/64_libs/5.14/64bit_libssh2-1.2.8-bin_20110506.zip',
-            'libxml2'       => '<package_url>/kmx/64_libs/5.14/64bit_libxml2-2.7.8-bin_20110506.zip',
-            'libxslt'       => '<package_url>/kmx/64_libs/5.14/64bit_libxslt-1.1.26-bin_20110506.zip',
-            'mpc'           => '<package_url>/kmx/64_libs/5.14/64bit_mpc-0.9-bin_20110506.zip',
-            'mpfr'          => '<package_url>/kmx/64_libs/5.14/64bit_mpfr-3.0.1-bin_20110506.zip',
-            'libmysql'      => '<package_url>/kmx/64_libs/5.14/64bit_mysql-5.1.44-bin_20100304.zip',
-            'libopenssl'    => '<package_url>/kmx/64_libs/5.14/64bit_openssl-1.0.0d-bin_20110506.zip',
-            'libpostgresql' => '<package_url>/kmx/64_libs/5.14/64bit_postgresql-9.0.4-bin_20110506.zip',
-            'libtiff'       => '<package_url>/kmx/64_libs/5.14/64bit_tiff-3.9.5-bin_20110506.zip',
-            'libxz'         => '<package_url>/kmx/64_libs/5.14/64bit_xz-5.0.2-bin_20110506.zip',
-            'zlib'          => '<package_url>/kmx/64_libs/5.14/64bit_zlib-1.2.5-bin_20110506.zip',
+            #libs
+            'libdb'         => '<package_url>/kmx/64_libs/gcc44-2011/64bit_db-5.1.25-bin_20110506.zip',
+            'libexpat'      => '<package_url>/kmx/64_libs/gcc44-2011/64bit_expat-2.0.1-sezero20110428-bin_20110506.zip',
+            'freeglut'      => '<package_url>/kmx/64_libs/gcc44-2011/64bit_freeglut-2.6.0-bin_20110506.zip',
+            'libfreetype'   => '<package_url>/kmx/64_libs/gcc44-2011/64bit_freetype-2.4.4-bin_20110506.zip',
+            'libgd'         => '<package_url>/kmx/64_libs/gcc44-2011/64bit_gd-2.0.35(OLD-jpg-png)-bin_20110506.zip',
+            'libgdbm'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_gdbm-1.8.3-bin_20110506.zip',
+            'libgif'        => '<package_url>/kmx/64_libs/gcc44-2011/64bit_giflib-4.1.6-bin_20110506.zip',
+            'gmp'           => '<package_url>/kmx/64_libs/gcc44-2011/64bit_gmp-5.0.1-bin_20110506.zip',
+            'libjpeg'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_jpeg-8c-bin_20110506.zip',
+            'libxpm'        => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libXpm-3.5.9-bin_20110506.zip',
+            'libiconv'      => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libiconv-1.13.1-sezero20110428-bin_20110506.zip',
+            'libpng'        => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libpng-1.5.2-bin_20110506.zip',
+            'libssh2'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libssh2-1.2.8-bin_20110506.zip',
+            'libxml2'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libxml2-2.7.8-bin_20110506.zip',
+            'libxslt'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_libxslt-1.1.26-bin_20110506.zip',
+            'mpc'           => '<package_url>/kmx/64_libs/gcc44-2011/64bit_mpc-0.9-bin_20110506.zip',
+            'mpfr'          => '<package_url>/kmx/64_libs/gcc44-2011/64bit_mpfr-3.0.1-bin_20110506.zip',
+            'libmysql'      => '<package_url>/kmx/64_libs/gcc44-2011/64bit_mysql-5.1.44-bin_20100304.zip',
+            'libopenssl'    => '<package_url>/kmx/64_libs/gcc44-2011/64bit_openssl-1.0.0d-bin_20110506.zip',
+            'libpostgresql' => '<package_url>/kmx/64_libs/gcc44-2011/64bit_postgresql-9.0.4-bin_20110506.zip',
+            'libtiff'       => '<package_url>/kmx/64_libs/gcc44-2011/64bit_tiff-3.9.5-bin_20110506.zip',
+            'libxz'         => '<package_url>/kmx/64_libs/gcc44-2011/64bit_xz-5.0.2-bin_20110506.zip',
+            'zlib'          => '<package_url>/kmx/64_libs/gcc44-2011/64bit_zlib-1.2.5-bin_20110506.zip',
         },
     },
     ### STEP 2 ###########################
@@ -216,7 +219,7 @@
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Learning Perl (tutorials, examples).url.tt', '<image_dir>/win32/Learning Perl (tutorials, examples).url' ] },
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Live Support (chat).url.tt',                 '<image_dir>/win32/Live Support (chat).url' ] },
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Perl 5.14 Documentation.url.tt',             '<image_dir>/win32/Perl 5.14 Documentation.url' ] },
-         { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Strawberry Perl Release Notes.url.tt',       '<image_dir>/win32/Strawberry Perl Release Notes.url' ] },
+         { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/5.14.2.1-64bit Release Notes.url.tt',        '<image_dir>/win32/Strawberry Perl Release Notes.url' ] },
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Strawberry Perl Website.url.tt',             '<image_dir>/win32/Strawberry Perl Website.url' ] },
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Win32 Perl Wiki.url.tt',                     '<image_dir>/win32/Win32 Perl Wiki.url' ] },
          # XXX-TODO cleanup (remove unwanted files/dirs)
@@ -250,7 +253,7 @@
        exclude_msm => [ # do not include these to MSM but to MSI
            #qr/^win32\\.*?\.url$/,
            'win32',
-           'strawberry2.reloc.txt',
+           'perl2.reloc.txt',
            'README.txt'
        ],
        msi_upgrade_code    => 'DBA41113-4E91-3FFC-B400-573BB4B80705', #BEWARE: fixed value for all 64bit releases (for ever)
@@ -269,8 +272,8 @@
          { type=>'shortcut', name=>'Strawberry Perl Release Notes', icon=>'<dist_sharedir>\msi\files\strawberry.ico', target=>'[d_win32]Strawberry Perl Release Notes.url', workingdir=>'d_win32' },
          { type=>'shortcut', name=>'Strawberry Perl README', target=>'[INSTALLDIR]README.txt', workingdir=>'INSTALLDIR' },
          { type=>'folder',   name=>'Tools', members=>[
-              { type=>'shortcut', name=>'CPAN Client', icon=>'<dist_sharedir>\msi\files\cpan.ico', target=>'[d_perl_bin]cpan.bat', workingdir=>'d_perl_bin' },
-              { type=>'shortcut', name=>'Create local library areas', icon=>'<dist_sharedir>\msi\files\strawberry.ico', target=>'[d_perl_bin]llw32helper.bat', workingdir=>'d_perl_bin' },
+              { type=>'shortcut', name=>'CPAN Client', icon=>'<dist_sharedir>\msi\files\cpan.ico', target=>'[d_perl_bin.<MSMID>]cpan.bat', workingdir=>'d_perl_bin.<MSMID>' },
+              { type=>'shortcut', name=>'Create local library areas', icon=>'<dist_sharedir>\msi\files\strawberry.ico', target=>'[d_perl_bin.<MSMID>]llw32helper.bat', workingdir=>'d_perl_bin.<MSMID>' },
          ] },
          { type=>'folder', name=>'Related Websites', members=>[
               { type=>'shortcut', name=>'CPAN Module Search', icon=>'<dist_sharedir>\msi\files\cpan.ico', target=>'[d_win32]CPAN Module Search.url', workingdir=>'d_win32' },
