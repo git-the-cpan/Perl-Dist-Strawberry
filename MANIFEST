@@ -37,26 +37,25 @@ README
 script/perldist_strawberry
 share/32bit-5.14.2.1.pp
 share/32bit-5.16.0.1-SPP-64int.pp
+share/32bit-5.16.0.1-SPP-debug-64int.pp
 share/32bit-5.16.0.1-SPP-debug.pp
 share/32bit-5.16.0.1.pp
+share/32bit-5.16.1.1-SPP-64int.pp
+share/32bit-5.16.1.1-SPP-debug-64int.pp
+share/32bit-5.16.1.1-SPP-debug.pp
+share/32bit-5.16.1.1.pp
 share/64bit-5.14.2.1.pp
 share/64bit-5.16.0.1.pp
+share/64bit-5.16.1.1.pp
 share/config-files/CPAN_Config.pm.tt
 share/config-files/CPANPLUS_Config.pm.tt
 share/extra-files/DISTRIBUTIONS.txt.tt
 share/extra-files/licenses/License.rtf
-share/extra-files/portable.perl.32
-share/extra-files/portable.perl.64
-share/extra-files/portableshell.bat
 share/extra-files/ppm/README.txt
 share/extra-files/README.txt.tt
 share/extra-files/release_notes.html.tt
 share/extra-files/relocation.pl.bat
 share/extra-files/update_env.pl.bat
-'share/extra-files/win32/5.14.2.1-32bit Release Notes.url.tt'
-'share/extra-files/win32/5.14.2.1-64bit Release Notes.url.tt'
-'share/extra-files/win32/5.16.0.1-32bit Release Notes.url.tt'
-'share/extra-files/win32/5.16.0.1-64bit Release Notes.url.tt'
 'share/extra-files/win32/CPAN Module Search.url.tt'
 share/extra-files/win32/cpan.ico
 'share/extra-files/win32/Learning Perl (tutorials, examples).url.tt'
@@ -67,6 +66,7 @@ share/extra-files/win32/onion.ico
 'share/extra-files/win32/Perl Documentation.url.tt'
 share/extra-files/win32/perldoc.ico
 share/extra-files/win32/perlhelp.ico
+'share/extra-files/win32/Strawberry Perl Release Notes.url.tt'
 'share/extra-files/win32/Strawberry Perl Website.url.tt'
 share/extra-files/win32/strawberry.ico
 'share/extra-files/win32/Win32 Perl Wiki.url.tt'
@@ -113,6 +113,7 @@ share/perl-5.16-x86-64int/diffs_for_info_only/makefile.mk.diff
 share/perl-5.16-x86-64int/win32_config.gc.tt
 share/perl-5.16-x86-64int/win32_config_H.gc
 share/perl-5.16-x86-64int/win32_makefile.mk
+share/perl-5.16-x86-64int/win32_makefile.mk.5161
 share/perl-5.16/diffs_for_info_only/config.gc.diff
 share/perl-5.16/diffs_for_info_only/config.gc64nox.diff
 share/perl-5.16/diffs_for_info_only/config_H.gc.diff

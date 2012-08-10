@@ -1,4 +1,8 @@
-no blockers
+- 5.16.0 vs. 5.16.1 - maybe add: Test::Pod 
+- check that installer warns if running without admin privileges
+- [nice-to-have] PATH checkbox would be a nice feature for strawberry, however.
+- [nice-to-have] perl.exe icon (higher resolution)
+- [nice-to-have] perl.exe properties
 
 --- FIX LATER ---
 
@@ -14,18 +18,8 @@ C:\perl\lib\CORE/win32.h:394:33: warning: "/*" within comment [-Wcomment]
 
 ### generate MSM info file
 
-### CPANPLUS_install_module.pl 
-- how to pass multiple args via makefilepl_param, buildpl_param
-
-### decide about (not)including: perl/vendor/lib/auto/DBD/mysql/libmysql_.dll
-- not for now
-
 ### check for XXX FIXME TODO in the code
 - ok for now
-
-##### 64bit update_env.pl.bat
-- set ENV without reboot - http://stackoverflow.com/questions/3837014/how-do-i-set-an-win32-system-environment-variable-in-perl
-- 32bit works fine (maybe a bug in Win32::API)
 
 ### modules (non critical)
 - DB_File - disable in core (install later in vendor)
