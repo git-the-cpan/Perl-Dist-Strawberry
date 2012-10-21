@@ -4,7 +4,7 @@
       "KMX <kmx@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112621",
+   "generated_by" : "Module::Build version 0.4002, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -22,37 +22,37 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Archive::Tar" : 0,
-            "Archive::Zip" : 0,
-            "Data::Dump" : 0,
-            "Data::UUID" : 0,
-            "Digest::SHA1" : 0,
-            "ExtUtils::MakeMaker" : 0,
-            "File::Basename" : 0,
-            "File::Copy" : 0,
-            "File::Copy::Recursive" : 0,
-            "File::Find::Rule" : 0,
-            "File::Glob" : 0,
+            "Archive::Tar" : "0",
+            "Archive::Zip" : "0",
+            "Data::Dump" : "0",
+            "Data::UUID" : "0",
+            "Digest::SHA1" : "0",
+            "ExtUtils::MakeMaker" : "0",
+            "File::Basename" : "0",
+            "File::Copy" : "0",
+            "File::Copy::Recursive" : "0",
+            "File::Find::Rule" : "0",
+            "File::Glob" : "0",
             "File::Path" : "2.04",
-            "File::ShareDir" : 0,
-            "File::Slurp" : 0,
+            "File::ShareDir" : "0",
+            "File::Slurp" : "0",
             "File::Spec" : "3.2701",
-            "File::pushd" : 0,
-            "Getopt::Long" : 0,
-            "HTML::Entities" : 0,
-            "IO::Capture" : 0,
-            "IPC::Run3" : 0,
-            "LWP::UserAgent" : 0,
-            "Pod::Usage" : 0,
+            "File::pushd" : "0",
+            "Getopt::Long" : "0",
+            "HTML::Entities" : "0",
+            "IO::Capture" : "0",
+            "IPC::Run3" : "0",
+            "LWP::UserAgent" : "0",
+            "Pod::Usage" : "0",
             "Portable::Dist" : "1.05",
-            "Storable" : 0,
-            "Template" : 0,
+            "Storable" : "0",
+            "Template" : "0",
             "Test::More" : "0.86",
-            "Text::Diff" : 0,
-            "Text::Patch" : 0,
-            "URI::file" : 0,
-            "Win32::File::Object" : 0,
-            "Win32::TieRegistry" : 0
+            "Text::Diff" : "0",
+            "Text::Patch" : "0",
+            "URI::file" : "0",
+            "Win32::File::Object" : "0",
+            "Win32::TieRegistry" : "0"
          }
       },
       "configure" : {
@@ -71,7 +71,7 @@
    "provides" : {
       "Perl::Dist::Strawberry" : {
          "file" : "lib/Perl/Dist/Strawberry.pm",
-         "version" : "3.004"
+         "version" : "3.005"
       },
       "Perl::Dist::Strawberry::Step" : {
          "file" : "lib/Perl/Dist/Strawberry/Step.pm",
@@ -141,5 +141,5 @@
       "x_Chat" : "irc://irc.perl.org/#win32",
       "x_MailingList" : "http://groups.google.com/group/perl.win32.vanilla"
    },
-   "version" : "3.004"
+   "version" : "3.005"
 }
