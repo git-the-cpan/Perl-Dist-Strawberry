@@ -1,4 +1,7 @@
+### replace Any::Moose with Moo
 ### add link https://metacpan.org/ to startmenu
+### remove link to http://win32.perl.org
+
 
 ### Bug in EU::MM - dmake MAXLINELENGTH
 
