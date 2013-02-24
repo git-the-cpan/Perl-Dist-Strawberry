@@ -71,7 +71,7 @@
    "provides" : {
       "Perl::Dist::Strawberry" : {
          "file" : "lib/Perl/Dist/Strawberry.pm",
-         "version" : "3.007"
+         "version" : "3.008"
       },
       "Perl::Dist::Strawberry::Step" : {
          "file" : "lib/Perl/Dist/Strawberry/Step.pm",
@@ -91,6 +91,10 @@
       },
       "Perl::Dist::Strawberry::Step::FilesAndDirs" : {
          "file" : "lib/Perl/Dist/Strawberry/Step/FilesAndDirs.pm",
+         "version" : 0
+      },
+      "Perl::Dist::Strawberry::Step::FixShebang" : {
+         "file" : "lib/Perl/Dist/Strawberry/Step/FixShebang.pm",
          "version" : 0
       },
       "Perl::Dist::Strawberry::Step::InstallModules" : {
@@ -121,6 +125,10 @@
          "file" : "lib/Perl/Dist/Strawberry/Step/SetupPortablePerl.pm",
          "version" : 0
       },
+      "Perl::Dist::Strawberry::Step::UninstallModules" : {
+         "file" : "lib/Perl/Dist/Strawberry/Step/UninstallModules.pm",
+         "version" : 0
+      },
       "Perl::Dist::Strawberry::Step::UpgradeCpanModules" : {
          "file" : "lib/Perl/Dist/Strawberry/Step/UpgradeCpanModules.pm",
          "version" : 0
@@ -141,5 +149,5 @@
       "x_Chat" : "irc://irc.perl.org/#win32",
       "x_MailingList" : "http://groups.google.com/group/perl.win32.vanilla"
    },
-   "version" : "3.007"
+   "version" : "3.008"
 }

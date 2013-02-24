@@ -21,6 +21,7 @@ lib/Perl/Dist/Strawberry/Step/BinaryToolsAndLibs.pm
 lib/Perl/Dist/Strawberry/Step/CreateReleaseNotes.pm
 lib/Perl/Dist/Strawberry/Step/CreateRelocationFile.pm
 lib/Perl/Dist/Strawberry/Step/FilesAndDirs.pm
+lib/Perl/Dist/Strawberry/Step/FixShebang.pm
 lib/Perl/Dist/Strawberry/Step/InstallModules.pm
 lib/Perl/Dist/Strawberry/Step/InstallPerlCore.pm
 lib/Perl/Dist/Strawberry/Step/OutputLogZIP.pm
@@ -28,6 +29,7 @@ lib/Perl/Dist/Strawberry/Step/OutputMSM_MSI.pm
 lib/Perl/Dist/Strawberry/Step/OutputPortableZIP.pm
 lib/Perl/Dist/Strawberry/Step/OutputZIP.pm
 lib/Perl/Dist/Strawberry/Step/SetupPortablePerl.pm
+lib/Perl/Dist/Strawberry/Step/UninstallModules.pm
 lib/Perl/Dist/Strawberry/Step/UpgradeCpanModules.pm
 LICENSE
 MANIFEST			This list of files
@@ -47,11 +49,13 @@ share/32bit-5.16.1.1-SPP-debug-64int.pp
 share/32bit-5.16.1.1-SPP-debug.pp
 share/32bit-5.16.1.1.pp
 share/32bit-5.16.2.1.pp
+share/32bit-5.16.2.2.pp
 share/64bit-5.14.2.1.pp
 share/64bit-5.14.3.1.pp
 share/64bit-5.16.0.1.pp
 share/64bit-5.16.1.1.pp
 share/64bit-5.16.2.1.pp
+share/64bit-5.16.2.2.pp
 share/config-files/CPAN_Config.pm.tt
 share/config-files/CPANPLUS_Config.pm.tt
 share/extra-files/DISTRIBUTIONS.txt.tt
@@ -65,6 +69,10 @@ share/extra-files/update_env.pl.bat
 share/extra-files/win32/cpan.ico
 'share/extra-files/win32/Learning Perl (tutorials, examples).url.tt'
 'share/extra-files/win32/Live Support (chat).url.tt'
+'share/extra-files/win32/MetaCPAN Search Engine.url.tt'
+share/extra-files/win32/metacpan.ico
+share/extra-files/win32/metacpan.svg
+share/extra-files/win32/metacpan.xcf
 share/extra-files/win32/onion.ico
 'share/extra-files/win32/Perl 5.12 Documentation.url.tt'
 'share/extra-files/win32/Perl 5.14 Documentation.url.tt'
@@ -82,6 +90,7 @@ share/msi/CA-release/x64/HelperCA.dll
 share/msi/CA-release/x86/HelperCA.dll
 share/msi/files/cpan.ico
 share/msi/files/License-short.rtf
+share/msi/files/metacpan.ico
 share/msi/files/onion.ico
 share/msi/files/perldoc.ico
 share/msi/files/perlexe.ico
@@ -148,6 +157,7 @@ share/utils/CPANPLUS_get_upgrade_list.pl
 share/utils/CPANPLUS_install_module.pl
 share/utils/CPANPLUS_list_build_cache.pl
 share/utils/CPANPLUS_list_distributions.pl
+share/utils/CPANPLUS_uninstall_module.pl
 t/001_compile.t
 t/002_all_pm.t
 TODO
