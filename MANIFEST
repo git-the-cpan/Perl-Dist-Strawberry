@@ -53,6 +53,8 @@ share/32bit-5.16.2.1.pp
 share/32bit-5.16.2.2.pp
 share/32bit-5.16.3.1-SPP-min.pp
 share/32bit-5.16.3.1.pp
+share/32bit-5.18.0.1-minimal.pp
+share/32bit-5.18.0.1.pp
 share/64bit-5.14.2.1.pp
 share/64bit-5.14.3.1.pp
 share/64bit-5.14.4.1.pp
@@ -61,6 +63,7 @@ share/64bit-5.16.1.1.pp
 share/64bit-5.16.2.1.pp
 share/64bit-5.16.2.2.pp
 share/64bit-5.16.3.1.pp
+share/64bit-5.18.0.1.pp
 share/config-files/CPAN_Config.pm.tt
 share/config-files/CPANPLUS_Config.pm.tt
 share/extra-files/DISTRIBUTIONS.txt.tt
@@ -150,6 +153,12 @@ share/perl-5.16/win32_config_H.gc
 share/perl-5.16/win32_config_H.gc64nox
 share/perl-5.16/win32_FindExt.pm
 share/perl-5.16/win32_win32.h
+share/perl-5.18/NDBM_MSWin32.pl
+share/perl-5.18/ODBM_MSWin32.pl
+share/perl-5.18/perlexe.rc.tt
+share/perl-5.18/win32_config.gc.tt
+share/perl-5.18/win32_config_H.gc
+share/perl-5.18/win32_FindExt.pm
 share/portable/portable.perl.32
 share/portable/portable.perl.32-NEW
 share/portable/portable.perl.64

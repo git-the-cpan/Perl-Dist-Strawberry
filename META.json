@@ -4,7 +4,7 @@
       "KMX <kmx@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4002, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Module::Build version 0.4004, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -71,7 +71,7 @@
    "provides" : {
       "Perl::Dist::Strawberry" : {
          "file" : "lib/Perl/Dist/Strawberry.pm",
-         "version" : "3.009"
+         "version" : "3.010"
       },
       "Perl::Dist::Strawberry::Step" : {
          "file" : "lib/Perl/Dist/Strawberry/Step.pm",
@@ -149,5 +149,5 @@
       "x_Chat" : "irc://irc.perl.org/#win32",
       "x_MailingList" : "http://groups.google.com/group/perl.win32.vanilla"
    },
-   "version" : "3.009"
+   "version" : "3.010"
 }
