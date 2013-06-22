@@ -53,6 +53,7 @@ share/32bit-5.16.2.1.pp
 share/32bit-5.16.2.2.pp
 share/32bit-5.16.3.1-SPP-min.pp
 share/32bit-5.16.3.1.pp
+share/32bit-5.18-experimental.pp
 share/32bit-5.18.0.1-minimal.pp
 share/32bit-5.18.0.1.pp
 share/64bit-5.14.2.1.pp
