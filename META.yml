@@ -50,7 +50,7 @@ no_index:
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 3.011
+    version: 3.012
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
     version: 0
@@ -107,4 +107,4 @@ resources:
   repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
   x_Chat: irc://irc.perl.org/#win32
   x_MailingList: http://groups.google.com/group/perl.win32.vanilla
-version: 3.011
+version: 3.012

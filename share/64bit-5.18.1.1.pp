@@ -6,10 +6,10 @@
 # <image_dir>     is placeholder for c:\strawberry
 
 {
-  app_version     => '5.18.0.2', #BEWARE: do not use '.0.0' in the last two version digits
-  bits            => 32,
+  app_version     => '5.18.1.1', #BEWARE: do not use '.0.0' in the last two version digits
+  bits            => 64,
   beta            => 0,
-  app_fullname    => 'Strawberry Perl',
+  app_fullname    => 'Strawberry Perl (64-bit)',
   app_simplename  => 'strawberry-perl',
   build_job_steps => [
     ### NEXT STEP ###########################
@@ -17,59 +17,52 @@
         plugin  => 'Perl::Dist::Strawberry::Step::BinaryToolsAndLibs',
         install_packages => {
             #tools
-            'dmake'         => '<package_url>/kmx/32_tools/32bit_dmake-4.12.2-bin_20130521.zip',
-            'mingw-make'    => '<package_url>/kmx/32_tools/32bit_gmake-3.82-bin_20110503.zip',
-            'pexports'      => '<package_url>/kmx/32_tools/32bit_pexports-0.44-bin_20100110.zip',
-            'patch'         => '<package_url>/kmx/32_tools/32bit_patch-2.5.9-7-bin_20100110_UAC.zip',
-            'gendef'        => '<package_url>/kmx/32_tools/32bit_gendef-rev5746-bin_20130519.zip',
+            'dmake'         => '<package_url>/kmx/64_tools/64bit_dmake-SVN20091127-bin_20111107.zip',
+            'mingw-make'    => '<package_url>/kmx/64_tools/64bit_gmake-3.82-bin_20110503.zip',
+            'pexports'      => '<package_url>/kmx/64_tools/64bit_pexports-0.44-bin_20100110.zip',
+            'patch'         => '<package_url>/kmx/64_tools/64bit_patch-2.5.9-7-bin_20100110_UAC.zip',
+            'gendef'        => '<package_url>/kmx/64_tools/64bit_gendef-rev4724-bin_20120411.zip',
             #gcc & co.
-            'gcc-toolchain' => { url=>'<package_url>/kmx/32_gcctoolchain/mingw64-w32-gcc4.7.3_20130526.zip', install_to=>'c' },
-            'gcc-license'   => '<package_url>/kmx/32_gcctoolchain/mingw64-w32-gcc4.7.3_20130526-lic.zip',
-            'gfortran'      => '<package_url>/kmx/32_gcctoolchain/mingw64-w32-gfortran4.7.3_20130526.zip',
+            'gcc-toolchain' => { url=>'<package_url>/kmx/64_gcctoolchain/mingw64-w64-gcc4.7.3_20130526.zip', install_to=>'c' },
+            'gcc-license'   => '<package_url>/kmx/64_gcctoolchain/mingw64-w64-gcc4.7.3_20130526-lic.zip',
+            'gfortran'      => '<package_url>/kmx/64_gcctoolchain/mingw64-w64-gfortran4.7.3_20130526.zip',
             #libs
-            'libdb'         => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_db-5.3.21-bin_20130530.zip',
-            'libexpat'      => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_expat-2.1.0-bin_20130530.zip',
-            'libfreeglut'   => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_freeglut-2.8.1-bin_20130530.zip',
-            'libfreetype'   => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_freetype-2.4.12-bin_20130530.zip',
-            'libgdbm'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_gdbm-1.8.3-bin_20130530.zip',
-            'libgd'         => '<package_url>/kmx/32_libs/gcc46-2012Q4/32bit_gd-2.0.35-bin_20121016-OLD-png-jpg.zip', #spec build statically linked with giflib-4.2.0
-            'libgiflib'     => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_giflib-5.0.4-bin_20130530.zip',
-            'libgmp'        => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_gmp-5.1.2-bin_20130530.zip',
-            'libjpeg'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_jpeg-9-bin_20130530.zip',
-            'liblibXpm'     => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libXpm-3.5.10-bin_20130530.zip',
-            'liblibiconv'   => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libiconv-1.14-bin_20130530.zip',
-            'liblibpng'     => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libpng-1.6.2-bin_20130530.zip',
-            'liblibssh2'    => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libssh2-1.4.3-bin_20130530.zip',
-            'liblibxml2'    => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libxml2-2.9.1-bin_20130530.zip',
-            'liblibxslt'    => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_libxslt-1.1.28-bin_20130530.zip',
-            'libmpc'        => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_mpc-1.0.1-bin_20130530.zip',
-            'libmpfr'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_mpfr-3.1.2-bin_20130530.zip',
-            'libopenssl'    => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_openssl-1.0.1e-bin_20130530.zip',
-            'libpostgresql' => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_postgresql-9.2.4-bin_20130530.zip',
-            'libt1lib'      => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_t1lib-5.1.2-bin_20130530.zip',
-            'libtiff'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_tiff-4.0.3-bin_20130530.zip',
-            'libxz'         => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_xz-5.0.4-bin_20130530.zip',
-            'libzlib'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_zlib-1.2.8-bin_20130530.zip',
-            #pdl related
-            'libgsl'        => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_gsl-1.15-bin_20130530.zip',
-            'libfftw2'      => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_fftw-2.1.5-bin_20130530.zip',
-            'libfftw3'      => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_fftw-3.3.3-bin_20130530.zip',
-            'libplplot'     => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_plplot-5.9.9-bin_20130530.zip',
-            'libproj'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_proj-4.8.0-bin_20130530.zip',
-            'libszip'       => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_szip-2.1-bin_20130530.zip',
+            'libdb'         => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_db-6.0.20-bin_20130810.zip',
+            'libexpat'      => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_expat-2.1.0-bin_20130810.zip',
+            'libfreeglut'   => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_freeglut-2.8.1-bin_20130810.zip',
+            'libfreetype'   => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_freetype-2.5.0.1-bin_20130810.zip',
+            'libgdbm'       => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_gdbm-1.8.3-bin_20130810.zip',
+            'libgiflib'     => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_giflib-5.0.4-bin_20130810.zip',
+            'libgmp'        => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_gmp-5.1.2-bin_20130810.zip',
+            'libjpeg'       => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_jpeg-9-bin_20130810.zip',
+            'libgd'         => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libgd-2.1.0-bin_20130810.zip',            
+            'liblibXpm'     => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libXpm-3.5.10-bin_20130810.zip',
+            'liblibiconv'   => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libiconv-1.14-bin_20130810.zip',
+            'liblibpng'     => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libpng-1.6.3-bin_20130810.zip',
+            'liblibssh2'    => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libssh2-1.4.3-bin_20130810.zip',
+            'liblibxml2'    => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libxml2-2.9.1-bin_20130810.zip',
+            'liblibxslt'    => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_libxslt-1.1.28-bin_20130810.zip',
+            'libmpc'        => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_mpc-1.0.1-bin_20130810.zip',
+            'libmpfr'       => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_mpfr-3.1.2-bin_20130810.zip',
+            'libopenssl'    => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_openssl-1.0.1e-bin_20130810.zip',
+            'libpostgresql' => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_postgresql-9.2.4-bin_20130810.zip',
+            'libt1lib'      => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_t1lib-5.1.2-bin_20130810.zip',
+            'libtiff'       => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_tiff-4.0.3-bin_20130810.zip',
+            'libxz'         => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_xz-5.0.5-bin_20130810.zip',
+            'libzlib'       => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_zlib-1.2.8-bin_20130810.zip',
             #special cases
-            'pthreads'      => '<package_url>/kmx/32_libs/gcc47-2013Q2/32bit_pthreads-2.10.0-bin_20130526.zip',  # built together with gcc toolchain
-            'libmysql'      => '<package_url>/kmx/32_libs/gcc44-2011/32bit_mysql-5.1.44-bin_20100304.zip',      # the latest DLL binary is missing some exports
+            'pthreads'      => '<package_url>/kmx/64_libs/gcc47-2013Q3/64bit_pthreads-2.10.0-bin_20130526.zip',  # built together with gcc toolchain
+            'libmysql'      => '<package_url>/kmx/64_libs/gcc44-2011/64bit_mysql-5.1.44-bin_20100304.zip',      # the latest DLL binary is missing some exports
         },
     },
     ### NEXT STEP ###########################
     {
         plugin     => 'Perl::Dist::Strawberry::Step::InstallPerlCore',
-        url        => 'http://www.cpan.org/authors/id/R/RJ/RJBS/perl-5.18.0.tar.gz',
+        url        => 'http://cpan.metacpan.org/authors/id/R/RJ/RJBS/perl-5.18.1.tar.gz',
         cf_email   => 'strawberry-perl@project',
         perl_debug => 0,
-        use_64_bit_int => 1,
-        #buildoptextra => '-DPERL_NEW_COPY_ON_WRITE',
+        #use_64_bit_int not needed on 64bit
+        #buildoptextra => '-D__USE_MINGW_ANSI_STDIO',
         patch => { #DST paths are relative to the perl src root
             '<dist_sharedir>/perl-5.18/win32_config.gc.tt'      => 'win32/config.gc',
             ### decoration
@@ -101,7 +94,8 @@
         exceptions => [
           # match: version=>... distribution=>... cpan_file=>...
           # possible 'do' options: ignore_testfailure | skiptest | skip
-          { do=>'ignore_testfailure', distribution => 'CPANPLUS' }, #XXX-TODO: CPANPLUS-0.9128 has test failure
+          { do=>'ignore_testfailure', distribution=>'CPANPLUS' },           #XXX-TODO: CPANPLUS-0.9128 has test failure
+          { do=>'ignore_testfailure', distribution=>'ExtUtils-MakeMaker' }  #XXX-TODO: ExtUtils-MakeMaker-6.72 has test failure
         ]
     },
     ### NEXT STEP ###########################
@@ -115,11 +109,8 @@
             # compression
             qw/ Archive-Zip IO-Compress-Lzma Compress-unLZMA /,
             
-            #{ module=>'Probe-Perl', ignore_testfailure=>1 }, #XXX-TODO: https://rt.cpan.org/Ticket/Display.html?id=85204
-            'http://cpan.metacpan.org/authors/id/K/KW/KWILLIAMS/Probe-Perl-0.01.tar.gz',
-
             # file related
-            { module=>'File-Slurp', ignore_testfailure=>1 }, #XXX-TODO: File-Slurp-9999.19 test FAILS
+            { module=>'File-Slurp', ignore_testfailure=>1 },    #XXX-TODO: on 32bit OK
             qw/ File-Find-Rule          File-HomeDir            File-Listing            File-Remove
                 File-ShareDir           File-Which              File-Copy-Recursive /,
 
@@ -130,7 +121,7 @@
 
             # math related
             qw/ Math-Round Math-BigInt-GMP Math-GMP Math-MPC Math-MPFR /,
-            qw/ Math-Pari /, #fails on 64bit
+            #qw/ Math-Pari /, #fails on 64bit
 
             # has to go before Module::Signature as it throws an error: Not trusting this module, aborting install
             qw/ HTTP-Server-Simple /,
@@ -148,25 +139,20 @@
             '<package_url>/kmx/perl-modules-patched/Crypt-OpenSSL-DSA-0.14_patched.tar.gz',     #XXX-TODO: OpenSSL detection
             'Crypt-OpenSSL-RSA',
             
-            '<package_url>/kmx/perl-modules-patched/Crypt-IDEA-1.08_patched2.tar.gz',           #XXX-TODO: win64bit issue + 5.18.x incompatibility
-            '<package_url>/kmx/perl-modules-patched/Crypt-Blowfish-2.12_patched2.tar.gz',       #XXX-TODO: win64bit issue + 5.18.x incompatibility
-            '<package_url>/kmx/perl-modules-patched/Crypt-DES-2.05_patched.tar.gz',             #XXX-TODO: 5.18.x incompatibility
-            { module =>'Convert-PEM', ignore_testfailure=>1 },                                  #XXX-TODO: Convert-PEM-0.08 test FAILS
-            'Crypt-DH',
-            'Alt::Crypt::RSA::BigInt', #XXX-TODO: a hack Crypt-RSA without Math::PARI
+            'Alt::Crypt::RSA::BigInt',                                                          #XXX-TODO: a hack Crypt-RSA without Math::PARI
+            
+            # this is subset of modules we install on64bit
+            qw/ Crypt::IDEA Crypt::Blowfish Crypt::Twofish Crypt::DES Crypt::DH /,
+            qw/ Crypt::Rijndael Crypt::CAST5_PP Crypt::CBC Crypt::DES_EDE3 Crypt::DSA Crypt::RIPEMD160 /,
+            { module =>'Convert-PEM', ignore_testfailure=>1 },                                  #XXX-TODO
+            qw/ Class-Loader Convert-ASCII-Armor Sort-Versions Tie-EncryptedHash /,
 
-            #XXX-TODO: the following modules need Math::PARI (which does not work on 64bit)
-            #XXX-TODO: Crypt::Random needs Math::Pari, Crypt::Primes needs Crypt::Random, Crypt::RSA needs Crypt::Random
-            #XXX-TODO: 
-            # https://rt.cpan.org/Ticket/Display.html?id=81442
-            # https://rt.cpan.org/Ticket/Display.html?id=82314
+            #qw/ Crypt::Random /, #fails on 64bit
+
+            # tests fail on 5.18.x
+            #{ module =>'Crypt::OpenPGP' },
+            #{ module =>'Module::Signature', ignore_testfailure=>1 },
             
-            #### Crypt-OpenPGP prereqs:
-            qw/ Crypt::Random Crypt::Blowfish Crypt::CAST5_PP Crypt::DES_EDE3 Crypt::DSA Crypt::IDEA Crypt::Rijndael Crypt::RIPEMD160 Crypt::RSA Crypt::Twofish Digest::MD5 Digest::SHA1 /,
-            
-            #### disabled for now
-            #{ module =>'Crypt-OpenPGP', ignore_testfailure=>1 },
-            #{ module =>'Module-Signature', ignore_testfailure=>1 }, #XXX-TODO: Module-Signature-0.68 makes trouble
 
             # digests
             qw/ Digest-BubbleBabble Digest-HMAC Digest-MD2 Digest-SHA1 /,
@@ -178,23 +164,20 @@
             qw/ LWP::UserAgent LWP-Protocol-https /,
 
             # graphics
-            { module=>'GD', ignore_testfailure=>1 }, #XXX-TODO 2.49 fails probably due to jpeg lib
-            { module =>'Imager', ignore_testfailure=>1 }, #XXX-TODO fails with libpng-1.6.2
-            qw/ Imager-File-GIF         Imager-File-JPEG        Imager-File-PNG
-                Imager-File-TIFF        Imager-Font-FT2         Imager-Font-W32 /,
+            { module=>'GD', ignore_testfailure=>1 },    #XXX-TODO
+            { module=>'Imager', ignore_testfailure=>1 },          #XXX-TODO
+            qw/ Imager-File-GIF Imager-File-JPEG Imager-File-PNG Imager-File-TIFF Imager-Font-FT2 Imager-Font-W32 /,
 
-            # XML
-            qw/ XML-LibXML XML-LibXSLT XML-Parser XML-SAX XML-Simple /,
-            { module=>'SOAP-Lite', ignore_testfailure=>1 },     #XXX-TODO: 5.18.x incompatibility https://rt.cpan.org/Ticket/Display.html?id=84168
+            # XML & co.
+            qw/ XML-LibXML XML-LibXSLT XML-Parser XML-SAX XML-Simple SOAP-Lite /,
 
             # YAML, JSON & co.
-            { module=>'JSON', ignore_testfailure=>1 },          #XXX-TODO: 5.18.x incompatibility https://rt.cpan.org/Ticket/Display.html?id=84154
-            { module=>'JSON::XS', ignore_testfailure=>1 },      #XXX-TODO: 5.18.x incompatibility https://rt.cpan.org/Ticket/Display.html?id=84151
-            qw/ YAML YAML-Tiny YAML::XS /,
+            qw/ JSON JSON-XS YAML YAML-Tiny YAML::XS /,
             #'YAML-Syck', #XXX-TODO: buggy therefore removed
 
             # dbm related
-            qw/ BerkeleyDB DB_File DBM-Deep /,
+            'http://cpan.metacpan.org/authors/id/P/PM/PMQS/BerkeleyDB-0.51.tar.gz', #qw/ BerkeleyDB /,
+            qw/ DB_File DBM-Deep /,
 
             # utils
             qw/ pler App-local-lib-Win32Helper /,
@@ -224,7 +207,7 @@
             { module=>'IO::Socket::IP', ignore_testfailure=>1 },        #XXX-TODO test failures ipv6related - https://rt.cpan.org/Ticket/Display.html?id=83485
             qw/ IO::Socket::INET6 /,
             qw/ WWW::Mechanize Net::Telnet Class::Accessor Date::Format /,
-            { module=>'Template-Toolkit', ignore_testfailure=>1 },      #XXX-TODO: 5.18.x incompatibility https://rt.cpan.org/Public/Bug/Display.html?id=81995
+            { module=>'Template-Toolkit', ignore_testfailure=>1 },      #XXX-TODO
             qw/ App-cpanminus /,
 
             # trying to include some GUI tools
@@ -275,7 +258,7 @@
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Strawberry Perl Release Notes.url.tt',       '<image_dir>/win32/Strawberry Perl Release Notes.url' ] },
          { do=>'apply_tt', args=>[ '<dist_sharedir>/extra-files/win32/Strawberry Perl Website.url.tt',             '<image_dir>/win32/Strawberry Perl Website.url' ] },
          # cleanup (remove unwanted files/dirs)
-         { do=>'removefile', args=>[ '<image_dir>/c/bin/gccbug' ] },
+         { do=>'removefile', args=>[ '<image_dir>/c/bin/gccbug', '<image_dir>/perl/vendor/lib/Crypt/._test.pl', '<image_dir>/perl/vendor/lib/DBD/testme.tmp.pl' ] },
          { do=>'removefile_recursive', args=>[ '<image_dir>/perl', '*.dll.AAA' ] },
        ],
     },
@@ -306,7 +289,7 @@
            'perl2.reloc.txt',
            'README.txt'
        ],
-       msi_upgrade_code    => '45F906A2-F86E-335B-992F-990E8BEABC13', #BEWARE: fixed value for all 32bit releases (for ever)
+       msi_upgrade_code    => 'DBA41113-4E91-3FFC-B400-573BB4B80705', #BEWARE: fixed value for all 64bit releases (for ever)
        app_publisher       => 'strawberryperl.com project',
        url_about           => 'http://strawberryperl.com/',
        url_help            => 'http://strawberryperl.com/support.html',
@@ -355,7 +338,7 @@
        commands => [ # files and dirs specific to portable edition
          { do=>'removefile', args=>[ '<image_dir>/README.txt', '<image_dir>/perl2.reloc.txt', '<image_dir>/perl1.reloc.txt', '<image_dir>/update_env.pl.bat', '<image_dir>/relocation.pl.bat' ] },
          { do=>'createdir',  args=>[ '<image_dir>/data' ] },
-         { do=>'copyfile',   args=>[ '<dist_sharedir>/portable/portable.perl.32',    '<image_dir>/portable.perl' ] }, # take portable.perl.32 or portable.perl.64
+         { do=>'copyfile',   args=>[ '<dist_sharedir>/portable/portable.perl.64',    '<image_dir>/portable.perl' ] }, # take portable.perl.32 or portable.perl.64
          { do=>'copyfile',   args=>[ '<dist_sharedir>/portable/portableshell.bat',   '<image_dir>/portableshell.bat' ] },
          { do=>'apply_tt',   args=>[ '<dist_sharedir>/portable/README.portable.txt.tt', '<image_dir>/README.portable.txt' ] },
        ],
