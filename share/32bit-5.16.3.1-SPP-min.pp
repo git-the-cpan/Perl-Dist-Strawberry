@@ -29,7 +29,7 @@
     ### NEXT STEP ###########################
     {
         plugin     => 'Perl::Dist::Strawberry::Step::InstallPerlCore',
-        url        => 'http://www.cpan.org/authors/id/R/RJ/RJBS/perl-5.16.3-RC1.tar.gz',
+        url        => 'http://www.cpan.org/authors/id/R/RJ/RJBS/perl-5.16.3.tar.gz',
         cf_email   => 'strawberry-perl@project',
         perl_debug => 0,
         patch      => { #DST paths are relative to the perl src root
@@ -49,21 +49,20 @@
         },
     },
     ### NEXT STEP ###########################
-    {
-        plugin => 'Perl::Dist::Strawberry::Step::InstallModules',
-        modules => [
-          #here is a place to (re)install/(up/down)grade modules needed before 'Perl::Dist::Strawberry::Step::UpgradeCpanModules'
-          'http://search.cpan.org/CPAN/authors/id/M/MU/MUIR/modules/Text-Tabs%2BWrap-2012.0818.tar.gz', # minicpan related issue XXX-CHECK version
-        ],
-    },
+##    {
+##        plugin => 'Perl::Dist::Strawberry::Step::InstallModules',
+##        modules => [
+##          # here is a place to (re)install/(up/down)grade modules needed before 'Perl::Dist::Strawberry::Step::UpgradeCpanModules'
+##          # e.g. { install_to=>'perl', module=>'Module::Name' },
+##        ],
+##    },
     ### NEXT STEP ###########################
     {
         plugin => 'Perl::Dist::Strawberry::Step::UpgradeCpanModules',
         exceptions => [
-          # match: version=>... distribution=>... cpan_file=>...
           # possible 'do' options: ignore_testfailure | skiptest | skip
-          { do=>'ignore_testfailure', distribution => 'CPANPLUS' }, #XXX-TODO: CPANPLUS-0.9128 has test failure
-          { do=>'ignore_testfailure', distribution => 'IPC-Cmd' },  #XXX-TODO: IPC-Cmd-0.78 has test failure
+          { do=>'ignore_testfailure', distribution=>'IPC-Cmd-0.92' },
+          { do=>'ignore_testfailure', distribution=>'Net-Ping-2.41' },
         ]
     },
     ### NEXT STEP ###########################
@@ -95,7 +94,11 @@
          # special hack moves all extlib DLLs to perl/bin
          { do=>'movedir',    args=>[ '<image_dir>/c/bin/startup', '<image_dir>/perl/bin/startup' ] },
          { do=>'movefile',   args=>[ '<image_dir>/c/bin/dmake.exe', '<image_dir>/perl/bin/dmake.exe' ] },
-         { do=>'smartmove',  args=>[ '<image_dir>/c/bin/*_.dll', '<image_dir>/perl/bin' ] },         
+         { do=>'smartmove',  args=>[ '<image_dir>/c/bin/*_.dll', '<image_dir>/perl/bin' ] },
+         # cleanup cpanm related files
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x86-multi-thread-64int' ] },
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x86-multi-thread' ] },
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x64-multi-thread' ] },
        ],
     },
     ### NEXT STEP ###########################

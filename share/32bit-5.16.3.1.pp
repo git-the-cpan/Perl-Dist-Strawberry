@@ -78,26 +78,30 @@
         },
     },
     ### NEXT STEP ###########################
-    {
-        plugin => 'Perl::Dist::Strawberry::Step::InstallModules',
-        modules => [
-          #here is a place to (re)install/(up/down)grade modules needed before 'Perl::Dist::Strawberry::Step::UpgradeCpanModules'
-          'http://search.cpan.org/CPAN/authors/id/M/MU/MUIR/modules/Text-Tabs%2BWrap-2012.0818.tar.gz', # minicpan related issue #XXX-TODO check version
-        ],
-    },
+##    {
+##        plugin => 'Perl::Dist::Strawberry::Step::InstallModules',
+##        modules => [
+##          # here is a place to (re)install/(up/down)grade modules needed before 'Perl::Dist::Strawberry::Step::UpgradeCpanModules'
+##          # e.g. { install_to=>'perl', module=>'Module::Name' },
+##        ],
+##    },
     ### NEXT STEP ###########################
     {
         plugin => 'Perl::Dist::Strawberry::Step::UpgradeCpanModules',
         exceptions => [
-          # match: version=>... distribution=>... cpan_file=>...
           # possible 'do' options: ignore_testfailure | skiptest | skip
-          { do=>'ignore_testfailure', distribution => 'CPANPLUS' }, #XXX-TODO: CPANPLUS-0.9128 has test failure
+          { do=>'ignore_testfailure', distribution=>'IPC-Cmd-0.92' },
+          { do=>'ignore_testfailure', distribution=>'Net-Ping-2.41' },
         ]
     },
     ### NEXT STEP ###########################
     {
         plugin => 'Perl::Dist::Strawberry::Step::InstallModules',
         modules => [
+            # IPC related
+            { module=>'IPC-Run', skiptest=>1 }, #XXX-FIXME trouble with 'Terminating on signal SIGBREAK(21)'
+            qw/ IPC-Run3 IPC-System-Simple /,
+
             # term related
             '<package_url>/kmx/perl-modules-patched/TermReadKey-2.30.02.tar.gz', # special version needed
             { module=>'Term::ReadLine::Perl', env=>{ PERL_MM_NONINTERACTIVE=>1 } },
@@ -113,7 +117,7 @@
             # database stuff
             qw/ DBI DBD-ODBC DBD-SQLite DBD-Pg DBIx-Simple /,
             { module=>'DBD-ADO', ignore_testfailure=>1 }, #XXX-TODO: DBD-ADO-2.99 test FAILS
-            { module=>'DBD-mysql', makefilepl_param=>'--mysql_config=mysql_config' },
+            { module=>'DBD-mysql', ignore_testfailure=>1, makefilepl_param=>'--mysql_config=mysql_config' }, #XXX-TODO: check test failures
 
             # math related
             qw/ Math-Round Math-BigInt-GMP Math-GMP Math-MPC Math-MPFR /,
@@ -176,8 +180,7 @@
 
             # misc
             qw/ CPAN::SQLite Alien-Tidyp FCGI Text-Diff Text-Patch /,
-            qw/ IO-stringy IO::String String-CRC32 Sub-Uplevel Convert-PEM/,
-            qw/ IPC-Run3 IPC-Run IPC-System-Simple /,
+            qw/ IO::Stringy IO::String String-CRC32 Sub-Uplevel Convert-PEM/,
 
             # strawberry extras
             qw/ App-module-version /,
@@ -188,7 +191,7 @@
             qw/ Moose MooseX-Types MooseX::Types::Structured MooseX::Declare MooseX::ClassAttribute MooseX::Role::Parameterized MooseX::NonMoose Moo /,
             { module=>'IO::Socket::IP', ignore_testfailure=>1 },#XXX-TODO test failures ipv6related - https://rt.cpan.org/Ticket/Display.html?id=83485
             qw/ IO::Socket::INET6 /,
-            qw/ WWW::Mechanize Net::Telnet Class::Accessor Date::Format Template-Toolkit /,
+            qw/ WWW::Mechanize Net::Telnet Class::Accessor Date::Format Template /,
             qw/ App-cpanminus /,
 
             # trying to include some GUI tools
@@ -197,11 +200,11 @@
 
     },
     ### NEXT STEP ###########################
-    {
-        plugin => 'Perl::Dist::Strawberry::Step::UninstallModules',
-        #modules => [ 'Alien-IUP' ],
-        modules => [],
-    },
+##    {
+##        plugin => 'Perl::Dist::Strawberry::Step::UninstallModules',
+##        #modules => [ 'Alien-IUP' ],
+##        modules => [],
+##    },
     ### NEXT STEP ###########################
     {
         plugin => 'Perl::Dist::Strawberry::Step::FixShebang',
@@ -241,6 +244,10 @@
          # cleanup (remove unwanted files/dirs)
          { do=>'removefile', args=>[ '<image_dir>/c/bin/gccbug' ] },
          { do=>'removefile_recursive', args=>[ '<image_dir>/perl', '*.dll.AAA' ] },
+         # cleanup cpanm related files
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x86-multi-thread-64int' ] },
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x86-multi-thread' ] },
+         { do=>'removedir', args=>[ '<image_dir>/perl/site/lib/MSWin32-x64-multi-thread' ] },
        ],
     },
     ### NEXT STEP ###########################

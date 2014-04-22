@@ -37,7 +37,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.38
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.132140'
+generated_by: 'Module::Build version 0.4203, CPAN::Meta::Converter version 2.133380'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -50,7 +50,7 @@ no_index:
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 3.013
+    version: 4.001
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
   Perl::Dist::Strawberry::Step::BinaryToolsAndLibs:
@@ -69,8 +69,12 @@ provides:
     file: lib/Perl/Dist/Strawberry/Step/InstallPerlCore.pm
   Perl::Dist::Strawberry::Step::OutputLogZIP:
     file: lib/Perl/Dist/Strawberry/Step/OutputLogZIP.pm
+  Perl::Dist::Strawberry::Step::OutputMSI:
+    file: lib/Perl/Dist/Strawberry/Step/OutputMSI.pm
   Perl::Dist::Strawberry::Step::OutputMSM_MSI:
     file: lib/Perl/Dist/Strawberry/Step/OutputMSM_MSI.pm
+  Perl::Dist::Strawberry::Step::OutputPdlZIP:
+    file: lib/Perl/Dist/Strawberry/Step/OutputPdlZIP.pm
   Perl::Dist::Strawberry::Step::OutputPortableZIP:
     file: lib/Perl/Dist/Strawberry/Step/OutputPortableZIP.pm
   Perl::Dist::Strawberry::Step::OutputZIP:
@@ -87,9 +91,9 @@ requires:
   perl: 5.012
 resources:
   Chat: irc://irc.perl.org/#win32
-  MailingList: http://groups.google.com/group/perl.win32.vanilla
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Perl-Dist-Strawberry
   homepage: http://strawberryperl.com/
   license: http://dev.perl.org/licenses/
+  mailingList: http://groups.google.com/group/perl.win32.vanilla
   repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
-version: 3.013
+version: 4.001

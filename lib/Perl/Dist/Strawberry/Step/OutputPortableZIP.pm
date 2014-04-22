@@ -8,8 +8,8 @@ use File::Spec::Functions qw(catfile);
 
 sub run {
   my $self = shift;
-    
-  my $output_basename = $self->global->{output_basename}."-portable" // 'perl-output-portable';
+
+  my $output_basename = ($self->global->{output_basename} // "perl-output") . "-portable";
   my $zip_file = catfile($self->global->{output_dir}, "$output_basename.zip");
   
   $self->boss->message(2, "gonna create '$zip_file'"); 
