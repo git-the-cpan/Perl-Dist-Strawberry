@@ -50,7 +50,7 @@ no_index:
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: 4.001
+    version: 4.002
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
   Perl::Dist::Strawberry::Step::BinaryToolsAndLibs:
@@ -96,4 +96,4 @@ resources:
   license: http://dev.perl.org/licenses/
   mailingList: http://groups.google.com/group/perl.win32.vanilla
   repository: http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/
-version: 4.001
+version: 4.002
