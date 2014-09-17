@@ -65,6 +65,7 @@ share/32bit-5.19.11.pp
 share/32bit-5.19.9.pp
 share/32bit-5.20.0.1-no64.pp
 share/32bit-5.20.0.1.pp
+share/32bit-5.20.1.1.pp
 share/64bit-5.16.3.1.pp
 share/64bit-5.18.2.1.pp
 share/64bit-5.18.2.2.pp
@@ -72,6 +73,8 @@ share/64bit-5.19.10.pp
 share/64bit-5.19.11.pp
 share/64bit-5.19.9.pp
 share/64bit-5.20.0.1.pp
+share/64bit-5.20.1.1-minimal.pp
+share/64bit-5.20.1.1.pp
 share/config-files/CPAN_Config.pm.tt
 share/extra-files/DISTRIBUTIONS.txt.tt
 share/extra-files/licenses/License.rtf
@@ -127,6 +130,7 @@ share/msi/MSM_documentation.html.tt
 share/msi/MSM_main.wxs.tt
 share/msi/Variables-v2.wxi.tt
 share/msi/Variables.wxi.tt
+share/pdl/perldl2.conf
 share/perl-5.16-x86-64int/diffs_for_info_only/config.gc.diff
 share/perl-5.16-x86-64int/diffs_for_info_only/config_H.gc.diff
 share/perl-5.16-x86-64int/diffs_for_info_only/makefile.mk.diff
@@ -153,11 +157,18 @@ share/perl-5.18/perlexe.rc.tt
 share/perl-5.18/win32_config.gc.tt
 share/perl-5.18/win32_config_H.gc
 share/perl-5.18/win32_FindExt.pm
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_installperl.diff
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_win32_config.gc.diff
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_win32_config_H.gc.diff
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_win32_FindExt.pm.diff
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_win32_perlexe.rc.diff
+share/perl-5.20/diffs_for_info_only/perl5-maint-5.20_win32_win32.h.diff
 share/perl-5.20/installperl
 share/perl-5.20/perlexe.rc.tt
 share/perl-5.20/win32_config.gc.tt
 share/perl-5.20/win32_config_H.gc
 share/perl-5.20/win32_FindExt.pm
+share/perl-5.20/win32_makefile.mk
 share/perl-5.20/win32_win32.h
 share/portable/portable.perl.32
 share/portable/portable.perl.32-NEW

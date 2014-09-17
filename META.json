@@ -4,7 +4,7 @@
       "KMX <kmx@cpan.org>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4203",
+   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.132140",
    "license" : [
       "perl_5"
    ],
@@ -71,7 +71,7 @@
    "provides" : {
       "Perl::Dist::Strawberry" : {
          "file" : "lib/Perl/Dist/Strawberry.pm",
-         "version" : "4.002"
+         "version" : "4.003"
       },
       "Perl::Dist::Strawberry::Step" : {
          "file" : "lib/Perl/Dist/Strawberry/Step.pm"
@@ -135,10 +135,10 @@
          "http://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "http://svn.ali.as/cpan/trunk/Perl-Dist-Strawberry/"
+         "url" : "https://github.com/StrawberryPerl/Perl-Dist-Strawberry"
       },
-      "x_chat" : "irc://irc.perl.org/#win32",
-      "x_mailingList" : "http://groups.google.com/group/perl.win32.vanilla"
+      "x_Chat" : "irc://irc.perl.org/#win32",
+      "x_MailingList" : "http://groups.google.com/group/perl.win32.vanilla"
    },
-   "version" : "4.002"
+   "version" : "4.003"
 }
