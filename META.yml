@@ -37,7 +37,7 @@ build_requires:
 configure_requires:
   Module::Build: '0.38'
 dynamic_config: 1
-generated_by: 'Module::Build version 0.4203, CPAN::Meta::Converter version 2.143240'
+generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.132140'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -50,7 +50,7 @@ no_index:
 provides:
   Perl::Dist::Strawberry:
     file: lib/Perl/Dist/Strawberry.pm
-    version: '4.005'
+    version: '4.006'
   Perl::Dist::Strawberry::Step:
     file: lib/Perl/Dist/Strawberry/Step.pm
   Perl::Dist::Strawberry::Step::BinaryToolsAndLibs:
@@ -90,10 +90,10 @@ requires:
   Module::Build: '0.38'
   perl: '5.012'
 resources:
+  IRC: irc://irc.perl.org/#win32
+  MailingList: http://groups.google.com/group/perl.win32.vanilla
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Perl-Dist-Strawberry
   homepage: http://strawberryperl.com/
-  iRC: irc://irc.perl.org/#win32
   license: http://dev.perl.org/licenses/
-  mailingList: http://groups.google.com/group/perl.win32.vanilla
   repository: https://github.com/StrawberryPerl/Perl-Dist-Strawberry
-version: '4.005'
+version: '4.006'
