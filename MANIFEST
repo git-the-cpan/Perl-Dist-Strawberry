@@ -69,6 +69,7 @@ share/32bit-5.20.0.1-no64.pp
 share/32bit-5.20.0.1.pp
 share/32bit-5.20.1.1.pp
 share/32bit-5.20.2.1.pp
+share/32bit-5.20.3.1.pp
 share/32bit-5.20.next.pp
 share/32bit-5.22.0.1.pp
 share/64bit-5.16.3.1.pp
@@ -82,6 +83,7 @@ share/64bit-5.20.0.1.pp
 share/64bit-5.20.1.1-minimal.pp
 share/64bit-5.20.1.1.pp
 share/64bit-5.20.2.1.pp
+share/64bit-5.20.3.1.pp
 share/64bit-5.20.next.pp
 share/64bit-5.22.0.1.pp
 share/config-files/CPAN_Config.pm.tt
