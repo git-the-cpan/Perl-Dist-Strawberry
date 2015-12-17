@@ -1,9 +1,18 @@
 BEWARE: Mostly unsorted ideas
 =============================
 
-### add some from: https://metacpan.org/pod/Bundle::libwin32
+###
++ Net::DNS::Native
++ Log::Log4perl
+Reply
+Devel::NYTProf
+AnyEvent
+Type::Tiny
+Perl::Critic
+Devel::Cover
+App::PMUtils (too big)
 
-### upgrade to TermReadKey-2.32
+### add some from: https://metacpan.org/pod/Bundle::libwin32
 
 ### add to after-QA:
 - OpenCL-patched
@@ -17,7 +26,7 @@ BEWARE: Mostly unsorted ideas
 
 ### set TERM= or set TERM=dumb ?
 
-### gdb (now included in PDL edition)
+### gdb
 - what about detached debug info?
 - http://stackoverflow.com/questions/866721/how-to-generate-gcc-debug-symbol-outside-the-build-target
 - http://marcioandreyoliveira.blogspot.cz/2008/03/how-to-load-debug-symbols-with-gdb.html
